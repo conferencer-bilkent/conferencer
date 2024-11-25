@@ -1,0 +1,128 @@
+openapi: 3.0.3
+info:
+  description: API for user authentication and basic user management.
+  title: Conferencer API
+  version: 1.0.0
+servers:
+- description: Local development server
+  url: http://localhost:8080/api
+paths:
+  /auth/signup:
+    post:
+      operationId: userSignup
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+        description: User details for signup
+        required: true
+      responses:
+        "201":
+          description: User created successfully
+        "400":
+          description: Invalid request data
+      summary: User signup
+      tags:
+      - Authentication
+      x-content-type: application/json
+      x-accepts:
+      - application/json
+  /auth/login:
+    post:
+      operationId: userLogin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+        description: Login credentials
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+          description: Login successful
+        "401":
+          description: Unauthorized - Invalid credentials
+      summary: User login
+      tags:
+      - Authentication
+      x-content-type: application/json
+      x-accepts:
+      - application/json
+  /users/names:
+    get:
+      operationId: getAllUserNames
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  type: string
+                type: array
+          description: List of all user names
+      summary: Get all user names
+      tags:
+      - Users
+      x-accepts:
+      - application/json
+components:
+  schemas:
+    User:
+      example:
+        password: password
+        name: name
+        id: 0
+        email: email
+      properties:
+        id:
+          description: Unique identifier for the user
+          type: integer
+        name:
+          description: Name of the user
+          type: string
+        email:
+          description: User's email address
+          type: string
+        password:
+          description: User's password
+          format: password
+          type: string
+      required:
+      - email
+      - name
+      - password
+      type: object
+    LoginRequest:
+      example:
+        password: password
+        email: email
+      properties:
+        email:
+          description: User's email address
+          type: string
+        password:
+          description: User's password
+          format: password
+          type: string
+      required:
+      - email
+      - password
+      type: object
+    LoginResponse:
+      example:
+        userId: 0
+        token: token
+      properties:
+        token:
+          description: JWT token for authentication
+          type: string
+        userId:
+          description: ID of the authenticated user
+          type: integer
+      type: object
+
