@@ -1,9 +1,0 @@
-.openapi-generator-ignore
-README.md
-pom.xml
-src/main/java/com/conferencer/api/ApiUtil.java
-src/main/java/com/conferencer/api/AuthenticationApi.java
-src/main/java/com/conferencer/api/UsersApi.java
-src/main/java/com/conferencer/model/LoginRequest.java
-src/main/java/com/conferencer/model/LoginResponse.java
-src/main/java/com/conferencer/model/User.java
