@@ -1,3 +1,46 @@
+# Ignore backend folder (Spring specific files)
+backend/target/
+backend/.mvn/
+backend/.idea/
+backend/.vscode/
+backend/*.iml
+backend/.classpath
+backend/.project
+backend/.settings/
+backend/.dependency-reduced-pom.xml
+
+# Ignore general project files
+*.log
+*.bak
+*.swp
+*.swo
+*.tmp
+*.temp
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# Maven / Java specific (root)
+/.target/
+/.idea/
+/.vscode/
+/*.iml
+/.classpath
+/.project
+/.settings
+
+# Eclipse project files
+/.classpath
+/.project
+/.settings/
+
+# IntelliJ project files
+/.idea/
+/*.iws
+/*.iml
+/*.ipr
+
 # Compiled class file
 *.class
 
