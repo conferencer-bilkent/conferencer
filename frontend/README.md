@@ -11,9 +11,12 @@ Before you can run the project, ensure you have the following installed:
      npm -v
      ```
 
-### **Run the project**
+---
+
+### **Run the Project**
+
 To run:
-     ```bash
-      cd frontend
-      npm start
-     ```
+```bash
+cd frontend
+npm start
+```
