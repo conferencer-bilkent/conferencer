@@ -1,0 +1,8 @@
+com/conferencer/api/AuthenticationApi.class
+com/conferencer/api/UsersApi.class
+com/conferencer/api/ApiUtil.class
+com/conferencer/App.class
+com/conferencer/model/LoginResponse.class
+com/conferencer/model/LoginRequest.class
+com/conferencer/model/User.class
+com/conferencer/controller/PingController.class
