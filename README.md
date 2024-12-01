@@ -7,6 +7,10 @@ Conferencer Main Repo
    1. To check version you need to "java -version"
 2. Install Apache Maven 3.9.9
     1. To check version you need to "mvn -v"
-3. cd backend
-4. mvn clean install
-5. congrats you compiled backend. now wait for it to be written or start writing from somewhere. no functionality is implemented yet. 
+3. Install postgresql 14
+4. clone repo && cd repo
+5. cd backend
+6. mvn install
+7. congrats you compiled backend
+8. run app and check localhost 8080
+9. now wait for it to be written or start writing from somewhere. no functionality is implemented yet. 
