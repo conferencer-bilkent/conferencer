@@ -13,6 +13,7 @@ Before you can run the project, ensure you have the following installed:
 
 ### **Run the project**
 
-cd frontend
-
-npm start
+     ```bash
+      cd frontend
+      npm start
+     ```
