@@ -8,6 +8,9 @@ Conferencer Main Repo
 2. Install Apache Maven 3.9.9
     1. To check version you need to "mvn -v"
 3. Install postgresql 14
+    1. get into postgres user (possibly with password "password")
+        1. if the password is not password, after getting in forcefully set the password to "password" by running ALTER USER postgres PASSWORD 'password'
+    2. run CREATE DATABASE conferencer_db
 4. clone repo && cd repo
 5. cd backend
 6. mvn install
