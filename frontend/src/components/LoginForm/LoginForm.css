@@ -1,0 +1,127 @@
+/* General wrapper styling */
+.wrapper {
+    width: 420px;
+    background: transparent;
+    color: #fff;
+    border-radius: 10px;
+    padding: 30px 40px;
+}
+
+.wrapper .input-box {
+    position: relative;
+    width: 100%;
+    height: 50px;
+    margin: 30px 0;
+}
+
+.input-box input {
+    width: 100%;
+    height: 100%;
+    background: transparent;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    outline: none;
+    border-radius: 40px;
+    font-size: 16px;
+    color: #fff;
+    padding: 10px 45px 10px 20px;
+    transition: border 0.3s ease;
+}
+
+.input-box .icon {
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 16px;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.wrapper .remember-forgot {     
+    display: flex;
+    justify-content: space-between;     
+    font-size:14.5px;     
+    margin: 15px 10px 15px; 
+} 
+.remember-forgot label input{     
+    accent-color: #fff;     
+    margin-right: 4px; 
+} 
+.remember-forgot a{     
+    color: #fff;     
+    text-decoration: none; 
+} 
+.remember-forgot a:hover {     
+    text-decoration: underline; 
+}
+
+
+.wrapper .button-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.text-button {
+    flex: 3;
+    height: 45px;
+    background: #fff;
+    border: none;
+    border-radius: 40px;
+    font-size: 16px;
+    font-weight: bold;
+    color: #000;
+    cursor: pointer;
+    transition: background 0.3s ease, color 0.3s ease;
+}
+
+.text-button:hover {
+    background: #000;
+    color: #fff;
+}
+
+.image-button {
+    margin-top: 10px;
+    flex: 1;
+    height: 30px;
+    width: 30px;    
+    text-align: center;
+    border: none;
+    background-color: transparent;
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
+    cursor: pointer;
+    text-indent: -9999px; /* Hides the button text */
+}
+
+.image-button:hover {
+    opacity: 0.8; /* Slight fade effect on hover */
+}
+
+/* Specific button styles */
+.google-button {
+    background-image: url('../assets/googlelogo.png');
+}
+
+.orcid-button {
+    background-image: url('../assets/orcidlogo.png');
+}
+
+
+/* Register link styling */
+.wrapper .register-link {
+    font-size: 14.5px;
+    text-align: center;
+    margin: 20px 0 15px;
+}
+
+.register-link p a {
+    color: #fff;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.register-link p a:hover {
+    text-decoration: underline;
+}
