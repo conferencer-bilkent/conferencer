@@ -1,114 +1,121 @@
-openapi: 3.0.3 #this is fully experimental 
+openapi: 3.0.1
 info:
   title: Conferencer API
-  description: API for user authentication and basic user management.
   version: 1.0.0
-servers:
-  - url: http://localhost:8080/api
-    description: Local development server
+  description: API for user authentication and registration.
 
 paths:
   /auth/signup:
     post:
-      summary: User signup
-      operationId: userSignup
+      summary: User registration
+      operationId: signup
+      description: Create a new user account.
       tags:
         - Authentication
       requestBody:
-        description: User details for signup
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/User'
+              $ref: '#/components/schemas/SignupRequest'
       responses:
-        '201':
-          description: User created successfully
-        '400':
-          description: Invalid request data
+        201:
+          description: User successfully created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SignupResponse'
+        400:
+          description: Invalid input or user already exists.
+        500:
+          description: Server error.
 
   /auth/login:
     post:
       summary: User login
-      operationId: userLogin
+      operationId: login
+      description: Authenticate a user and return a token.
       tags:
         - Authentication
       requestBody:
-        description: Login credentials
         required: true
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/LoginRequest'
       responses:
-        '200':
-          description: Login successful
+        200:
+          description: User authenticated successfully.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/LoginResponse'
-        '401':
-          description: Unauthorized - Invalid credentials
-
-  /users/names:
-    get:
-      summary: Get all user names
-      operationId: getAllUserNames
-      tags:
-        - Users
-      responses:
-        '200':
-          description: List of all user names
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  type: string
+        401:
+          description: Invalid email or password.
+        500:
+          description: Server error.
 
 components:
   schemas:
-    User:
+    SignupRequest:
       type: object
+      required:
+        - name
+        - surname
+        - email
+        - password
       properties:
-        id:
-          type: integer
-          description: Unique identifier for the user
         name:
           type: string
-          description: Name of the user
+          example: John
+        surname:
+          type: string
+          example: Doe
         email:
           type: string
-          description: User's email address
+          format: email
+          example: john.doe@example.com
         password:
           type: string
           format: password
-          description: User's password
-      required:
-        - name
-        - email
-        - password
+          example: "strongpassword123"
+        phone:
+          type: string
+          example: "+1234567890"
+
+    SignupResponse:
+      type: object
+      properties:
+        userId:
+          type: string
+          format: uuid
+          example: "f47ac10b-58cc-4372-a567-0e02b2c3d479"
+        message:
+          type: string
+          example: "User registered successfully."
 
     LoginRequest:
       type: object
-      properties:
-        email:
-          type: string
-          description: User's email address
-        password:
-          type: string
-          format: password
-          description: User's password
       required:
         - email
         - password
+      properties:
+        email:
+          type: string
+          format: email
+          example: john.doe@example.com
+        password:
+          type: string
+          format: password
+          example: "strongpassword123"
 
     LoginResponse:
       type: object
       properties:
         token:
           type: string
-          description: JWT token for authentication
-        userId:
-          type: integer
-          description: ID of the authenticated user
+          example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+        expiresAt:
+          type: string
+          format: date-time
+          example: "2024-12-31T23:59:59Z"
