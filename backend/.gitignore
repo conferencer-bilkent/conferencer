@@ -1,3 +1,14 @@
+# Ignore backend folder (Spring specific files)
+target/
+.mvn/
+.idea/
+.vscode/
+*.iml
+.classpath
+.project
+.settings/
+.dependency-reduced-pom.xml
+
 # Ignore general project files
 *.log
 *.bak
