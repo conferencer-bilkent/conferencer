@@ -11,7 +11,7 @@
     position: relative;
     width: 100%;
     height: 50px;
-    margin: 30px 0;
+    margin: 10px 0; /* Reduce the margin here for consistent spacing */
 }
 
 .input-box input {
@@ -36,25 +36,19 @@
     color: rgba(255, 255, 255, 0.7);
 }
 
-.wrapper .remember-forgot {     
+/* Name fields row styling */
+.name-row {
     display: flex;
-    justify-content: space-between;     
-    font-size:14.5px;     
-    margin: 15px 10px 15px; 
-} 
-.remember-forgot label input{     
-    accent-color: #fff;     
-    margin-right: 4px; 
-} 
-.remember-forgot a{     
-    color: #fff;     
-    text-decoration: none; 
-} 
-.remember-forgot a:hover {     
-    text-decoration: underline; 
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: -5px; /* Add bottom margin to control the space between name row and email */
 }
 
+.name-row .input-box {
+    width: 48%; /* Adjust to allow for side-by-side inputs */
+}
 
+/* Button Row */
 .wrapper .button-row {
     display: flex;
     justify-content: space-between;
@@ -107,7 +101,6 @@
 .orcid-button {
     background-image: url('../assets/orcidlogo.png');
 }
-
 
 /* Register link styling */
 .wrapper .register-link {
