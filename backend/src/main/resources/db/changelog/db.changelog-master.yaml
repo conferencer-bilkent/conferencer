@@ -1,19 +1,4 @@
 databaseChangeLog:
-  - changeSet:
-      id: 1
-      author: bilal
-      changes:
-        - createTable:
-            tableName: mock_for_startup
-            columns:
-              - column:
-                  name: id
-                  type: BIGINT
-                  constraints:
-                    primaryKey: true
-                    nullable: false
-              - column:
-                  name: annen
-                  type: VARCHAR(255)
-                  constraints:
-                    nullable: false
+  - include:
+      file: db.changelog-1.0.sql
+      relativeToChangelogFile: true

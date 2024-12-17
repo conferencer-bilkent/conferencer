@@ -2,7 +2,7 @@ openapi: 3.0.1
 info:
   title: Conferencer API
   version: 1.0.0
-  description: API for user authentication and registration.
+  description: API 
 
 paths:
   /auth/signup:
