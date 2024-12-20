@@ -1,7 +1,3 @@
-/*
- * Copyright 2024 Commencis Backend Camp. All Rights Reserved.
- */
-
 package com.conferencer.model;
 
 import java.time.LocalDateTime;
