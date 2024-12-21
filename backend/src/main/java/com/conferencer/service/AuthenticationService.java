@@ -14,7 +14,7 @@ public interface AuthenticationService {
      * @return LoginResponse containing a JWT token and other relevant information.
      * @throws Exception if authentication fails.
      */
-    LoginResponse login(LoginRequest loginRequest) throws Exception;
+    LoginResponse login(LoginRequest loginRequest) ;
 
     /**
      * Handles the registration of a new user.
@@ -23,5 +23,5 @@ public interface AuthenticationService {
      * @return SignupResponse with a success message and the newly created user's ID.
      * @throws Exception if there is an error (e.g., user already exists).
      */
-    SignupResponse signup(SignupRequest signupRequest) throws Exception;
+    SignupResponse signup(SignupRequest signupRequest) ;
 }

@@ -19,17 +19,10 @@ const LoginForm: React.FC = () => {
         body: JSON.stringify({ email, password }),
       });
 
-      let data;
-      if (response.status === 200) {
-        data = await response.json();
-        if (data.token) {
+      const data = await response.json();
+      if (response.status === 200 && data.token) {
           setMessage("Login successful!");
           console.log("Token:", data.token);
-          // Add token handling logic here, e.g., storing in localStorage
-          // localStorage.setItem("token", data.token);
-        } else {
-          setMessage("Unknown error occurred. Please try again.");
-        }
       } else if (response.status === 401) {
         setMessage("Incorrect email or password.");
       } else {

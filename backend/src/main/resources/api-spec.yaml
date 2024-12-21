@@ -85,6 +85,9 @@ components:
 
     SignupResponse:
       type: object
+      required:
+        - email
+        - password
       properties:
         userId:
           type: string
@@ -112,10 +115,14 @@ components:
     LoginResponse:
       type: object
       properties:
+        message:
+          type: string
+          example: "User authenticated successfully."
         token:
           type: string
-          example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+          example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJmNDdhYzEwYi01OGNjLTQzNzItYTU2Ny0wZTAyYjJjM2Q0NzkifQ.1"
         expiresAt:
           type: string
           format: date-time
-          example: "2024-12-31T23:59:59Z"
+          example: "2021-12-31T23:59:59Z"
+   
