@@ -5,7 +5,7 @@ import { FaUser, FaLock, FaRegUser } from "react-icons/fa";
 const RegisterForm: React.FC = () => {
   // State to capture input values
   const [name, setFirstName] = useState('');
-  const [lastname, setLastName] = useState('');
+  const [surname, setSurname] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [message, setMessage] = useState("");
@@ -17,7 +17,7 @@ const RegisterForm: React.FC = () => {
     // Prepare data to send in POST request
     const requestData = {
       name,
-      lastname,
+      surname,
       email,
       password
     };
@@ -66,8 +66,8 @@ const RegisterForm: React.FC = () => {
               type="text"
               placeholder="Last Name"
               required
-              value={lastname}
-              onChange={(e) => setLastName(e.target.value)}
+              value={surname}
+              onChange={(e) => setSurname(e.target.value)}
             />
             <FaRegUser className="icon" />
           </div>
