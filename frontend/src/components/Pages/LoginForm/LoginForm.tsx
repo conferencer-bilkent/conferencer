@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import "./LoginForm.css";
 import { FaUser, FaLock } from "react-icons/fa";
+import Topbar from '../../global/TopBar';
 
 const LoginForm: React.FC = () => {
   const [email, setEmail] = useState("");
@@ -35,7 +36,9 @@ const LoginForm: React.FC = () => {
   };
 
   return (
-    <div className="wrapper">
+    <div>
+      <Topbar></Topbar>
+        <div className="wrapper">
       <form onSubmit={handleSubmit}>
         <div className="input-box">
           <input
@@ -85,6 +88,8 @@ const LoginForm: React.FC = () => {
         {message && <p className="message">{message}</p>}
       </form>
     </div>
+    </div>
+    
   );
 };
 
