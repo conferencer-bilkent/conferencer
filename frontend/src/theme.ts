@@ -86,7 +86,7 @@ export const tokens = (mode: "light" | "dark"): Tokens => ({
           100: "#040509",
           200: "#080b12",
           300: "#0c101b",
-          400: "#f2f0f0", // manually changed
+          400: "#f2f0f0", 
           500: "#141b2d",
           600: "#1F2A40",
           700: "#727681",
@@ -129,7 +129,7 @@ export const tokens = (mode: "light" | "dark"): Tokens => ({
       }),
 });
 
-// mui theme settings
+
 export const themeSettings = (mode: "light" | "dark"): object => {
   const colors = tokens(mode);
   return {
@@ -200,17 +200,17 @@ export const themeSettings = (mode: "light" | "dark"): object => {
   };
 };
 
-// Define the color mode context type
+
 interface ColorModeContextType {
   toggleColorMode: () => void;
 }
 
-// context for color mode
+
 export const ColorModeContext = createContext<ColorModeContextType>({
   toggleColorMode: () => {},
 });
 
-// Define the hook return type
+
 export const useMode = (): [Theme, ColorModeContextType] => {
   const [mode, setMode] = useState<"light" | "dark">("dark");
 

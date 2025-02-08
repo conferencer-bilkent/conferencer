@@ -16,7 +16,9 @@ Before you can run the project, ensure you have the following installed:
 ### **Run the Project**
 
 To run:
+
 ```bash
 cd frontend
+npm install
 npm start
 ```

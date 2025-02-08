@@ -8,6 +8,7 @@ import {ThemeProvider, CssBaseline} from "@mui/material";
 import { ColorModeContext, useMode } from "./theme";
 const App: React.FC = () => {
 
+  //sample use of theme, also see LoginForm
   const [theme, colorMode] = useMode();
   return (
     <ColorModeContext.Provider value={colorMode}>
