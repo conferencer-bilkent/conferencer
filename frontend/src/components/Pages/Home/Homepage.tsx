@@ -27,9 +27,19 @@ const Homepage: React.FC = () => {
 
       {/* Container on the right */}
       <div className="content-container">
-        {/* AppTitle components stacked vertically */}
-        <AppTitle text="CS FAIR 2024 - Day 1" />
-        <AppTitle text="CS FAIR 2024 - Day 2" />
+        {/* Upcoming Conferences Section */}
+        <div className="section">
+          <h2 className="section-title">Upcoming Conferences</h2>
+          <AppTitle text="OS FAIR 2024" />
+          <AppTitle text="BILKENT CONFERENCE 2025" />
+        </div>
+
+        {/* Past Conferences Section */}
+        <div className="section">
+          <h2 className="section-title">Past Conferences</h2>
+          <AppTitle text="BILKENT CONFERENCE 2023" />
+          <AppTitle text="CS FAIR 2023" />
+        </div>
       </div>
     </div>
   );
