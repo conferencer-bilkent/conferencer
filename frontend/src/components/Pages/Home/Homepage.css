@@ -1,0 +1,16 @@
+.homepage-container {
+    display: flex; /* Use Flexbox for layout */
+    height: 100vh; /* Full viewport height */
+    align-items: start;
+  }
+  
+  .content-container {
+    flex: 1; /* Take up remaining space */
+    position: relative;
+    width: 70vw; /* 60% of the screen width */
+    display: flex;
+    flex-direction: column; /* Stack children vertically */
+    align-items: center; /* Center children horizontally */
+    /* Add some padding */
+    gap: 20px; /* Space between children */
+  }
