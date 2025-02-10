@@ -1,6 +1,7 @@
 import React from 'react';
 import AppButton from '../../global/AppButton';// Import the AppButton component
 import { FaVideo, FaMicrophone } from 'react-icons/fa'; // Example icons from react-icons library
+import ConferenceDetail, { ConferenceDetailExample } from './components/ConferenceDetail';
 
 const ConferencePage: React.FC = () => {
   return (
@@ -13,6 +14,9 @@ const ConferencePage: React.FC = () => {
 
       {/* Example usage of AppButton with a microphone icon */}
       <AppButton icon={<FaMicrophone />} text="Mute Audio" />
+      <ConferenceDetailExample />
+
+
     </div>
   );
 };
