@@ -1,0 +1,13 @@
+.app-title {
+    border: 2px solid white; /* 2px white border */
+    border-radius: 20px; /* 20px corner radius */
+    color: white; /* White text color */
+    position: relative;
+    padding: 10px; /* Add padding for better appearance */
+    width: 100%; /* Take up the full horizontal space */
+    box-sizing: border-box; /* Include padding and border in the element's total width */
+    font-family: Arial, sans-serif; /* Optional: Set a font */
+    font-size: 22px; /* Larger font size for a title */
+    font-weight: bold; /* Bold text for emphasis */
+    text-align: center; /* Center the text horizontally */
+  }

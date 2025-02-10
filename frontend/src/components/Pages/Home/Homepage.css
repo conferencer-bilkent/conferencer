@@ -1,0 +1,33 @@
+.homepage-container {
+    display: flex; /* Use Flexbox for layout */
+    height: 100vh; /* Full viewport height */
+    align-items: start; /* Align items to the top */
+  }
+  
+  .content-container {
+    flex: 1; /* Take up remaining space */
+    position: relative;
+    width: 70vw; /* 70% of the viewport width */
+    display: flex;
+    padding-left: 30px;
+    flex-direction: column; /* Stack children vertically */
+    align-items: center; /* Center children horizontally */
+    gap: 20px; /* Space between children */
+  }
+  
+  /* Additional styles for sections */
+  .section {
+    width: 100%; /* Take full width of the container */
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Center content horizontally */
+    gap: 10px; /* Space between items in the section */
+  }
+  
+  .section-title {
+    font-size: 24px; /* Larger font size for section titles */
+    font-weight: bold; /* Bold text for emphasis */
+    color: #fffdfd; /* Dark text color */
+    margin-bottom: 10px; /* Space below the title */
+    align-self: flex-start; /* Align title to the left */
+  }
