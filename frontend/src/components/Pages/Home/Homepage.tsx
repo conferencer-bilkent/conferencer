@@ -15,7 +15,7 @@ const menuItems = [
   "LOG OUT",
 ];
 
-const Homepage: React.FC = () => {
+const HomePage: React.FC = () => {
   const handleItemClick = (item: string) => {
     console.log("Clicked:", item);
   };
@@ -45,4 +45,4 @@ const Homepage: React.FC = () => {
   );
 };
 
-export default Homepage;
+export default HomePage;
