@@ -21,13 +21,16 @@ interface ConferenceDetailProps {
 const ConferenceDetail: React.FC<ConferenceDetailProps> = ({ texts, buttons }) => {
   return (
     <div className="conference-detail">
-      <div className="text-info">
-        <div className="description">
+      
+      <div className="description-container">
+        
+      <div className="description"> Description: orem ipsum dolor sit amet, consectetur adipiscing elit. Sed egestas vulputate elit non consectetur. Pellentesque vel enim diam. Maecenas dictum turpis vitae elit pellentesque, sit amet pharetra dolor viverra. Pellentesque vel nisi sit amet dui pharetra auctor. Cras condimentum nisl a posuere sagittis. Suspendisse volutpat auctor fermentum. Morbi ultrices felis quis felis facilisis, nec maximus nibh lacinia. Phasellus porta lorem ante, a fermentum risus blandit vitae. Suspendisse tempus ultrices risus sit amet consequat. Morbi lacus lacus, accumsan non blandit suscipit, aliquet sed lorem. </div>
+        <div className="text-info">
           {texts.map((item, index) => (
-            <p key={index}>
+            <div className="small-details" key={index}>
               {item.title && <strong>{item.title}: </strong>}
-              {item.link ? <a href={item.link}>{item.content}</a> : item.content}
-            </p>
+              {item.content}
+            </div>
           ))}
         </div>
       </div>
@@ -45,11 +48,6 @@ const ConferenceDetail: React.FC<ConferenceDetailProps> = ({ texts, buttons }) =
 
 // Default Props (Hardcoded Example)
 const defaultTexts: TextInfo[] = [
-  {
-    title: "Description",
-    content:
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin elit massa, accumsan non consectetur non, accumsan sit amet odio.",
-  },
   {
     title: "Track Dates",
     content: "23.12.2024 - 25.12.2024",

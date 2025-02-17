@@ -2,7 +2,7 @@ import React from "react";
 import Topbar from "../../global/TopBar";
 import SideMenu from "../../global/SideMenu";
 import AppTitle from "../../global/AppTitle";
-import "./Homepage.css"; // Import the CSS file
+import "./Homepage.css"; 
 
 const menuItems = [
   "MY TASKS",
