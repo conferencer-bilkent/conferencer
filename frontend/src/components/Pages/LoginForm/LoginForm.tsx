@@ -2,6 +2,9 @@ import React, { useState } from 'react';
 import "./LoginForm.css";
 import { FaUser, FaLock } from "react-icons/fa";
 import Topbar from '../../global/TopBar';
+import { GoogleLogin } from "@react-oauth/google";
+import { jwtDecode } from "jwt-decode";
+
 //check Topbar for theme change use
 const LoginForm: React.FC = () => {
   const [email, setEmail] = useState("");
@@ -71,9 +74,18 @@ const LoginForm: React.FC = () => {
 
         <div className="button-row">
           <button type="submit" className="text-button">Login</button>
-          <button type="button" className="image-button google-button">
+          <GoogleLogin
+  onSuccess={(credentialResponse) => {
+    if (credentialResponse.credential) {
+      const decodedToken: any = jwtDecode(credentialResponse.credential);
+      console.log("Google Login Success:", decodedToken.name);
+    }
+  }}
+  onError={() => console.log("Google Login Failed")}
+/>
+          {/* <button type="button" className="image-button google-button">
             Google Login
-          </button>
+          </button> */}
           <button type="button" className="image-button orcid-button">
             Orcid Login
           </button>

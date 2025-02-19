@@ -24,4 +24,7 @@ public class User extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "token_id")
     private UserToken userToken;
+
+    private String googleId; // Store Google User ID
+    private String authProvider; // "LOCAL" or "GOOGLE"
 }

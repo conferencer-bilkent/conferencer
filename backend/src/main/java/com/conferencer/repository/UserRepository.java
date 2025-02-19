@@ -16,6 +16,6 @@ public interface UserRepository extends JpaRepository<User, UUID> {
             + "LEFT JOIN FETCH r.authorities a "
             + " WHERE u.email = :email")
     Optional<User> findByEmail(String email);
-
+    Optional<User> findByGoogleId(String googleId);
 
 }
