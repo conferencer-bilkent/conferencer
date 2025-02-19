@@ -1,4 +1,4 @@
-import { createContext, useState, useMemo, ReactNode } from "react";
+import { createContext, useState, useMemo, ReactNode, useEffect } from "react";
 import { createTheme, Theme } from "@mui/material/styles";
 
 // Define the tokens structure
@@ -165,7 +165,7 @@ export const themeSettings = (mode: "light" | "dark"): object => {
               light: colors.grey[100],
             },
             background: {
-              default: "#fcfcfc",
+              default: "#f1f2f3",
             },
           }),
     },
@@ -210,19 +210,25 @@ export const ColorModeContext = createContext<ColorModeContextType>({
   toggleColorMode: () => {},
 });
 
+export const useMode = (): [Theme, { toggleColorMode: () => void }] => {
+  const storedTheme = localStorage.getItem("theme") as "light" | "dark" | null;
+  const [mode, setMode] = useState<"light" | "dark">(storedTheme || "dark");
 
-export const useMode = (): [Theme, ColorModeContextType] => {
-  const [mode, setMode] = useState<"light" | "dark">("dark");
+  useEffect(() => {
+    localStorage.setItem("theme", mode); // Save the theme to localStorage whenever it changes
+  }, [mode]);
 
-  const colorMode = useMemo<ColorModeContextType>(
-    () => ({
-      toggleColorMode: () =>
-        setMode((prev) => (prev === "light" ? "dark" : "light")),
-    }),
-    []
-  );
+  const colorMode = useMemo(() => ({
+    toggleColorMode: () => {
+      setMode((prev) => {
+        const newMode = prev === "light" ? "dark" : "light";
+        localStorage.setItem("theme", newMode); // Persist theme change
+        return newMode;
+      });
+    },
+  }), []);
 
   const theme = useMemo(() => createTheme(themeSettings(mode)), [mode]);
+
   return [theme, colorMode];
 };
-  

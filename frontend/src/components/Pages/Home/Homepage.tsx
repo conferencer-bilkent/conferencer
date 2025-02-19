@@ -21,6 +21,9 @@ const Homepage: React.FC = () => {
   };
 
   return (
+    <>
+    
+    <Topbar></Topbar>
     <div className="homepage-container">
       {/* Side Menu on the left */}
       <SideMenu items={menuItems} onItemClick={handleItemClick} />
@@ -42,6 +45,7 @@ const Homepage: React.FC = () => {
         </div>
       </div>
     </div>
+    </>
   );
 };
 
