@@ -1,9 +1,14 @@
-import React, { useState } from 'react';
-import "./LoginForm.css";
+import React, { useState } from "react";
+import { Box, Button, TextField, Typography, useTheme } from "@mui/material";
 import { FaUser, FaLock } from "react-icons/fa";
-import Topbar from '../../global/TopBar';
-//check Topbar for theme change use
+import { ColorModeContext, useMode } from "../../../theme";
+import { useContext } from "react";
+import Topbar from "../../global/TopBar"; // Ensures theme switching works
+
 const LoginForm: React.FC = () => {
+  const theme = useTheme();
+  const colorMode = useContext(ColorModeContext);
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
@@ -22,8 +27,8 @@ const LoginForm: React.FC = () => {
 
       const data = await response.json();
       if (response.status === 200 && data.token) {
-          setMessage("Login successful!");
-          console.log("Token:", data.token);
+        setMessage("Login successful!");
+        console.log("Token:", data.token);
       } else if (response.status === 401) {
         setMessage("Incorrect email or password.");
       } else {
@@ -36,60 +41,144 @@ const LoginForm: React.FC = () => {
   };
 
   return (
-    <div>
-      <Topbar></Topbar>
-        <div className="wrapper">
-      <form onSubmit={handleSubmit}>
-        <div className="input-box">
-          <input
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
-          <FaUser className="icon" />
-        </div>
+    <>
+      <Topbar />
+      <Box
+        sx={{
+          minHeight: "100vh",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          bgcolor: theme.palette.background.default, // Dynamic background
+          color: theme.palette.text.primary, // Dynamic text color
+        }}
+      >
+        <Box
+          sx={{
+            width: "350px",
+            padding: "2rem",
+            borderRadius: "8px",
+            backgroundColor:
+              theme.palette.mode === "dark" ? "#1E1E1E" : "#FFFFFF",
+            boxShadow:
+              theme.palette.mode === "dark"
+                ? "0px 0px 10px rgba(255, 255, 255, 0.2)"
+                : "0px 0px 10px rgba(0, 0, 0, 0.1)",
+          }}
+        >
+          <Typography variant="h4" align="center" sx={{ mb: 2 }}>
+            Login
+          </Typography>
 
-        <div className="input-box">
-          <input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-          <FaLock className="icon" />
-        </div>
-        <div className="remember-forgot">
-          <label>
-            <input type="checkbox" />
-            Remember me
-          </label>
-          <a href="#">Forgot Password?</a>
-        </div>
+          <form onSubmit={handleSubmit}>
+            <Box sx={{ mb: 2 }}>
+              <TextField
+                fullWidth
+                variant="outlined"
+                label="Email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                InputProps={{
+                  startAdornment: <FaUser style={{ marginRight: "8px" }} />,
+                }}
+              />
+            </Box>
 
-        <div className="button-row">
-          <button type="submit" className="text-button">Login</button>
-          <button type="button" className="image-button google-button">
-            Google Login
-          </button>
-          <button type="button" className="image-button orcid-button">
-            Orcid Login
-          </button>
-        </div>
+            <Box sx={{ mb: 2 }}>
+              <TextField
+                fullWidth
+                variant="outlined"
+                label="Password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                InputProps={{
+                  startAdornment: <FaLock style={{ marginRight: "8px" }} />,
+                }}
+              />
+            </Box>
 
-        <div className="register-link">
-          <p>
-            Don't you have an account? <a href="/register">Register</a>
-          </p>
-        </div>
+            <Box
+              sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}
+            >
+              <Typography variant="body2">
+                <input type="checkbox" /> Remember me
+              </Typography>
+              <Typography
+                variant="body2"
+                sx={{ cursor: "pointer", color: theme.palette.secondary.main }}
+              >
+                Forgot Password?
+              </Typography>
+            </Box>
 
-        {message && <p className="message">{message}</p>}
-      </form>
-    </div>
-    </div>
-    
+            <Button
+              type="submit"
+              variant="contained"
+              fullWidth
+              sx={{
+                backgroundColor: theme.palette.primary.main,
+                color: "#fff",
+                mb: 2,
+                "&:hover": {
+                  backgroundColor: theme.palette.primary.dark,
+                },
+              }}
+            >
+              Login
+            </Button>
+
+            <Button
+              variant="outlined"
+              fullWidth
+              sx={{
+                color: theme.palette.text.primary,
+                borderColor: theme.palette.text.primary,
+                mb: 1,
+                "&:hover": {
+                  backgroundColor:
+                    theme.palette.mode === "dark" ? "#333" : "#f5f5f5",
+                },
+              }}
+            >
+              Google Login
+            </Button>
+
+            <Button
+              variant="outlined"
+              fullWidth
+              sx={{
+                color: theme.palette.text.primary,
+                borderColor: theme.palette.text.primary,
+                "&:hover": {
+                  backgroundColor:
+                    theme.palette.mode === "dark" ? "#333" : "#f5f5f5",
+                },
+              }}
+            >
+              Orcid Login
+            </Button>
+
+            <Typography align="center" sx={{ mt: 2 }}>
+              Don't have an account?{" "}
+              <a
+                href="/register"
+                style={{ color: theme.palette.secondary.main }}
+              >
+                Register
+              </a>
+            </Typography>
+
+            {message && (
+              <Typography align="center" sx={{ mt: 2, color: "red" }}>
+                {message}
+              </Typography>
+            )}
+          </form>
+        </Box>
+      </Box>
+    </>
   );
 };
 

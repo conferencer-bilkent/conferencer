@@ -9,25 +9,35 @@ import ConferencePage from "./components/Pages/Conference/ConferencePage";
 import HomePage from "./components/Pages/Home/Homepage";
 const App: React.FC = () => {
 
-  //sample use of theme, also see LoginForm
+
+const App: React.FC = () => {
   const [theme, colorMode] = useMode();
+
   return (
     <ColorModeContext.Provider value={colorMode}>
-    <ThemeProvider theme={theme}>
-      <Router>
-        <div className="App">
-          <Routes>
-            <Route path="/login" element={<LoginForm />} />
-            <Route path="/register" element={<RegisterForm />} />
-            <Route path="/home" element ={<HomePage />} />
-            <Route path="/conference" element ={<ConferencePage />} />
-
-            {/* You can set the default route to be the login page */}
-            <Route path="/" element={<ConferencePage />} />
-          </Routes>
-        </div>
-      </Router>
-    </ThemeProvider>
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        <Box
+          sx={{
+            minHeight: "100vh",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            bgcolor: theme.palette.background.default,
+          }}
+        >
+          <Router>
+            <div className="App">
+              <Routes>
+                <Route path="/login" element={<LoginForm />} />
+                <Route path="/register" element={<RegisterForm />} />
+                <Route path="/home" element={<HomePage />} />
+                <Route path="/" element={<HomePage />} />
+              </Routes>
+            </div>
+          </Router>
+        </Box>
+      </ThemeProvider>
     </ColorModeContext.Provider>
   );
 };

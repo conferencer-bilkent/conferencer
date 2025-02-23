@@ -4,6 +4,7 @@ import SideMenu from "../../global/SideMenu";
 import AppTitle from "../../global/AppTitle";
 import "./Homepage.css"; 
 
+
 const menuItems = [
   "MY TASKS",
   "MY ROLES",
@@ -15,12 +16,17 @@ const menuItems = [
   "LOG OUT",
 ];
 
-const HomePage: React.FC = () => {
+const Homepage: React.FC = () => {
+
   const handleItemClick = (item: string) => {
     console.log("Clicked:", item);
   };
 
   return (
+
+    <>
+    
+    <Topbar></Topbar>
     <div className="homepage-container">
       {/* Side Menu on the left */}
       <SideMenu items={menuItems} onItemClick={handleItemClick} />
@@ -42,7 +48,10 @@ const HomePage: React.FC = () => {
         </div>
       </div>
     </div>
+
+    </>
   );
 };
 
-export default HomePage;
+export default Homepage;
+

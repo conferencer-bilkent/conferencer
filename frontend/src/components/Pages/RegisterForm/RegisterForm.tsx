@@ -1,43 +1,33 @@
-import React, { useState } from 'react';
-import "./RegisterForm.css";
+import React, { useState, useContext } from "react";
+import { Box, Button, TextField, Typography, useTheme } from "@mui/material";
 import { FaUser, FaLock, FaRegUser } from "react-icons/fa";
+import { ColorModeContext } from "../../../theme"; // Ensure correct path
+import Topbar from "../../global/TopBar"; // Import Topbar for theme toggle
 
 const RegisterForm: React.FC = () => {
-  // State to capture input values
-  const [name, setFirstName] = useState('');
-  const [surname, setSurname] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const theme = useTheme();
+  const colorMode = useContext(ColorModeContext);
+
+  const [name, setFirstName] = useState("");
+  const [surname, setSurname] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
 
-  // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    // Prepare data to send in POST request
-    const requestData = {
-      name,
-      surname,
-      email,
-      password
-    };
+    const requestData = { name, surname, email, password };
 
     try {
-      // Send POST request
-      const response = await fetch('http://localhost:8080/auth/signup', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+      const response = await fetch("http://localhost:8080/auth/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(requestData),
       });
 
       if (response.ok) {
-        // Handle successful registration (e.g., redirect to login page)
-        setMessage('User registered successfully');
-        // You can redirect here using something like: window.location.href = '/login';
+        setMessage("User registered successfully");
       } else {
-        // Handle error (e.g., display a message)
         const errorData = await response.json();
         setMessage(`Registration failed: ${errorData.message}`);
       }
@@ -47,69 +37,119 @@ const RegisterForm: React.FC = () => {
   };
 
   return (
-    <div className="wrapper">
-      <form onSubmit={handleSubmit}>
-        <div className="name-row">
-          <div className="input-box">
-            <input
-              type="text"
-              placeholder="First Name"
-              required
-              value={name}
-              onChange={(e) => setFirstName(e.target.value)}
-            />
-            <FaRegUser className="icon" />
-          </div>
+    <>
+      <Topbar /> {/* Ensures theme switching */}
+      <Box
+        sx={{
+          minHeight: "100vh",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          bgcolor: theme.palette.background.default, // Theme-based background
+          color: theme.palette.text.primary, // Theme-based text color
+        }}
+      >
+        <Box
+          sx={{
+            width: "400px",
+            padding: "2rem",
+            borderRadius: "8px",
+            backgroundColor:
+              theme.palette.mode === "dark" ? "#1E1E1E" : "#FFFFFF",
+            boxShadow:
+              theme.palette.mode === "dark"
+                ? "0px 0px 10px rgba(255, 255, 255, 0.2)"
+                : "0px 0px 10px rgba(0, 0, 0, 0.1)",
+          }}
+        >
+          <Typography variant="h4" align="center" sx={{ mb: 2 }}>
+            Register
+          </Typography>
 
-          <div className="input-box">
-            <input
-              type="text"
-              placeholder="Last Name"
-              required
-              value={surname}
-              onChange={(e) => setSurname(e.target.value)}
-            />
-            <FaRegUser className="icon" />
-          </div>
-        </div>
+          <form onSubmit={handleSubmit}>
+            <Box sx={{ display: "flex", gap: 2, mb: 2 }}>
+              <TextField
+                fullWidth
+                variant="outlined"
+                label="First Name"
+                value={name}
+                onChange={(e) => setFirstName(e.target.value)}
+                InputProps={{
+                  startAdornment: <FaRegUser style={{ marginRight: "8px" }} />,
+                }}
+              />
+              <TextField
+                fullWidth
+                variant="outlined"
+                label="Last Name"
+                value={surname}
+                onChange={(e) => setSurname(e.target.value)}
+                InputProps={{
+                  startAdornment: <FaRegUser style={{ marginRight: "8px" }} />,
+                }}
+              />
+            </Box>
 
-        <div className="input-box">
-          <input
-            type="email"
-            placeholder="Email"
-            required
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-          <FaUser className="icon" />
-        </div>
+            <Box sx={{ mb: 2 }}>
+              <TextField
+                fullWidth
+                variant="outlined"
+                label="Email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                InputProps={{
+                  startAdornment: <FaUser style={{ marginRight: "8px" }} />,
+                }}
+              />
+            </Box>
 
-        <div className="input-box">
-          <input
-            type="password"
-            placeholder="Password"
-            required
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-          <FaLock className="icon" />
-        </div>
+            <Box sx={{ mb: 2 }}>
+              <TextField
+                fullWidth
+                variant="outlined"
+                label="Password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                InputProps={{
+                  startAdornment: <FaLock style={{ marginRight: "8px" }} />,
+                }}
+              />
+            </Box>
 
-        <div className="button-row">
-            <button type="submit" className="text-button">Register</button>
-            <button type="button" className="image-button google-button">Google Login</button>
-            <button type="button" className="image-button orcid-button">Orcid Login</button>
-        </div>
+            <Button
+              type="submit"
+              variant="contained"
+              fullWidth
+              sx={{
+                backgroundColor: theme.palette.primary.main,
+                color: "#fff",
+                mb: 2,
+                "&:hover": {
+                  backgroundColor: theme.palette.primary.dark,
+                },
+              }}
+            >
+              Register
+            </Button>
 
-        {message && <div className="message">{message}</div>}
-        
-        <div className="register-link">
-          <p>
-            Already have an account? <a href="/login">Login</a>
-          </p>
-        </div>
-      </form>
-    </div>
+            <Typography align="center" sx={{ mt: 2 }}>
+              Already have an account?{" "}
+              <a href="/login" style={{ color: theme.palette.secondary.main }}>
+                Login
+              </a>
+            </Typography>
+
+            {message && (
+              <Typography align="center" sx={{ mt: 2, color: "red" }}>
+                {message}
+              </Typography>
+            )}
+          </form>
+        </Box>
+      </Box>
+    </>
   );
 };
 
