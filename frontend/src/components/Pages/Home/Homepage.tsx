@@ -2,7 +2,8 @@ import React from "react";
 import Topbar from "../../global/TopBar";
 import SideMenu from "../../global/SideMenu";
 import AppTitle from "../../global/AppTitle";
-import "./Homepage.css"; // Import the CSS file
+import "./Homepage.css"; 
+
 
 const menuItems = [
   "MY TASKS",
@@ -16,11 +17,13 @@ const menuItems = [
 ];
 
 const Homepage: React.FC = () => {
+
   const handleItemClick = (item: string) => {
     console.log("Clicked:", item);
   };
 
   return (
+
     <>
     
     <Topbar></Topbar>
@@ -45,8 +48,10 @@ const Homepage: React.FC = () => {
         </div>
       </div>
     </div>
+
     </>
   );
 };
 
 export default Homepage;
+

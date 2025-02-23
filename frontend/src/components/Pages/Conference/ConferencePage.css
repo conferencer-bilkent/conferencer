@@ -1,0 +1,12 @@
+.conference-container {
+    display: flex;
+  }
+  
+  .side-menu-container {
+  }
+  
+  .content-container {
+    flex: 1;
+    margin-left: 20px;
+    width: 80vw;
+  }
