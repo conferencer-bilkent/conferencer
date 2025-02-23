@@ -12,7 +12,7 @@ const App: React.FC = () => {
   //sample use of theme, also see LoginForm
   const [theme, colorMode] = useMode();
   return (
-    <GoogleOAuthProvider clientId="957813325622-dvrciioe73t4dorpokic7evbfihh6kim.apps.googleusercontent.com">
+    //<GoogleOAuthProvider clientId="x">
     <ColorModeContext.Provider value={colorMode}>
     <ThemeProvider theme={theme}>
       <Router>
@@ -28,7 +28,7 @@ const App: React.FC = () => {
       </Router>
     </ThemeProvider>
     </ColorModeContext.Provider>
-    </GoogleOAuthProvider>
+    //</GoogleOAuthProvider>
   );
 };
 
