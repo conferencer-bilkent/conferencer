@@ -3,11 +3,10 @@ import './App.css';
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import LoginForm from "./components/Pages/LoginForm/LoginForm";
 import RegisterForm from "./components/Pages/RegisterForm/RegisterForm";
-import {ThemeProvider, CssBaseline} from "@mui/material";
+import {ThemeProvider, CssBaseline, Box} from "@mui/material";
 import { ColorModeContext, useMode } from "./theme";
 import ConferencePage from "./components/Pages/Conference/ConferencePage";
 import HomePage from "./components/Pages/Home/Homepage";
-const App: React.FC = () => {
 
 
 const App: React.FC = () => {
@@ -32,6 +31,7 @@ const App: React.FC = () => {
                 <Route path="/login" element={<LoginForm />} />
                 <Route path="/register" element={<RegisterForm />} />
                 <Route path="/home" element={<HomePage />} />
+                <Route path="/conference" element={<ConferencePage />} />
                 <Route path="/" element={<HomePage />} />
               </Routes>
             </div>
