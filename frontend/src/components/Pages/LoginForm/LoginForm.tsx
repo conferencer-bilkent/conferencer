@@ -3,10 +3,12 @@ import { Box, Button, TextField, Typography, useTheme } from "@mui/material";
 import { FaUser, FaLock } from "react-icons/fa";
 import { ColorModeContext, useMode } from "../../../theme";
 import { useContext } from "react";
+import { useNavigate } from "react-router-dom";
 import Topbar from "../../global/TopBar"; // Ensures theme switching works
 
 const LoginForm: React.FC = () => {
   const theme = useTheme();
+  const navigate = useNavigate();
   const colorMode = useContext(ColorModeContext);
 
   const [email, setEmail] = useState("");
@@ -17,7 +19,7 @@ const LoginForm: React.FC = () => {
     e.preventDefault(); // Prevent default form submission
 
     try {
-      const response = await fetch("http://localhost:8080/auth/login", {
+      const response = await fetch("http://127.0.0.1:5000/auth/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -26,9 +28,11 @@ const LoginForm: React.FC = () => {
       });
 
       const data = await response.json();
-      if (response.status === 200 && data.token) {
+      if (response.status === 200 && data.access_token) {
         setMessage("Login successful!");
-        console.log("Token:", data.token);
+        localStorage.setItem("access_token", data.access_token);
+        navigate("/home");
+        console.log("Token:", data.access_token);
       } else if (response.status === 401) {
         setMessage("Incorrect email or password.");
       } else {
