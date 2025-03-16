@@ -22,6 +22,7 @@ jobs:
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} "
             cd ${{ secrets.DOCKER_COMPOSE_PATH }} &&
+            git pull origin main &&
             docker-compose down &&
             docker-compose build &&
             docker-compose up -d
