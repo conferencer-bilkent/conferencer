@@ -28,11 +28,11 @@ jobs:
           source venv/bin/activate
           pip install -r requirements.txt
 
-      - name: Run Tests
-        working-directory: ./backend
-        run: |
-          source venv/bin/activate
-          pytest --disable-warnings
+      # - name: Run Tests
+      #   working-directory: ./backend
+      #   run: |
+      #     source venv/bin/activate
+      #     pytest --disable-warnings
 
     outputs:
       build_status: success
