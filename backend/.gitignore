@@ -1,0 +1,55 @@
+__pycache__/
+*.py[cod]
+*.so
+
+venv/
+env/
+*.env
+*.venv
+*.virtualenv
+
+.vscode/
+.idea/
+*.swp
+*.swo
+*.swn
+
+*.log
+*.out
+*.err
+logs/
+debug.log
+
+.DS_Store
+Thumbs.db
+
+*.lock
+pip-log.txt
+pip-delete-this-directory.txt
+
+docker-compose.override.yml
+.dockerignore
+
+# Database / Caches
+*.sqlite3
+*.db
+*.pid
+
+# Environment variables
+.env
+.env.local
+.env.development
+.env.production
+.env.test
+
+# Gunicorn logs
+gunicorn.log
+instance/
+
+# Jupyter Notebook checkpoints (if using Jupyter)
+.ipynb_checkpoints/
+
+# Compiled C extensions
+*.o
+*.pyc
+*.pyo
