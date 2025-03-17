@@ -50,7 +50,7 @@ jobs:
       - name: Set Up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.9'
+          python-version: "3.10"
 
       - name: Install Dependencies
         working-directory: ./backend
@@ -58,13 +58,7 @@ jobs:
           python -m venv venv
           source venv/bin/activate
           pip install -r requirements.txt
-
-      - name: Build Backend
-        working-directory: ./backend
-        run: |
-          # Add your build commands here, such as:
-          python setup.py install  # Or any other backend build steps you need
-
+          
   deploy_backend:
     name: Deploy Backend
     runs-on: ubuntu-latest
