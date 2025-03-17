@@ -1,15 +1,15 @@
 import React, { useState } from "react";
 import { Box, Button, TextField, Typography, useTheme } from "@mui/material";
 import { FaUser, FaLock } from "react-icons/fa";
-import { ColorModeContext, useMode } from "../../../theme";
-import { useContext } from "react";
+// import { ColorModeContext } from "../../../theme";
+// import { useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import Topbar from "../../global/TopBar"; // Ensures theme switching works
 
 const LoginForm: React.FC = () => {
   const theme = useTheme();
   const navigate = useNavigate();
-  const colorMode = useContext(ColorModeContext);
+  // const colorMode = useContext(ColorModeContext);
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");

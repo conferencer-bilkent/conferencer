@@ -1,7 +1,7 @@
 import React from 'react';
 import AppButton from '../../global/AppButton';// Import the AppButton component
 import { FaVideo, FaMicrophone } from 'react-icons/fa'; // Example icons from react-icons library
-import ConferenceDetail, { ConferenceDetailExample } from './components/ConferenceDetail';
+import { ConferenceDetailExample } from './components/ConferenceDetail';
 import AppTitle from '../../global/AppTitle';
 import SideMenu from '../../global/SideMenu';
 import { getMenuItemsForPage } from '../../global/sideMenuConfig';
