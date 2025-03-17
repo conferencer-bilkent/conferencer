@@ -21,7 +21,6 @@ const menuItems = [
 const Homepage: React.FC = () => {
 
   useAuth();
-  
   const handleItemClick = (item: string) => {
     console.log("Clicked:", item);
   };

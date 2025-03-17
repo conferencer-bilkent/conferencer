@@ -8,7 +8,6 @@ import { ColorModeContext, useMode } from "./theme";
 import ConferencePage from "./components/Pages/Conference/ConferencePage";
 import HomePage from "./components/Pages/Home/Homepage";
 
-
 const App: React.FC = () => {
   const [theme, colorMode] = useMode();
 
