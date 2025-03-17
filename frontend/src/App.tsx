@@ -22,12 +22,14 @@ const App: React.FC = () => {
             justifyContent: "center",
             alignItems: "center",
             bgcolor: theme.palette.background.default,
+            transition:
+              "background-color 0.3s ease-in-out, color 0.3s ease-in-out",
           }}
         >
           <Router>
             <div className="App">
               <Routes>
-                <Route path="/login" element={<ConferencePage />} />
+                <Route path="/login" element={<LoginForm />} />
                 <Route path="/register" element={<RegisterForm />} />
                 <Route path="/home" element={<HomePage />} />
                 <Route path="/conference" element={<ConferencePage />} />

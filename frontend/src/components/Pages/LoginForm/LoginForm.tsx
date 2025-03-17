@@ -55,6 +55,8 @@ const LoginForm: React.FC = () => {
           alignItems: "center",
           bgcolor: theme.palette.background.default, // Dynamic background
           color: theme.palette.text.primary, // Dynamic text color
+          transition:
+            "background-color 0.3s ease-in-out, color 0.3s ease-in-out",
         }}
       >
         <Box
