@@ -1,7 +1,11 @@
-FROM openjdk:21-jdk
+FROM python:3.10
 
-COPY target/conferencer-1.0.0.jar app.jar
+WORKDIR /app
 
-EXPOSE 8080
+COPY . /app
 
-ENTRYPOINT ["java", "-jar", "/app.jar"]
+RUN pip install --no-cache-dir -r requirements.txt
+
+EXPOSE 5000
+
+CMD ["python", "app.py"]

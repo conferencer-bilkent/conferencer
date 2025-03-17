@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import AppButton from '../../global/AppButton';
 import { FaPlusCircle } from 'react-icons/fa';
+
 import { ConferenceDetailExample } from './components/ConferenceDetail';
 import AppTitle from '../../global/AppTitle';
 import SideMenu from '../../global/SideMenu';
@@ -10,7 +11,7 @@ import './ConferencePage.css';
 
 const ConferencePage: React.FC = () => {
   const menuItems = getMenuItemsForPage("home");
-  
+
   const handleItemClick = (item: string) => {
     console.log("Clicked:", item);
   };
@@ -68,6 +69,7 @@ const ConferencePage: React.FC = () => {
               onClose={closePopup}
             />
           )}
+
         </div>
       </div>
     </div>
@@ -75,3 +77,4 @@ const ConferencePage: React.FC = () => {
 };
 
 export default ConferencePage;
+

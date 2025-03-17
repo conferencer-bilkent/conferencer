@@ -1,7 +1,9 @@
 import React from "react";
+// import { useNavigate } from "react-router-dom";
 import Topbar from "../../global/TopBar";
 import SideMenu from "../../global/SideMenu";
 import AppTitle from "../../global/AppTitle";
+import useAuth from "../../hooks/useAuth";
 import "./Homepage.css"; 
 
 
@@ -18,6 +20,7 @@ const menuItems = [
 
 const Homepage: React.FC = () => {
 
+  useAuth();
   const handleItemClick = (item: string) => {
     console.log("Clicked:", item);
   };
