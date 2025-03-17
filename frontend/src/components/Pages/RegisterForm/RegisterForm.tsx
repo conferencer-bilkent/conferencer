@@ -1,12 +1,12 @@
-import React, { useState, useContext } from "react";
+import React, { useState, } from "react";
 import { Box, Button, TextField, Typography, useTheme } from "@mui/material";
 import { FaUser, FaLock, FaRegUser } from "react-icons/fa";
-import { ColorModeContext } from "../../../theme"; // Ensure correct path
+//import { ColorModeContext } from "../../../theme"; // Ensure correct path
 import Topbar from "../../global/TopBar"; // Import Topbar for theme toggle
 
 const RegisterForm: React.FC = () => {
   const theme = useTheme();
-  const colorMode = useContext(ColorModeContext);
+  //const colorMode = useContext(ColorModeContext);
 
   const [name, setFirstName] = useState("");
   const [surname, setSurname] = useState("");
