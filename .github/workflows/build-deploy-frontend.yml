@@ -29,6 +29,12 @@ jobs:
         working-directory: ./frontend
         run: npm run build
 
+      - name: Upload dist folder as artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: frontend-dist
+          path: ./frontend/dist/
+
   deploy:
     name: Deploy Frontend
     runs-on: ubuntu-latest
@@ -42,6 +48,11 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
+      - name: Download dist folder artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: frontend-dist
+
       - name: Deploy Frontend
         run: |
-          rsync -avz -e "ssh -o StrictHostKeyChecking=no" ./frontend/dist/ ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}:/var/www/html/
+          rsync -avz -e "ssh -o StrictHostKeyChecking=no" ./frontend-dist/dist/ ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}:/var/www/html/
