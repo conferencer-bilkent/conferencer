@@ -13,10 +13,17 @@ jobs:
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
 
     steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
       - name: Set Up SSH Agent
         uses: webfactory/ssh-agent@v0.7.0
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Check if dist folder exists
+        run: |
+          ls ./frontend/dist
 
       - name: Deploy Frontend
         run: |
