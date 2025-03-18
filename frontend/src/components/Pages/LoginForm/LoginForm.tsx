@@ -1,22 +1,20 @@
 import React, { useState } from "react";
-import { Box, Button, TextField, Typography, useTheme } from "@mui/material";
+import "./LoginForm.css";
 import { FaUser, FaLock } from "react-icons/fa";
-import { ColorModeContext, useMode } from "../../../theme";
-import { useContext } from "react";
+import Topbar from "../../global/TopBar";
 import { useNavigate } from "react-router-dom";
-import Topbar from "../../global/TopBar"; // Ensures theme switching works
+import { Box, Button, TextField, Typography, useTheme } from "@mui/material";
 
 const LoginForm: React.FC = () => {
   const theme = useTheme();
-  const navigate = useNavigate();
-  const colorMode = useContext(ColorModeContext);
 
+  const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault(); // Prevent default form submission
+    e.preventDefault();
 
     try {
       const response = await fetch("http://127.0.0.1:5000/auth/login", {
@@ -31,8 +29,7 @@ const LoginForm: React.FC = () => {
       if (response.status === 200 && data.access_token) {
         setMessage("Login successful!");
         localStorage.setItem("access_token", data.access_token);
-        navigate("/home");
-        console.log("Token:", data.access_token);
+        navigate("/");
       } else if (response.status === 401) {
         setMessage("Incorrect email or password.");
       } else {

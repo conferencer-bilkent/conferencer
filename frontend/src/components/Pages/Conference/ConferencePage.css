@@ -10,3 +10,10 @@
     margin-left: 20px;
     width: 80vw;
   }
+  .buttons-row {
+    display: flex;
+    width: 100%;              /* Make the row span the full width of its container */
+    justify-content: space-between; /* Evenly distribute space around all buttons */
+    align-items: center;      /* Vertically center the buttons */
+  }
+  

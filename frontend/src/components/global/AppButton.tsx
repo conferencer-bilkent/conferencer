@@ -2,10 +2,11 @@ import React from "react";
 import { Button, useTheme, Box } from "@mui/material";
 import { tokens } from "../../theme"; // Import theme tokens
 
-interface AppButtonProps {
+type AppButtonProps = {
   icon: React.ReactNode;
   text: string;
-}
+  onClick?: () => void;
+};
 
 const AppButton: React.FC<AppButtonProps> = ({ icon, text }) => {
   const theme = useTheme();
