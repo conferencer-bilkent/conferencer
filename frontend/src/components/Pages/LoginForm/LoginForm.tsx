@@ -17,27 +17,22 @@ const LoginForm: React.FC = () => {
     e.preventDefault();
 
     try {
-      const response = await fetch("http://127.0.0.1:5000/auth/login", {
+      const response = await fetch("http://localhost:5000/auth/login", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
+        credentials: "include", // Ensures session cookies are sent for authentication
         body: JSON.stringify({ email, password }),
       });
 
       const data = await response.json();
-      if (response.status === 200 && data.access_token) {
-        setMessage("Login successful!");
-        localStorage.setItem("access_token", data.access_token);
-        navigate("/");
-      } else if (response.status === 401) {
-        setMessage("Incorrect email or password.");
+      if (response.ok) {
+        setMessage(`Welcome, ${data.user.name} ${data.user.surname}!`);
+        navigate("/home");
       } else {
-        setMessage("Unknown error occurred. Please try again.");
+        setMessage(`Login failed: ${data.error}`);
       }
     } catch (error) {
-      console.error("An error occurred:", error);
-      setMessage("Unable to connect to the server. Please try again later.");
+      setMessage(`Error occurred during login: ${error}`);
     }
   };
 

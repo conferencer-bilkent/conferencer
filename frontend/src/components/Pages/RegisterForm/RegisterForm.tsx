@@ -4,9 +4,12 @@ import "./RegisterForm.css";
 import { FaUser, FaLock, FaRegUser } from "react-icons/fa";
 import { Box, Button, TextField, Typography, useTheme } from "@mui/material";
 import Topbar from "../../global/TopBar"; // Import Topbar for theme toggle
+import { useNavigate } from "react-router-dom";
+
 
 const RegisterForm: React.FC = () => {
   const theme = useTheme();
+  const navigate = useNavigate();
 
   const [name, setFirstName] = useState("");
   const [surname, setSurname] = useState("");
@@ -19,17 +22,19 @@ const RegisterForm: React.FC = () => {
     const requestData = { name, surname, email, password };
 
     try {
-      const response = await fetch("http://127.0.0.1:5000/auth/signup", {
+      const response = await fetch("http://localhost:5000/auth/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify(requestData),
       });
 
+      const data = await response.json();
       if (response.ok) {
-        setMessage("User registered successfully");
+        setMessage(`User ${data.name} ${data.surname} registered successfully!`);
+        navigate("/home")
       } else {
-        const errorData = await response.json();
-        setMessage(`Registration failed: ${errorData.message}`);
+        setMessage(`Registration failed: ${data.error}`);
       }
     } catch (error) {
       setMessage(`Error occurred during registration: ${error}`);

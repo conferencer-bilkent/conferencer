@@ -1,5 +1,5 @@
 import React from "react";
-// import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import Topbar from "../../global/TopBar";
 import SideMenu from "../../global/SideMenu";
 import AppTitle, { SectionTitle } from "../../global/AppTitle";
@@ -18,10 +18,32 @@ const menuItems = [
 ];
 
 const Homepage: React.FC = () => {
+  const navigate = useNavigate();
   useAuth();
 
+  const handleLogout = async () => {
+    try {
+      const response = await fetch("http://localhost:5000/auth/logout", {
+        method: "POST",
+        credentials: "include",
+      });
+
+      if (response.ok) {
+        navigate("/login");
+      } else {
+        console.error("Logout failed");
+      }
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
+  };
+
   const handleItemClick = (item: string) => {
-    console.log("Clicked:", item);
+    if (item === "LOG OUT") {
+      handleLogout();
+    } else {
+      console.log("Clicked:", item);
+    }
   };
 
   return (
