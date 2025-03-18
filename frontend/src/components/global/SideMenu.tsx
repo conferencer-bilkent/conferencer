@@ -1,5 +1,5 @@
 import React from "react";
-import { useTheme, Box, Typography } from "@mui/material";
+import { useTheme, Box } from "@mui/material";
 import { tokens } from "../../theme"; // Import the theme tokens
 
 interface SideMenuProps {
