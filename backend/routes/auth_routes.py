@@ -1,7 +1,6 @@
-from flask import Blueprint, request, jsonify
-from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
-from services.auth_service import login_user, signup_user
-from extensions import mongo, bcrypt  # Import extensions directly
+from flask import Blueprint, request, jsonify, session
+from services.auth_service import login_user, signup_user, logout_user
+from extensions import mongo, bcrypt
 
 auth_bp = Blueprint("auth", __name__)
 
@@ -12,14 +11,9 @@ def login():
     email = data.get("email")
     password = data.get("password")
 
-    # Now using imported `mongo` and `bcrypt` from extensions.py
     result = login_user(email, password, mongo, bcrypt)
     if result:
-        return jsonify({
-            "message": "Login successful!",
-            "access_token": result["token"],
-            "user": result["user"]
-        }), 200
+        return jsonify(result), 200
     else:
         return jsonify({"error": "Invalid credentials"}), 401
 
@@ -27,22 +21,40 @@ def login():
 @auth_bp.route("/signup", methods=["POST"])
 def signup():
     data = request.json
+    name = data.get("name")
+    surname = data.get("surname")
     email = data.get("email")
     password = data.get("password")
 
-    # Using imported `mongo` and `bcrypt`
-    user_id = signup_user(email, password, mongo, bcrypt)
+    user_id = signup_user(name, surname, email, password, mongo, bcrypt)
     if not user_id:
         return jsonify({"error": "User already exists"}), 400
 
     return jsonify({
         "message": "Signup successful!",
-        "user_id": user_id
+        "user_id": user_id,
+        "name": name,
+        "surname": surname
     }), 201
 
-# Example of a protected route
-@auth_bp.route("/protected", methods=["GET"])
-@jwt_required()
-def protected():
-    current_user = get_jwt_identity()
-    return jsonify({"message": f"Hello, user {current_user}!"}), 200
+# Logout Endpoint
+@auth_bp.route("/logout", methods=["POST"])
+def logout():
+    return jsonify(logout_user()), 200
+
+# Check if user is logged in
+@auth_bp.route("/session", methods=["GET"])
+def check_session():
+    if "user_id" in session:
+        session.modified = True  # 🔹 Ensures session remains active
+        return jsonify({
+            "logged_in": True,
+            "user": {
+                "id": session["user_id"],
+                "email": session["email"],
+                "name": session.get("name", ""),
+                "surname": session.get("surname", "")
+            }
+        }), 200
+    return jsonify({"logged_in": False, "error": "Session expired or invalid"}), 401
+

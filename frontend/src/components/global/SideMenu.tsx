@@ -18,12 +18,12 @@ const SideMenu: React.FC<SideMenuProps> = ({ items = [
   'SETTINGS',
   'PROFILE',
   'LOG OUT'
-] }) => {
+], onItemClick }) => {
   return (
     <div className="side-menu">
       <ul className="menu-list">
         {items.map((item, index) => (
-          <li key={index} className="menu-item">
+          <li key={index} className="menu-item" onClick={() => onItemClick(item)} >
             {item}
           </li>
         ))}

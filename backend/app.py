@@ -1,4 +1,5 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, session
+from flask_session import Session
 from flask_cors import CORS
 from config import Config
 import traceback
@@ -8,11 +9,18 @@ from extensions import mongo, jwt, bcrypt
 
 app = Flask(__name__)
 app.config["MONGO_URI"] = Config.MONGO_URI
-app.config["JWT_SECRET_KEY"] = Config.JWT_SECRET_KEY
+# app.config["JWT_SECRET_KEY"] = Config.JWT_SECRET_KEY
+app.config["SECRET_KEY"] = Config.SECRET_KEY  # session security
+
+# 🔹 Session Configuration for Persistence
+app.config["SESSION_TYPE"] = "filesystem"  # Ensures session persistence
+app.config["SESSION_PERMANENT"] = False
+app.config["SESSION_USE_SIGNER"] = True
 
 # Initialize Flask extensions with app
+Session(app)
 mongo.init_app(app)
-jwt.init_app(app)
+# jwt.init_app(app)
 bcrypt.init_app(app)
 
 CORS(app, resources={r"/*": {"origins": "http://localhost:5173"}}, supports_credentials=True)

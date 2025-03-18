@@ -1,9 +1,11 @@
-
 import React, { useState } from 'react';
 import "./RegisterForm.css";
 import { FaUser, FaLock, FaRegUser } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
+
 
 const RegisterForm: React.FC = () => {
+  const navigate = useNavigate();
   const [name, setFirstName] = useState('');
   const [surname, setSurname] = useState('');
   const [email, setEmail] = useState('');
@@ -15,17 +17,19 @@ const RegisterForm: React.FC = () => {
     const requestData = { name, surname, email, password };
 
     try {
-      const response = await fetch("http://127.0.0.1:5000/auth/signup", {
+      const response = await fetch("http://localhost:5000/auth/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify(requestData),
       });
 
+      const data = await response.json();
       if (response.ok) {
-        setMessage("User registered successfully");
+        setMessage(`User ${data.name} ${data.surname} registered successfully!`);
+        setTimeout(() => navigate("/home"), 1500); // Redirect to homepage
       } else {
-        const errorData = await response.json();
-        setMessage(`Registration failed: ${errorData.message}`);
+        setMessage(`Registration failed: ${data.error}`);
       }
     } catch (error) {
       setMessage(`Error occurred during registration: ${error}`);
