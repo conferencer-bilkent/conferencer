@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 
 const useAuth = () => {
   const navigate = useNavigate();
-  const [checkingSession, setCheckingSession] = useState(true);
+  const [checkingSession] = useState(true);
 
   useEffect(() => {
     const checkSession = async () => {
