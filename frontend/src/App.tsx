@@ -6,6 +6,7 @@ import RegisterForm from "./components/Pages/RegisterForm/RegisterForm";
 import { ThemeProvider, CssBaseline, Box } from "@mui/material";
 import { ColorModeContext, useMode } from "./theme";
 import ConferencePage from "./components/Pages/Conference/ConferencePage";
+import CreateConference from "./components/Pages/Conference/CreateConference/CreateConference";
 import HomePage from "./components/Pages/Home/Homepage";
 
 import MyTasks from "./components/Pages/MyTasks/MyTasks";
@@ -41,6 +42,7 @@ const App: React.FC = () => {
                 <Route path="/register" element={<RegisterForm />} />
                 <Route path="/home" element={<HomePage />} />
                 <Route path="/conference" element={<ConferencePage />} />
+                <Route path="/conference/create" element={<CreateConference />} />
                 <Route path="/mytasks" element={<MyTasks />} />
                 <Route path="/review" element={<ReviewsPage />} />
 

@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import Topbar from "../../global/TopBar";
 import SideMenu from "../../global/SideMenu";
 import AppTitle, { SectionTitle } from "../../global/AppTitle";
-import useAuth from "../../hooks/useAuth";
+//import useAuth from "../../hooks/useAuth";
 import "./Homepage.css";
 
 const menuItems = [
@@ -19,7 +19,7 @@ const menuItems = [
 
 const Homepage: React.FC = () => {
   const navigate = useNavigate();
-  useAuth();
+  //useAuth();
 
   const handleLogout = async () => {
     try {
