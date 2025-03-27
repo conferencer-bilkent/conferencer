@@ -60,7 +60,7 @@ const ConferencePage: React.FC = () => {
             />
           </div>
           
-          <ConferenceDetailExample />
+          <ConferenceDetailExample openPopup={openPopup} />
 
           {/* Conditionally render the popup if popupAction is set */}
           {popupAction && (
@@ -69,7 +69,6 @@ const ConferencePage: React.FC = () => {
               onClose={closePopup}
             />
           )}
-
         </div>
       </div>
     </div>

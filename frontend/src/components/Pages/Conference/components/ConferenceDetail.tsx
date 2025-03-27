@@ -11,6 +11,7 @@ interface TextInfo {
 interface ButtonInfo {
   icon: JSX.Element;
   text: string;
+  onClick?: () => void;  // Added onClick handler
 }
 
 interface ConferenceDetailProps {
@@ -36,7 +37,12 @@ const ConferenceDetail: React.FC<ConferenceDetailProps> = ({ texts, buttons }) =
       </div>
       <div className="buttons-container">
         {buttons.map((button, index) => (
-          <div key={index} className="button">
+          <div 
+            key={index} 
+            className="button" 
+            onClick={button.onClick}
+            style={button.onClick ? { cursor: 'pointer' } : {}}
+          >
             {button.icon}
             <p>{button.text}</p>
           </div>
@@ -77,9 +83,24 @@ const defaultButtons: ButtonInfo[] = [
   { icon: <FaPlusCircle size={24} />, text: "Assign Trackchair(s)" },
 ];
 
-// Example usage
-export const ConferenceDetailExample = () => (
-  <ConferenceDetail texts={defaultTexts} buttons={defaultButtons} />
-);
+// Example usage with props to handle popup
+interface ConferenceDetailExampleProps {
+  openPopup?: (action: string) => void;
+}
+
+export const ConferenceDetailExample: React.FC<ConferenceDetailExampleProps> = ({ openPopup }) => {
+  // Create buttons with onClick handlers where needed
+  const buttonsWithHandlers = defaultButtons.map(button => {
+    if (button.text === "Assign Papers" && openPopup) {
+      return {
+        ...button,
+        onClick: () => openPopup("Select Paper(s)")
+      };
+    }
+    return button;
+  });
+  
+  return <ConferenceDetail texts={defaultTexts} buttons={buttonsWithHandlers} />;
+};
 
 export default ConferenceDetail;

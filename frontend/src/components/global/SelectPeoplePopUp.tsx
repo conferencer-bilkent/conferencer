@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { FaSearch } from "react-icons/fa";
 import SelectPeopleItem, { Person } from "./SelectPeopleItem";
+import SelectPaperItem, { Paper } from "./SelectPaperItem";
 
 interface SelectPeoplePopupProps {
   buttonText: string; // e.g., "Invite People", "Assign Superchair(s)", etc.
@@ -14,6 +15,18 @@ const EXAMPLE_PEOPLE: Person[] = [
   { id: 3, name: "Charlie Brown" },
   { id: 4, name: "Diana Prince" },
   { id: 5, name: "Evan Stone" },
+];
+const EXAMPLE_PAPERS: Paper[] = [
+  {
+    id: 1,
+    title: "Impact of Virtual Reality on Cognitive Learning in Higher Education",
+    authors: "Jane Doe, Memduh Tutus, Bilal Kar, et al.",
+  },
+  {
+    id: 2,
+    title: "AI-Powered Learning Tools: A Future Perspective",
+    authors: "Alice Johnson, Bob Smith",
+  },
 ];
 
 const styles = {
@@ -92,36 +105,34 @@ const SelectPeoplePopup: React.FC<SelectPeoplePopupProps> = ({
   onClose,
 }) => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedPeople, setSelectedPeople] = useState<number[]>([]);
+  const [selectedItems, setSelectedItems] = useState<number[]>([]);
+  
+  const isPaperMode = buttonText === "Select Paper(s)";
 
   const handleToggle = (id: number) => {
-    setSelectedPeople((prev) =>
+    setSelectedItems((prev) =>
       prev.includes(id) ? prev.filter((p) => p !== id) : [...prev, id]
     );
   };
 
-  // Filter by search term
-  const filteredPeople = EXAMPLE_PEOPLE.filter((person) =>
-    person.name.toLowerCase().includes(searchTerm.toLowerCase())
+  // Choose data set based on mode
+  const dataList = isPaperMode ? EXAMPLE_PAPERS : EXAMPLE_PEOPLE;
+  
+  // Search filter
+  const filteredItems = dataList.filter((item) =>
+    (isPaperMode 
+      ? (item as Paper).title 
+      : (item as Person).name
+    ).toLowerCase().includes(searchTerm.toLowerCase())
   );
-
-  // Click handler for the search icon
-  const handleIconClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    console.log("Search icon clicked, ignoring typed text for now.");
-  };
 
   return (
     <div style={styles.overlay} onClick={onClose}>
       <div style={styles.popupContent} onClick={(e) => e.stopPropagation()}>
-        {/* Close button in the top-right corner */}
-        <button style={styles.closeButton} onClick={onClose}>
-          ✕
-        </button>
+        <button style={styles.closeButton} onClick={onClose}>✕</button>
 
-        {/* Custom search bar with left icon and input to the right */}
         <div style={styles.searchContainer}>
-          <FaSearch style={styles.searchIcon} onClick={handleIconClick} />
+          <FaSearch style={styles.searchIcon} />
           <input
             type="text"
             placeholder="Search..."
@@ -131,15 +142,13 @@ const SelectPeoplePopup: React.FC<SelectPeoplePopupProps> = ({
           />
         </div>
 
-        {/* 2px white line to separate from the rest */}
         <hr style={styles.divider} />
 
-        {/* Child component that shows the filtered example people */}
-        <SelectPeopleItem
-          people={filteredPeople}
-          selectedIds={selectedPeople}
-          onToggle={handleToggle}
-        />
+        {isPaperMode ? (
+          <SelectPaperItem papers={filteredItems.filter((item): item is Paper => isPaperMode)} selectedIds={selectedItems} onToggle={handleToggle} />
+        ) : (
+          <SelectPeopleItem people={filteredItems.filter((item): item is Person => !isPaperMode)} selectedIds={selectedItems} onToggle={handleToggle} />
+        )}
 
         <button style={styles.popupButton} onClick={onClose}>
           {buttonText}
@@ -148,5 +157,6 @@ const SelectPeoplePopup: React.FC<SelectPeoplePopupProps> = ({
     </div>
   );
 };
+
 
 export default SelectPeoplePopup;
