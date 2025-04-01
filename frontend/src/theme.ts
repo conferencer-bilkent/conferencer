@@ -14,6 +14,7 @@ interface Tokens {
 export const tokens = (mode: "light" | "dark"): Tokens => ({
   ...(mode === "dark"
     ? {
+      
         grey: {
           100: "#e0e0e0",
           200: "#c2c2c2",
@@ -151,6 +152,9 @@ export const themeSettings = (mode: "light" | "dark"): object => {
             background: {
               default: colors.primary[500],
             },
+            border : {
+              main: colors.grey[100],
+            },
           }
         : {
             primary: {
@@ -166,6 +170,9 @@ export const themeSettings = (mode: "light" | "dark"): object => {
             },
             background: {
               default: "#f1f2f3",
+            },
+            border : {
+              main: colors.grey[100],
             },
           }),
     },
