@@ -10,7 +10,7 @@ import HomePage from "./components/Pages/Home/Homepage";
 
 import MyTasks from "./components/Pages/MyTasks/MyTasks";
 import ReviewsPage from "./components/Pages/Conference/components/Reviews/ReviewsPage";
-
+import ReviewDetailPage from "./components/Pages/Conference/components/Reviews/ReviewDetailPage";
 
 const App: React.FC = () => {
   const [theme, colorMode] = useMode();
@@ -39,6 +39,7 @@ const App: React.FC = () => {
                 <Route path="/conference" element={<ConferencePage />} />
                 <Route path="/mytasks" element={<MyTasks />} />
                 <Route path="/review" element={<ReviewsPage />} />
+                <Route path="/reviews" element={<ReviewDetailPage />} />
 
                 <Route path="/" element={<LoginForm />} />
               </Routes>

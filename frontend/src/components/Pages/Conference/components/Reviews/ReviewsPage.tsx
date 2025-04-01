@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Topbar from "../../../../global/TopBar";
 import AppTitle from "../../../../global/AppTitle";
 import SideMenu from "../../../../global/SideMenu";
@@ -54,11 +55,27 @@ const ReviewsPage: React.FC = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const menuItems = getMenuItemsForPage("home");
+  const navigate = useNavigate();
 
-  const [expandedId, setExpandedId] = useState<number | null>(null);
+  // Allow multiple expanded items using a Set
+  const [expandedIds, setExpandedIds] = useState<Set<number>>(new Set());
 
   const handleToggleExpand = (id: number) => {
-    setExpandedId((prev) => (prev === id ? null : id));
+    setExpandedIds((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(id)) {
+        newSet.delete(id);
+      } else {
+        newSet.add(id);
+      }
+      return newSet;
+    });
+  };
+
+  const isExpanded = (id: number) => expandedIds.has(id);
+
+  const handleNavigateToDetail = (id: number) => {
+    navigate(`/reviews/`);
   };
 
   const getReviewColor = (completed: number, assigned: number) => {
@@ -71,9 +88,7 @@ const ReviewsPage: React.FC = () => {
     <>
       <Topbar />
       <Box display="flex">
-        <Box width="240px" bgcolor={colors.primary[400]} minHeight="100vh">
-          <SideMenu items={menuItems} onItemClick={() => {}} />
-        </Box>
+        <SideMenu items={menuItems} onItemClick={() => {}} />
 
         <Box
           flex="1"
@@ -100,9 +115,7 @@ const ReviewsPage: React.FC = () => {
               size="small"
               sx={{
                 borderRadius: "10px",
-                input: {
-                  color: colors.grey[100],
-                },
+                input: { color: colors.grey[100] },
                 minWidth: "300px",
               }}
               InputProps={{
@@ -124,11 +137,13 @@ const ReviewsPage: React.FC = () => {
               p={2}
               mb={3}
               borderRadius="12px"
-              bgcolor={colors.primary[400]} // Match SideMenu background
+              bgcolor={colors.primary[400]}
               boxShadow={4}
               sx={{
                 transition: "all 0.3s ease-in-out",
+                cursor: "pointer",
               }}
+              onClick={() => handleToggleExpand(paper.id)}
             >
               <Box
                 display="flex"
@@ -157,9 +172,13 @@ const ReviewsPage: React.FC = () => {
                     {paper.reviewsAssigned}
                   </Typography>
                 </Box>
+
                 <Button
                   variant="contained"
-                  onClick={() => handleToggleExpand(paper.id)}
+                  onClick={(e) => {
+                    e.stopPropagation(); // Prevent expand toggle
+                    handleNavigateToDetail(paper.id);
+                  }}
                   sx={{
                     borderRadius: "8px",
                     fontWeight: "bold",
@@ -169,15 +188,11 @@ const ReviewsPage: React.FC = () => {
                     },
                   }}
                 >
-                  {expandedId === paper.id ? "Close" : "View Reviews"}
+                  View Reviews
                 </Button>
               </Box>
 
-              <Collapse
-                in={expandedId === paper.id}
-                timeout="auto"
-                unmountOnExit
-              >
+              <Collapse in={isExpanded(paper.id)} timeout="auto" unmountOnExit>
                 <Box mt={2} p={2} borderTop={`1px solid ${colors.grey[700]}`}>
                   <Typography variant="body2" color={colors.grey[300]} mb={1}>
                     <strong>Publication Date:</strong> {paper.publicationDate}
@@ -186,7 +201,6 @@ const ReviewsPage: React.FC = () => {
                     sx={{
                       maxHeight: "150px",
                       overflowY: "auto",
-                      paddingRight: "5px",
                       pr: 1,
                       color: colors.grey[100],
                     }}
@@ -207,6 +221,27 @@ const ReviewsPage: React.FC = () => {
                     <strong>Assigned Reviewer(s):</strong>{" "}
                     {paper.assignedReviewers}
                   </Typography>
+
+                  {/* Close Button */}
+                  <Box mt={2} display="flex" justifyContent="flex-end">
+                    <Button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleToggleExpand(paper.id);
+                      }}
+                      variant="outlined"
+                      sx={{
+                        borderRadius: "8px",
+                        color: colors.grey[100],
+                        borderColor: colors.grey[300],
+                        "&:hover": {
+                          backgroundColor: colors.primary[500],
+                        },
+                      }}
+                    >
+                      Close
+                    </Button>
+                  </Box>
                 </Box>
               </Collapse>
             </Box>
