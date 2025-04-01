@@ -1,5 +1,7 @@
 import React from "react";
 import RoleItem from "./RoleItem";
+import { tokens } from "../../../../theme";
+import { useTheme } from "@mui/material";
 
 interface Role {
   name: string;
@@ -11,7 +13,30 @@ interface UserRolesProps {
 }
 
 const UserRoles: React.FC<UserRolesProps> = ({ activeRoles, pastRoles }) => {
+  const theme = useTheme();
+  const colors = tokens(theme.palette.mode);
+  const containerStyle: React.CSSProperties = {
+    border: `1px solid ${colors.grey[100]}`, // Match ProfileUserRoles border
+    borderRadius: "12px",
+    padding: "15px",
+    color: "white",
+    width: "100%",
+  };
+  
+  const titleStyle: React.CSSProperties = {
+    fontWeight: "bold",
+    marginBottom: "10px",
+    color: colors.grey[100],
+    fontFamily: theme.typography.fontFamily,
+  };
+  
+  const listStyle: React.CSSProperties = {
+    display: "flex",
+    flexDirection: "column",
+    gap: "10px",
+  };
   return (
+
     <div style={containerStyle}>
       {/* Active Roles Section */}
       <h3 style={titleStyle}>Active Roles</h3>
@@ -33,23 +58,6 @@ const UserRoles: React.FC<UserRolesProps> = ({ activeRoles, pastRoles }) => {
 };
 
 // Inline styles
-const containerStyle: React.CSSProperties = {
-  border: "1px solid white",
-  borderRadius: "12px",
-  padding: "15px",
-  color: "white",
-  width: "100%",
-};
 
-const titleStyle: React.CSSProperties = {
-  fontWeight: "bold",
-  marginBottom: "10px",
-};
-
-const listStyle: React.CSSProperties = {
-  display: "flex",
-  flexDirection: "column",
-  gap: "10px",
-};
 
 export default UserRoles;
