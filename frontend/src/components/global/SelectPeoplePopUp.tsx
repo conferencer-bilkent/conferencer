@@ -145,9 +145,17 @@ const SelectPeoplePopup: React.FC<SelectPeoplePopupProps> = ({
         <hr style={styles.divider} />
 
         {isPaperMode ? (
-          <SelectPaperItem papers={filteredItems.filter((item): item is Paper => isPaperMode)} selectedIds={selectedItems} onToggle={handleToggle} />
+          <SelectPaperItem 
+            papers={filteredItems as Paper[]} 
+            selectedIds={selectedItems} 
+            onToggle={handleToggle} 
+          />
         ) : (
-          <SelectPeopleItem people={filteredItems.filter((item): item is Person => !isPaperMode)} selectedIds={selectedItems} onToggle={handleToggle} />
+          <SelectPeopleItem 
+            people={filteredItems as Person[]} 
+            selectedIds={selectedItems} 
+            onToggle={handleToggle} 
+          />
         )}
 
         <button style={styles.popupButton} onClick={onClose}>
