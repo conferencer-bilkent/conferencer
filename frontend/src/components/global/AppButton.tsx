@@ -8,41 +8,12 @@ type AppButtonProps = {
   onClick?: () => void;
 };
 
-const AppButton: React.FC<AppButtonProps> = ({ icon, text }) => {
-  const theme = useTheme();
-  const colors = tokens(theme.palette.mode);
-
+const AppButton: React.FC<AppButtonProps> = ({ icon, text, onClick }) => {
   return (
-    <Button
-      variant="contained"
-      sx={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        backgroundColor:
-          theme.palette.mode === "dark"
-            ? colors.primary[600]
-            : colors.primary[900],
-        color: colors.grey[100],
-        fontFamily: theme.typography.fontFamily,
-        fontSize: theme.typography.h5.fontSize,
-        fontWeight: "bold",
-        padding: "10px 20px",
-        borderRadius: "10px",
-        transition: "background-color 0.3s, color 0.3s",
-        "&:hover": {
-          backgroundColor:
-            theme.palette.mode === "dark"
-              ? colors.primary[500]
-              : colors.primary[400],
-        },
-      }}
-    >
-      <Box sx={{ display: "flex", alignItems: "center", gap: "8px" }}>
-        <Box>{icon}</Box>
-        <span>{text}</span>
-      </Box>
-    </Button>
+    <button className="app-button" onClick={onClick}>
+      <div className="icon-wrapper">{icon}</div>
+      <span className="button-text">{text}</span>
+    </button>
   );
 };
 

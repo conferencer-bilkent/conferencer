@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import AppButton from "../../global/AppButton";
 import { FaPlusCircle } from "react-icons/fa";
@@ -63,7 +64,7 @@ const ConferencePage: React.FC = () => {
               />
             </div>
 
-            <ConferenceDetailExample />
+            <ConferenceDetailExample openPopup={openPopup} />
 
             {/* Conditionally render the popup if popupAction is set */}
             {popupAction && (
@@ -73,6 +74,7 @@ const ConferencePage: React.FC = () => {
               />
             )}
           </div>
+
         </div>
       </div>
     </>
@@ -80,3 +82,4 @@ const ConferencePage: React.FC = () => {
 };
 
 export default ConferencePage;
+
