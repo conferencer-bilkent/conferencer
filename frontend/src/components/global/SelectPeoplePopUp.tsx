@@ -1,7 +1,9 @@
 import React, { useState } from "react";
 import { FaSearch } from "react-icons/fa";
 import SelectPeopleItem, { Person } from "./SelectPeopleItem";
+
 import SelectPaperItem, { Paper } from "./SelectPaperItem";
+
 
 interface SelectPeoplePopupProps {
   buttonText: string; // e.g., "Invite People", "Assign Superchair(s)", etc.
@@ -16,6 +18,7 @@ const EXAMPLE_PEOPLE: Person[] = [
   { id: 4, name: "Diana Prince" },
   { id: 5, name: "Evan Stone" },
 ];
+
 const EXAMPLE_PAPERS: Paper[] = [
   {
     id: 1,
@@ -28,6 +31,7 @@ const EXAMPLE_PAPERS: Paper[] = [
     authors: "Alice Johnson, Bob Smith",
   },
 ];
+
 
 const styles = {
   overlay: {
@@ -105,12 +109,14 @@ const SelectPeoplePopup: React.FC<SelectPeoplePopupProps> = ({
   onClose,
 }) => {
   const [searchTerm, setSearchTerm] = useState("");
+
   const [selectedItems, setSelectedItems] = useState<number[]>([]);
   
   const isPaperMode = buttonText === "Select Paper(s)";
 
   const handleToggle = (id: number) => {
     setSelectedItems((prev) =>
+
       prev.includes(id) ? prev.filter((p) => p !== id) : [...prev, id]
     );
   };
@@ -133,6 +139,7 @@ const SelectPeoplePopup: React.FC<SelectPeoplePopupProps> = ({
 
         <div style={styles.searchContainer}>
           <FaSearch style={styles.searchIcon} />
+
           <input
             type="text"
             placeholder="Search..."
@@ -141,6 +148,7 @@ const SelectPeoplePopup: React.FC<SelectPeoplePopupProps> = ({
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
+
 
         <hr style={styles.divider} />
 
@@ -157,6 +165,7 @@ const SelectPeoplePopup: React.FC<SelectPeoplePopupProps> = ({
             onToggle={handleToggle} 
           />
         )}
+
 
         <button style={styles.popupButton} onClick={onClose}>
           {buttonText}

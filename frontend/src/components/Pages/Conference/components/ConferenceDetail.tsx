@@ -19,13 +19,25 @@ interface ConferenceDetailProps {
   buttons: ButtonInfo[];
 }
 
-const ConferenceDetail: React.FC<ConferenceDetailProps> = ({ texts, buttons }) => {
+const ConferenceDetail: React.FC<ConferenceDetailProps> = ({
+  texts,
+  buttons,
+}) => {
   return (
     <div className="conference-detail">
-      
       <div className="description-container">
-        
-      <div className="description"> Description: orem ipsum dolor sit amet, consectetur adipiscing elit. Sed egestas vulputate elit non consectetur. Pellentesque vel enim diam. Maecenas dictum turpis vitae elit pellentesque, sit amet pharetra dolor viverra. Pellentesque vel nisi sit amet dui pharetra auctor. Cras condimentum nisl a posuere sagittis. Suspendisse volutpat auctor fermentum. Morbi ultrices felis quis felis facilisis, nec maximus nibh lacinia. Phasellus porta lorem ante, a fermentum risus blandit vitae. Suspendisse tempus ultrices risus sit amet consequat. Morbi lacus lacus, accumsan non blandit suscipit, aliquet sed lorem. </div>
+        <div className="description">
+          {" "}
+          Description: orem ipsum dolor sit amet, consectetur adipiscing elit.
+          Sed egestas vulputate elit non consectetur. Pellentesque vel enim
+          diam. Maecenas dictum turpis vitae elit pellentesque, sit amet
+          pharetra dolor viverra. Pellentesque vel nisi sit amet dui pharetra
+          auctor. Cras condimentum nisl a posuere sagittis. Suspendisse volutpat
+          auctor fermentum. Morbi ultrices felis quis felis facilisis, nec
+          maximus nibh lacinia. Phasellus porta lorem ante, a fermentum risus
+          blandit vitae. Suspendisse tempus ultrices risus sit amet consequat.
+          Morbi lacus lacus, accumsan non blandit suscipit, aliquet sed lorem.{" "}
+        </div>
         <div className="text-info">
           {texts.map((item, index) => (
             <div className="small-details" key={index}>
@@ -77,7 +89,10 @@ const defaultTexts: TextInfo[] = [
 ];
 
 const defaultButtons: ButtonInfo[] = [
-  { icon: <FaBookOpen size={24} />, text: "View Submissions and Paper Assignments" },
+  {
+    icon: <FaBookOpen size={24} />,
+    text: "View Submissions and Paper Assignments",
+  },
   { icon: <FaPlusCircle size={24} />, text: "Assign Papers" },
   { icon: <FaPlusCircle size={24} />, text: "Add People to Track" },
   { icon: <FaPlusCircle size={24} />, text: "Assign Trackchair(s)" },
