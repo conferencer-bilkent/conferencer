@@ -91,11 +91,27 @@ interface ConferenceDetailExampleProps {
 export const ConferenceDetailExample: React.FC<ConferenceDetailExampleProps> = ({ openPopup }) => {
   // Create buttons with onClick handlers where needed
   const buttonsWithHandlers = defaultButtons.map(button => {
-    if (button.text === "Assign Papers" && openPopup) {
-      return {
-        ...button,
-        onClick: () => openPopup("Select Paper(s)")
-      };
+    // Handle multiple buttons that should open popups
+    if (openPopup) {
+      switch (button.text) {
+        case "Assign Papers":
+          return {
+            ...button,
+            onClick: () => openPopup("Select Paper(s)")
+          };
+        case "Add People to Track":
+          return {
+            ...button,
+            onClick: () => openPopup("Add People to Track")
+          };
+        case "Assign Trackchair(s)":
+          return {
+            ...button,
+            onClick: () => openPopup("Assign Trackchair(s)")
+          };
+        default:
+          return button;
+      }
     }
     return button;
   });
