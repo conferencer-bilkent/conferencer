@@ -38,24 +38,16 @@ const ProfilePage: React.FC = () => {
           </div> 
           <div className="bottomContainer">
             <div className="roleContainer">
-              <p className='bottomContainerText'>Active Roles</p>
-              <div className="Roles">
+              {/* UserRoles component already includes both sections with their titles */}
               <UserRoles
                 activeRoles={[
-                    { name: "RECOMB2023, PC Member(TRACK1), Track Chair (YTTW2)" },
-                    { name: "CS FAIR, Superchair" }
+                  { name: "RECOMB2023, PC Member(TRACK1), Track Chair (YTTW2)" },
+                  { name: "CS FAIR, Superchair" }
                 ]}
                 pastRoles={[
-                    { name: "RECOMB2022, PC Member(TRACK1), Track Chair (TRACK2)" }
+                  { name: "RECOMB2022, PC Member(TRACK1), Track Chair (TRACK2)" }
                 ]}
-                />
-                
-              </div>
-              <div className="Roles">
-                <p className='bottomContainerText'>Past Roles</p>
-                <div className="Role">jlhdfh HSDFIJG jlkjn JKNJ</div>
-              </div>
-              <div className="pastRoles"></div>
+              />
             </div>
             <div className="statsContainer">
               <p className='bottomContainerText'>Stats</p>

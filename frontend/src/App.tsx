@@ -10,6 +10,7 @@ import HomePage from "./components/Pages/Home/Homepage";
 
 import MyTasks from "./components/Pages/MyTasks/MyTasks";
 import ReviewsPage from "./components/Pages/Conference/components/Reviews/ReviewsPage";
+import ProfilePage from "./components/Pages/Profile/ProfilePage";
 
 
 const App: React.FC = () => {
@@ -39,6 +40,7 @@ const App: React.FC = () => {
                 <Route path="/conference" element={<ConferencePage />} />
                 <Route path="/mytasks" element={<MyTasks />} />
                 <Route path="/review" element={<ReviewsPage />} />
+                <Route path="/profile" element={<ProfilePage />} />
 
                 <Route path="/" element={<LoginForm />} />
               </Routes>
