@@ -2,12 +2,12 @@ import React, { useState } from "react";
 import "./CreateConference.css";
 import { useNavigate } from "react-router-dom";
 
-type Scope = "conference" | "track";
+//type Scope = "conference" | "track";
 
-type ConfigValue = {
-  value: string | number | boolean;
-  scope: Scope;
-};
+// type ConfigValue = {
+//   value: string | number | boolean;
+//   scope: Scope;
+// };
 
 type ConferenceForm = {
   [key: string]: any; // 💡 Enable dynamic typing for flexible key access
