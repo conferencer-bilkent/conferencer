@@ -1,9 +1,7 @@
 from flask import Blueprint, request, jsonify, session
 from extensions import mongo, bcrypt
 
-# auth_bp = Blueprint("auth", __name__)
 
-# @auth_bp.route("/login", methods=["POST"])
 def login():
     data = request.json
     email = data.get("email")
@@ -30,7 +28,6 @@ def login():
 
     return jsonify({"error": "Invalid credentials"}), 401
 
-#@auth_bp.route("/signup", methods=["POST"])
 def signup():
     data = request.json
     name = data.get("name")
@@ -56,13 +53,11 @@ def signup():
         "surname": surname
     }), 201
 
-#@auth_bp.route("/logout", methods=["POST"])
 def logout():
     session.clear()
     session.modified = True
     return jsonify({"message": "Logout successful!"}), 200
 
-#@auth_bp.route("/session", methods=["GET"])
 def check_session():
     if "user_id" in session:
         session.modified = True
