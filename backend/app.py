@@ -33,14 +33,12 @@ except Exception as e:
     print("❌ Error connecting to MongoDB:", e)
 
 # 🔹 Import routes AFTER initializing extensions
-from routes.auth_routes import auth_bp
-from routes.ping_routes import ping_bp
-from routes.conference_routes import conference_bp
+from routes.routes import all_routes
+
 
 # Register blueprints
-app.register_blueprint(auth_bp, url_prefix="/auth")
-app.register_blueprint(ping_bp, url_prefix="/ping")
-app.register_blueprint(conference_bp, url_prefix="/api")
+for bp, prefix in all_routes:
+    app.register_blueprint(bp, url_prefix=prefix)
 
 # Global error handler with detailed logs
 @app.errorhandler(Exception)

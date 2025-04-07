@@ -3,9 +3,9 @@ from models.conference import Conference
 from bson import ObjectId
 from extensions import mongo
 
-conference_bp = Blueprint('conference_bp', __name__)
+#conference_bp = Blueprint('conference_bp', __name__)
 
-@conference_bp.route("/conference/create", methods=["POST"])
+#@conference_bp.route("/conference/create", methods=["POST"])
 def create_conference():
     if "user_id" not in session:
         return jsonify({"error": "Unauthorized"}), 401
