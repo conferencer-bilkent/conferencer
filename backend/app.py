@@ -3,6 +3,7 @@ from flask_session import Session
 from flask_cors import CORS
 from config import Config
 import traceback
+from routes.auth_routes import oauth
 
 # Import extensions from extensions.py
 from extensions import mongo, jwt, bcrypt
@@ -22,6 +23,7 @@ Session(app)
 mongo.init_app(app)
 # jwt.init_app(app)
 bcrypt.init_app(app)
+oauth.init_app(app)
 
 CORS(app, resources={r"/*": {"origins": "http://localhost:5173"}}, supports_credentials=True)
 

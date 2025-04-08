@@ -130,6 +130,7 @@ const LoginForm: React.FC = () => {
             <Button
               variant="outlined"
               fullWidth
+              onClick={() => window.location.href = "http://localhost:5000/auth/login/google"}
               sx={{
                 color: theme.palette.text.primary,
                 borderColor: theme.palette.text.primary,
