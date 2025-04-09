@@ -23,7 +23,8 @@ mongo.init_app(app)
 # jwt.init_app(app)
 bcrypt.init_app(app)
 
-CORS(app, resources={r"/*": {"origins": "http://localhost:5173"}}, supports_credentials=True)
+# CORS(app, resources={r"/*": {"origins": "http://localhost:5173"}}, supports_credentials=True)
+CORS(app, supports_credentials=True) 
 
 try:
     # Test MongoDB connection
@@ -53,4 +54,4 @@ def home():
     return jsonify({"message": "Flask server is running!"}), 200
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=True, port=5000)
