@@ -4,4 +4,6 @@ flask-pymongo
 python-dotenv
 flask-bcrypt
 flask-jwt-extended
-flask-session 
+flask-session
+authlib
+requests

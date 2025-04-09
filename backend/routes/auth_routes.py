@@ -1,6 +1,22 @@
-from flask import Blueprint, request, jsonify, session
+from flask import Blueprint, request, jsonify, session, redirect, url_for
 from extensions import mongo, bcrypt
+from authlib.integrations.flask_client import OAuth
+from config import Config
 
+oauth = OAuth()
+google = oauth.register(
+    name='google',
+    client_id=Config.GOOGLE_CLIENT_ID,
+    client_secret=Config.GOOGLE_CLIENT_SECRET,
+    access_token_url='https://oauth2.googleapis.com/token',
+    access_token_params=None,
+    authorize_url='https://accounts.google.com/o/oauth2/v2/auth',
+    authorize_params=None,
+    api_base_url='https://www.googleapis.com/oauth2/v2/',
+    userinfo_endpoint='https://www.googleapis.com/oauth2/v2/userinfo',
+    jwks_uri="https://www.googleapis.com/oauth2/v3/certs",  # ✅ Add this line
+    client_kwargs={'scope': 'openid email profile'},
+)
 
 def login():
     data = request.json
@@ -71,3 +87,33 @@ def check_session():
             }
         }), 200
     return jsonify({"logged_in": False, "error": "Session expired or invalid"}), 401
+
+def login_google():
+    redirect_uri = url_for('auth.google_callback', _external=True)
+    return google.authorize_redirect(redirect_uri)
+
+def google_callback():
+    token = google.authorize_access_token()
+    resp = google.get('userinfo')
+    user_info = resp.json()
+    email = user_info.get("email")
+
+    user = mongo.db.users.find_one({"email": email})
+    if not user:
+        user_id = mongo.db.users.insert_one({
+            "name": user_info.get("given_name"),
+            "surname": user_info.get("family_name", ""),
+            "email": email,
+            "auth_provider": "google",
+            "google_id": user_info.get("id")
+        }).inserted_id
+        user = mongo.db.users.find_one({"_id": user_id})
+
+    session["user_id"] = str(user["_id"])
+    session["email"] = user["email"]
+    session["name"] = user.get("name", "")
+    session["surname"] = user.get("surname", "")
+    session.permanent = True
+    session.modified = True
+
+    return redirect("http://localhost:5173/home")  # or wherever your frontend points

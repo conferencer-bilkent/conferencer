@@ -1,7 +1,7 @@
 from bson import ObjectId
 
 class User:
-    def __init__(self, user_id, name, surname, email, password, bio="", roles=None, stat_id=None):
+    def __init__(self, user_id, name, surname, email, password=None, bio="", roles=None, stat_id=None, auth_provider="local", google_id=None):
         self.id = str(user_id) if isinstance(user_id, ObjectId) else user_id 
         self.name = name
         self.surname = surname
@@ -9,7 +9,9 @@ class User:
         self.password = password
         self.bio = bio
         self.roles = roles or []  
-        self.stats = stat_id         
+        self.stats = stat_id
+        self.auth_provider = auth_provider
+        self.google_id = google_id
 
     def to_dict(self, include_password=False):
         user_data = {
@@ -19,7 +21,9 @@ class User:
             "email": self.email,
             "bio": self.bio,
             "roles": self.roles,
-            "stats": self.stats
+            "stats": self.stats,
+            "auth_provider": self.auth_provider,
+            "google_id": self.google_id,
         }
         if include_password:
             user_data["password"] = self.password
