@@ -6,7 +6,7 @@ class Conference:
                  state, country, submission_page, license_expiry, contact_emails,
                  forwarding_emails_conference, forwarding_emails_tracks,
                  created_by,
-                 # 🔽 Configurable fields
+                 # Configurable fields
                  double_blind_review,
                  can_pc_see_unassigned_submissions,
                  abstract_before_full,
@@ -52,7 +52,7 @@ class Conference:
         self.created_by = created_by
         self.created_at = created_at or datetime.utcnow()
 
-        # 🔽 Individual config values (value + scope)
+        # Individual config values (value + scope)
         self.double_blind_review = double_blind_review
         self.can_pc_see_unassigned_submissions = can_pc_see_unassigned_submissions
         self.abstract_before_full = abstract_before_full
