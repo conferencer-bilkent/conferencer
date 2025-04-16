@@ -31,4 +31,4 @@ class User:
     #BURDA SANKİ BİO YU BİRAZ DAHA DALLANDIRARAK HANGİ ÜNİDEN MEZUN NEREDE ÇALIŞIYO VS ONLARI DA AYIRIRSAK KONFERANSA İNSAN DAVET EDERKEN ATIYOM BİLKENT MEZUNLARINIA SEARCH ATAR ŞIK OLUR 
     #USER CHAT İ İLE İLGİLİ Bİ KARAR ACİLİNDEN, BURADA MI OLUR, CHAT NOTIFICATION VS Bİ KONUŞAK 
     #ROL konferans bağlama vs ile alakalı bi şeye gerek yok sanırsam öylesine yazıyom 
-    
+    #conflict of interest için hocam şu id li şahıs vs diye bi alan eklenebilir     
