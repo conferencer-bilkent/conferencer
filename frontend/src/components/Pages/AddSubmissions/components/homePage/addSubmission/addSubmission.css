@@ -20,25 +20,26 @@
 }
 
 .submissionDetailContainer {
-    margin: 30px 0 0 0;
+    margin: 180px 0 0 0;
     width: 45vw;
     display: flex;
     flex-direction: column;
-    align-items:center;
+    align-items:st;
     justify-content: start;
     border: 1px solid #ffffff;
 }
 
 .lastButtons {
     display: flex;
-    flex-direction: row;
-    margin-top: 40px;
+    flex-direction: column;
+    margin-top: 0px;
+    gap: 0px;
     align-items: flex-start;
-    transform: translateX(-50px);
 }
 
 .lastButtons input {
-    margin-top: 18px;
+    margin-top: 10px;
+    margin-bottom: 72px;
 }
 
 @media screen and (max-width: 888px) {
