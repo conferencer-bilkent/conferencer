@@ -1,0 +1,62 @@
+.submissionMainContainer {
+    display: flex;
+    flex-direction: row;
+    height: 100vh;
+    width: 100vw ;
+
+}
+
+.addSubmissionContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    margin-left: 10px;
+    width: 42vw;
+
+}
+
+.addPersonContainer {
+    margin-top: 40px;
+}
+
+.submissionDetailContainer {
+    margin: 30px 0 0 0;
+    width: 45vw;
+    display: flex;
+    flex-direction: column;
+    align-items:center;
+    justify-content: start;
+    border: 1px solid #ffffff;
+}
+
+.lastButtons {
+    display: flex;
+    flex-direction: row;
+    margin-top: 40px;
+    align-items: flex-start;
+    transform: translateX(-50px);
+}
+
+.lastButtons input {
+    margin-top: 18px;
+}
+
+@media screen and (max-width: 888px) {
+    .submissionMainContainer {
+        flex-direction: column;
+        overflow-y: scroll;
+    }
+    .submissionDetailContainer {
+        margin: 30px 0 30px 8px;
+        align-items: start;
+    }
+
+    .lastButtons {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .lastButtons input {
+        margin-bottom: 10px;
+    }
+}

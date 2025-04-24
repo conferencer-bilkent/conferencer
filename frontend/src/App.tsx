@@ -15,7 +15,9 @@ import ReviewsPage from "./components/Pages/Conference/components/Reviews/Review
 import ProfilePage from "./components/Pages/Profile/ProfilePage";
 
 import ReviewDetailPage from "./components/Pages/Conference/components/Reviews/ReviewDetailPage";
-
+import SubmissionsList from "./components/Pages/AddSubmissions/components/homePage/submissionsList/submissionsList";
+import AddSubmissionPage from "./components/Pages/AddSubmissions/components/homePage/addSubmission/addSubmission";
+import { SubmissionProvider } from "./context/addSubmissionContext";
 
 const App: React.FC = () => {
   const [theme, colorMode] = useMode();
@@ -49,7 +51,15 @@ const App: React.FC = () => {
                 <Route path="/profile" element={<ProfilePage />} />
 
                 <Route path="/reviews" element={<ReviewDetailPage />} />
-
+                <Route path="/ex" element={<SubmissionsList />}></Route>
+                <Route
+                  path="/addSubmission"
+                  element={
+                    <SubmissionProvider>
+                      <AddSubmissionPage />
+                    </SubmissionProvider>
+                  }
+                />
 
                 <Route path="/" element={<LoginForm />} />
               </Routes>

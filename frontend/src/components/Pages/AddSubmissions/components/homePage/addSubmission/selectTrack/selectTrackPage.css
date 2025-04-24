@@ -1,0 +1,18 @@
+.radioSelectTrack {
+    display: flex;
+    flex-direction: row;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width:thin;
+    width: 100%;
+}
+
+.radioSelectTrack label {
+    font-size: 12px;
+    align-items: center;
+    
+}
+
+.radioSelectTrack input {
+    margin-right: 50px;
+}

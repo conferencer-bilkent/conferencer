@@ -1,0 +1,51 @@
+.authorPartContainer {
+    margin-top: 40px;
+    display: flex;
+    width: 480px; 
+    flex-direction: column;
+    background-color: white;
+}
+.authorTitle {
+    display: flex;
+    padding: 6px 0 6px 10px;   
+    flex-direction: row;
+    background-color: blue;
+    align-items: center;
+    justify-content:start;
+}
+
+.fillAsYourself {
+    width: 120px;
+    height: 36px;
+    border: 1px solid white;
+    border-radius: 16px;
+    margin:0 10px 0 10px;
+    font-size: 12px;
+    background-color: inherit;
+    color: white;
+    cursor: pointer;
+}
+
+.authorLabel {
+    margin: 1px 0 1px 0;
+    padding: 1px 0 1px 0;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    height: 24px;
+    background-color: rgb(161, 166, 164);
+   
+}
+.authorLabel input, select {
+    width:248px;
+    border-radius: 2px;
+    border: none;
+}
+
+.authorLabel p {
+    width: 100px;
+    padding: 3px;
+    font-size: 12px;
+    color: black;
+    text-align: end;
+}
