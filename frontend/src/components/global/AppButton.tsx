@@ -48,7 +48,13 @@ const AppButton: React.FC<AppButtonProps> = ({ icon, text, onClick }) => {
           marginRight: "12px",
         }}
       >
-        {icon}
+        {React.cloneElement(icon as React.ReactElement, { 
+          style: { 
+            width: "24px", 
+            height: "24px",
+            ...((icon as React.ReactElement)?.props?.style || {})
+          } 
+        })}
       </div>
       <span
         style={{

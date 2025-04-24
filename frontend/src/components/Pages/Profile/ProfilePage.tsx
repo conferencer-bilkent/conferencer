@@ -6,14 +6,17 @@ import TopBar from "../../global/TopBar"; // Import TopBar component
 import { getMenuItemsForPage } from "../../global/sideMenuConfig";
 import ProfileUserRoles from "./components/ProfileUserRoles";
 import { tokens } from "../../../theme";
+import { useNavigate } from "react-router-dom";
+import { handleMenuItemClick } from "../../../utils/navigation/menuNavigation";
 
 const ProfilePage: React.FC = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
-  const menuItems = getMenuItemsForPage("home");
+  const menuItems = getMenuItemsForPage("default");
+  const navigate = useNavigate();
 
   const handleItemClick = (item: string) => {
-    console.log("Clicked:", item);
+    handleMenuItemClick(item, navigate);
   };
 
   // Inline styles using theme values

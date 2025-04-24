@@ -1,7 +1,9 @@
-
 import React, { useState } from "react";
 import AppButton from "../../global/AppButton";
 import { FaPlusCircle } from "react-icons/fa";
+import DashboardIcon from '@mui/icons-material/Dashboard';
+import { useNavigate } from "react-router-dom";
+
 
 import { ConferenceDetailExample } from "./components/ConferenceDetail";
 import AppTitle from "../../global/AppTitle";
@@ -10,12 +12,14 @@ import { getMenuItemsForPage } from "../../global/sideMenuConfig";
 import SelectPeoplePopup from "../../global/SelectPeoplePopUp";
 import "./ConferencePage.css";
 import Topbar from "../../global/TopBar";
+import { handleMenuItemClick } from "../../../utils/navigation/menuNavigation";
 
 const ConferencePage: React.FC = () => {
-  const menuItems = getMenuItemsForPage("home");
+  const menuItems = getMenuItemsForPage("default");
+  const navigate = useNavigate();
 
   const handleItemClick = (item: string) => {
-    console.log("Clicked:", item);
+    handleMenuItemClick(item, navigate);
   };
 
   // Track which popup button (if any) is clicked
@@ -48,7 +52,7 @@ const ConferencePage: React.FC = () => {
                 onClick={() => openPopup("Invite People")}
               />
               <AppButton
-                icon={<FaPlusCircle />}
+                icon={<DashboardIcon sx={{ width: "26px", height: "26px" }} />}
                 text="Conference Overview"
                 // no popup for this one
               />

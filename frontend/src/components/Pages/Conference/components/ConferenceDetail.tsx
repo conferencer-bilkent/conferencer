@@ -1,6 +1,8 @@
 import React from "react";
 import "./ConferenceDetail.css";
 import { FaBookOpen, FaPlusCircle } from "react-icons/fa";
+import AssignmentIcon from '@mui/icons-material/Assignment';
+
 
 interface TextInfo {
   title?: string;
@@ -93,7 +95,7 @@ const defaultButtons: ButtonInfo[] = [
     icon: <FaBookOpen size={24} />,
     text: "View Submissions and Paper Assignments",
   },
-  { icon: <FaPlusCircle size={24} />, text: "Assign Papers" },
+  { icon: <AssignmentIcon sx={{ fontSize: 26 }} />, text: "Assign Papers" },
   { icon: <FaPlusCircle size={24} />, text: "Add People to Track" },
   { icon: <FaPlusCircle size={24} />, text: "Assign Trackchair(s)" },
 ];
