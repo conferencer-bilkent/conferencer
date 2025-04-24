@@ -1,0 +1,49 @@
+.currentSubmissions {
+    width: inherit;
+    display: flex;
+    flex-direction: column;
+}
+
+.tableContainer {
+    max-height: 250px;
+    overflow-y: auto; 
+    scrollbar-width: none;
+    -ms-overflow-style: none; 
+}
+
+.tableContainer::-webkit-scrollbar {
+    display: none;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+   
+}
+
+thead {
+    background-color: blue;
+    position: sticky;
+    top:-1px;
+    z-index: 10;
+}
+
+tbody {
+    background-color: white;
+}
+
+th, td {
+    border: 1px solid black;
+    padding: 8px;
+    text-align: center;
+    vertical-align: middle;
+}
+
+th {
+    font-weight: bold;
+}
+
+td{
+    color: black;
+}
+
