@@ -3,22 +3,14 @@ import { useNavigate } from "react-router-dom";
 import Topbar from "../../global/TopBar";
 import SideMenu from "../../global/SideMenu";
 import AppTitle, { SectionTitle } from "../../global/AppTitle";
+import { getMenuItemsForPage } from "../../global/sideMenuConfig";
+import { handleMenuItemClick } from "../../../utils/navigation/menuNavigation";
 //import useAuth from "../../hooks/useAuth";
 import "./Homepage.css";
 
-const menuItems = [
-  "MY TASKS",
-  "MY ROLES",
-  "CONFERENCES",
-  "NOTIFICATIONS",
-  "CHATS",
-  "SETTINGS",
-  "PROFILE",
-  "LOG OUT",
-];
-
 const Homepage: React.FC = () => {
   const navigate = useNavigate();
+  const menuItems = getMenuItemsForPage("default");
   //useAuth();
 
   const handleLogout = async () => {
@@ -42,7 +34,7 @@ const Homepage: React.FC = () => {
     if (item === "LOG OUT") {
       handleLogout();
     } else {
-      console.log("Clicked:", item);
+      handleMenuItemClick(item, navigate);
     }
   };
 
