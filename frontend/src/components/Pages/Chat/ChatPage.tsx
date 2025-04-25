@@ -182,9 +182,9 @@ const ChatPage: React.FC = () => {
                 borderRight: `1px solid ${colors.grey[700]}`,
                 display: "flex",
                 flexDirection: "column",
-                backgroundColor: colors.primary[400],
+                backgroundColor: "transparent",
               }}
-              elevation={3}
+              elevation={0}
             >
               <Button
                 variant="contained"
@@ -196,6 +196,7 @@ const ChatPage: React.FC = () => {
                   textTransform: "none",
                   borderRadius: "24px",
                   boxShadow: "none",
+                  backgroundColor: colors.blueAccent[700],
                 }}
                 onClick={() => setComposeOpen(true)}
               >
@@ -300,7 +301,7 @@ const ChatPage: React.FC = () => {
                   sx={{
                     flexGrow: 1,
                     overflowY: "auto",
-                    backgroundColor: colors.primary[400],
+                    backgroundColor: "transparent",
                     borderRadius: "8px",
                     padding: "15px",
                     marginBottom: "20px",
