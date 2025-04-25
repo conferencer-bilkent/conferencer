@@ -1,30 +1,48 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useTheme } from "@mui/material/styles";
 import AppTitle from "../../global/AppTitle";
 import SideMenu from "../../global/SideMenu";
 import TopBar from "../../global/TopBar";
 import { getMenuItemsForPage } from "../../global/sideMenuConfig";
-import ProfileUserRoles from "./components/ProfileUserRoles";
 import { tokens } from "../../../theme";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { handleMenuItemClick } from "../../../utils/navigation/menuNavigation";
-import { useUser } from "../../../context/UserContext";
 import { CircularProgress } from "@mui/material";
-
 
 const ProfilePage: React.FC = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
-  const menuItems = getMenuItemsForPage("default");
   const navigate = useNavigate();
-  const { user, loading } = useUser();
+  const { id } = useParams<{ id: string }>(); // Get user id from URL
+  const menuItems = getMenuItemsForPage("default");
 
+  const [user, setUser] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      try {
+        const response = await fetch(`http://127.0.0.1:5000/profile/${id}`, {
+          credentials: "include",
+        });
+        if (!response.ok) throw new Error("Failed to fetch profile");
+        const data = await response.json();
+        setUser(data);
+      } catch (error) {
+        console.error(error);
+        navigate("/login"); // Redirect if error
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUserProfile();
+  }, [id, navigate]);
 
   const handleItemClick = (item: string) => {
     handleMenuItemClick(item, navigate);
   };
 
-  // Inline styles using theme values
   const profilePageStyle: React.CSSProperties = {
     display: "flex",
     height: "100vh",
@@ -44,7 +62,6 @@ const ProfilePage: React.FC = () => {
     height: "100%",
   };
 
-  // Add new container for content with TopBar
   const contentWrapperStyle: React.CSSProperties = {
     display: "flex",
     flexDirection: "column",
@@ -78,53 +95,28 @@ const ProfilePage: React.FC = () => {
     width: "50%",
   };
 
-  const numericPartStyle: React.CSSProperties = {
-    width: "50%",
-  };
-
-  const contactContainerStyle: React.CSSProperties = {
-    width: "50%",
-  };
-
-  const contactStyle: React.CSSProperties = {
-    textAlign: "start",
-  };
-
-  const bottomContainerStyle: React.CSSProperties = {
-    display: "flex",
-    flexDirection: "row",
-    marginTop: "20px",
-    width: "100%",
-    justifyContent: "start",
-    gap: "20px", // Add spacing between containers
-  };
-
-  const roleContainerStyle: React.CSSProperties = {
-    width: "45%",
-  };
-
   const statsContainerStyle: React.CSSProperties = {
-    border: `1px solid ${colors.grey[100]}`,// Match ProfileUserRoles border
-    borderRadius: "12px",
     width: "45%",
-    padding: "15px", // Match ProfileUserRoles padding
-    color: colors.grey[100], // Match ProfileUserRoles text color
+    border: `1px solid ${colors.grey[100]}`,
+    borderRadius: "12px",
+    padding: "15px",
+    color: colors.grey[100],
   };
 
   const statsTableStyle: React.CSSProperties = {
     marginLeft: "5px",
     borderCollapse: "collapse",
     width: "95%",
-    marginTop: "10px", // Add some spacing after the title
+    marginTop: "10px",
   };
 
   const statsCellStyle: React.CSSProperties = {
-    border: `1px solid ${colors.grey[100]}`, // Match ProfileUserRoles border
+    border: `1px solid ${colors.grey[100]}`,
     padding: "8px",
     textAlign: "left",
     width: "45%",
   };
-  
+
   const loadingContainerStyle: React.CSSProperties = {
     display: "flex",
     justifyContent: "center",
@@ -141,13 +133,10 @@ const ProfilePage: React.FC = () => {
   }
 
   if (!user) {
-    // Redirect to login if no user is available
-    navigate("/login");
     return null;
   }
 
-  // Get formatted stats
-  const otherStats = user.stats.otherStats || [];
+  const stats = user.stats && user.stats.length > 0 ? user.stats[0] : null;
 
   return (
     <div style={profilePageStyle}>
@@ -155,7 +144,6 @@ const ProfilePage: React.FC = () => {
         <div style={sideMenuContainerStyle}>
           <SideMenu items={menuItems} onItemClick={handleItemClick} />
         </div>
-        {/* New wrapper container for TopBar and content */}
         <div style={contentWrapperStyle}>
           <TopBar />
           <div style={contentContainerStyle}>
@@ -163,39 +151,70 @@ const ProfilePage: React.FC = () => {
             <div style={headerOuterStyle}>
               <div style={headerInnerStyle}>
                 <div style={userPartStyle}>
-                  <p>{`${user.name} ${user.surname}`}</p>
-                  <p>Bio: {user.bio || "No bio provided"}</p>
+                  <p>
+                    <strong>Name:</strong> {user.name}
+                  </p>
+                  <p>
+                    <strong>Surname:</strong> {user.surname}
+                  </p>
+                  <p>
+                    <strong>Email:</strong> {user.email}
+                  </p>
+                  <p>
+                    <strong>Bio:</strong> {user.bio || "No bio provided"}
+                  </p>
                 </div>
-                <div style={numericPartStyle}>
-                  <p>Total Reviews: {user.stats.totalReviews || 0}</p>
-                  <p>Conferences Worked: {user.stats.conferencesWorked || 0}</p>
-                  <p>Submissions: {user.stats.submissions || 0}</p>
-                </div>
-              </div>
-              <div style={contactContainerStyle}>
-                <p style={contactStyle}>Contact: {user.email}</p>
-              </div>
-            </div>
-            <div style={bottomContainerStyle}>
-              <div style={roleContainerStyle}>
-                <ProfileUserRoles
-                  activeRoles={user.roles.active.map(role => ({ name: role.name }))}
-                  pastRoles={user.roles.past.map(role => ({ name: role.name }))}
-                />
-              </div>
-              <div style={statsContainerStyle}>
-                <h3 style={{ fontWeight: "bold", marginBottom: "10px" }}>Stats</h3>
-                <div>
-                  <table style={statsTableStyle}>
-                    <tbody>
-                      {otherStats.map((stat, index) => (
-                        <tr key={index}>
-                          <td style={statsCellStyle}>{stat.label}</td>
-                          <td style={statsCellStyle}>{stat.value}</td>
+
+                <div style={statsContainerStyle}>
+                  <h3 style={{ fontWeight: "bold", marginBottom: "10px" }}>
+                    Stats
+                  </h3>
+                  {stats ? (
+                    <table style={statsTableStyle}>
+                      <tbody>
+                        <tr>
+                          <td style={statsCellStyle}>Avg. Time to Review</td>
+                          <td style={statsCellStyle}>
+                            {stats.avg_time_to_review}
+                          </td>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                        <tr>
+                          <td style={statsCellStyle}>
+                            Avg. Submit Time Before Deadline
+                          </td>
+                          <td style={statsCellStyle}>
+                            {stats.avg_submit_time_before_deadline}
+                          </td>
+                        </tr>
+                        <tr>
+                          <td style={statsCellStyle}>
+                            Deadline Compliance Rate
+                          </td>
+                          <td style={statsCellStyle}>
+                            {stats.deadline_compliance_rate}
+                          </td>
+                        </tr>
+                        <tr>
+                          <td style={statsCellStyle}>Avg. Rating Given</td>
+                          <td style={statsCellStyle}>
+                            {stats.avg_rating_given}
+                          </td>
+                        </tr>
+                        <tr>
+                          <td style={statsCellStyle}>Avg. Words per Review</td>
+                          <td style={statsCellStyle}>
+                            {stats.avg_words_per_review}
+                          </td>
+                        </tr>
+                        <tr>
+                          <td style={statsCellStyle}>Review Rating</td>
+                          <td style={statsCellStyle}>{stats.review_rating}</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  ) : (
+                    <p>No statistics available.</p>
+                  )}
                 </div>
               </div>
             </div>

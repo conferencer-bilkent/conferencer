@@ -19,7 +19,7 @@ import SubmissionsList from "./components/Pages/AddSubmissions/components/homePa
 import AddSubmissionPage from "./components/Pages/AddSubmissions/components/homePage/addSubmission/addSubmission";
 import { SubmissionProvider } from "./context/addSubmissionContext";
 import { UserProvider } from "./context/UserContext";
-
+import NotFoundPage from "./components/Pages/NotFound/NotFoundPage";
 
 const App: React.FC = () => {
   const [theme, colorMode] = useMode();
@@ -47,10 +47,13 @@ const App: React.FC = () => {
                   <Route path="/register" element={<RegisterForm />} />
                   <Route path="/home" element={<HomePage />} />
                   <Route path="/conference" element={<ConferencePage />} />
-                  <Route path="/conference/create" element={<CreateConference />} />
+                  <Route
+                    path="/conference/create"
+                    element={<CreateConference />}
+                  />
                   <Route path="/mytasks" element={<MyTasks />} />
                   <Route path="/review" element={<ReviewsPage />} />
-                  <Route path="/profile" element={<ProfilePage />} />
+                  <Route path="/profile/:id" element={<ProfilePage />} />
                   <Route path="/reviews" element={<ReviewDetailPage />} />
                   <Route path="/ex" element={<SubmissionsList />}></Route>
                   <Route
@@ -61,7 +64,6 @@ const App: React.FC = () => {
                       </SubmissionProvider>
                     }
                   />
-
 
                   <Route path="/" element={<LoginForm />} />
                 </Routes>
