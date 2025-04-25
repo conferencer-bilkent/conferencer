@@ -20,6 +20,7 @@ import AddSubmissionPage from "./components/Pages/AddSubmissions/components/home
 import { SubmissionProvider } from "./context/addSubmissionContext";
 import { UserProvider } from "./context/UserContext";
 import NotFoundPage from "./components/Pages/NotFound/NotFoundPage";
+import ChatPage from "./components/Pages/Chat/ChatPage";
 
 const App: React.FC = () => {
   const [theme, colorMode] = useMode();
@@ -52,6 +53,7 @@ const App: React.FC = () => {
                     element={<CreateConference />}
                   />
                   <Route path="/mytasks" element={<MyTasks />} />
+                  <Route path="/chat" element={<ChatPage />} />
                   <Route path="/review" element={<ReviewsPage />} />
                   <Route path="/profile/:id" element={<ProfilePage />} />
                   <Route path="/reviews" element={<ReviewDetailPage />} />

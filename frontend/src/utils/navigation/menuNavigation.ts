@@ -42,7 +42,7 @@ export const handleMenuItemClick = (
       navigate("/notifications");
       break;
     case "CHATS":
-      navigate("/chats");
+      navigate("/chat");
       break;
     case "SETTINGS":
       navigate("/settings");

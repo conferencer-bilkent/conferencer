@@ -13,7 +13,6 @@ import { CircularProgress } from "@mui/material";
 import { emptyRole, getUserStats, UserData } from "../../../models/user";
 import { getUserById } from "../../../services/userService";
 
-
 const ProfilePage: React.FC = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
@@ -147,7 +146,7 @@ const ProfilePage: React.FC = () => {
   };
 
   const statsContainerStyle: React.CSSProperties = {
-    border: `1px solid ${colors.grey[100]}`,// Match ProfileUserRoles border
+    border: `1px solid ${colors.grey[100]}`, // Match ProfileUserRoles border
     borderRadius: "12px",
     width: "45%",
     padding: "15px", // Match ProfileUserRoles padding
@@ -167,7 +166,7 @@ const ProfilePage: React.FC = () => {
     textAlign: "left",
     width: "45%",
   };
-  
+
   const loadingContainerStyle: React.CSSProperties = {
     display: "flex",
     justifyContent: "center",
@@ -243,12 +242,18 @@ const ProfilePage: React.FC = () => {
             <div style={bottomContainerStyle}>
               <div style={roleContainerStyle}>
                 <ProfileUserRoles
-                  activeRoles={(activeRoles || []).map(role => ({ name: role?.name || "Unknown" }))}
-                  pastRoles={(pastRoles || []).map(role => ({ name: role?.name || "Unknown" }))}
+                  activeRoles={(activeRoles || []).map((role) => ({
+                    name: role?.name || "Unknown",
+                  }))}
+                  pastRoles={(pastRoles || []).map((role) => ({
+                    name: role?.name || "Unknown",
+                  }))}
                 />
               </div>
               <div style={statsContainerStyle}>
-                <h3 style={{ fontWeight: "bold", marginBottom: "10px" }}>Stats</h3>
+                <h3 style={{ fontWeight: "bold", marginBottom: "10px" }}>
+                  Stats
+                </h3>
                 <div>
                   <table style={statsTableStyle}>
                     <tbody>
@@ -272,6 +277,7 @@ const ProfilePage: React.FC = () => {
                         <td style={statsCellStyle}>Review Rating</td>
                         <td style={statsCellStyle}>{userStats.review_rating}</td>
                       </tr>
+
                     </tbody>
                   </table>
                 </div>
@@ -285,4 +291,3 @@ const ProfilePage: React.FC = () => {
 };
 
 export default ProfilePage;
-

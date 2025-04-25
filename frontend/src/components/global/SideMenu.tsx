@@ -39,7 +39,7 @@ const SideMenu: React.FC<SideMenuProps> = ({ items }) => {
         navigate("/notifications");
         break;
       case "CHATS":
-        navigate("/chats");
+        navigate("/chat");
         break;
       case "SETTINGS":
         navigate("/settings");
