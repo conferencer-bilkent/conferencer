@@ -12,7 +12,21 @@ def get_profile(user_id=None):
     if not user:
         return jsonify({"error": "User not found"}), 404
 
-    return jsonify(user), 200
+    stats_id = user.get("stat_id")
+    stats_data = None
+    if stats_id:
+        stats_data = mongo.db.stats.find_one({"_id": ObjectId(stats_id)}),
+  
+
+    user_data = {
+        "email": user.get("email"),
+        "name": user.get("name"),
+        "surname": user.get("surname"),
+        "bio": user.get("bio"),
+        "stats": stats_data
+    }
+
+    return jsonify(user_data), 200
 
 def update_profile():
     if "user_id" not in session:
