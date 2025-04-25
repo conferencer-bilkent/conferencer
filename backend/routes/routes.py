@@ -2,8 +2,9 @@ from flask import Blueprint
 from routes.auth_routes import login, signup, logout, check_session, login_google, google_callback
 from routes.conference_routes import create_conference
 from routes.ping_routes import ping
-from routes.profile_routes import get_profile, update_profile
+from routes.profile_routes import get_profile, update_profile, get_all_users
 from routes.role_routes import assign_role
+
 
 # Define blueprints
 auth_bp = Blueprint("auth", __name__)
@@ -26,6 +27,7 @@ ping_bp.route("/", methods=["GET"])(ping)
 
 profile_bp.route("/<user_id>", methods=["GET"])(get_profile)
 profile_bp.route("/update", methods=["POST"])(update_profile)
+profile_bp.route("/users", methods=["GET"])(get_all_users)
 
 role_bp.route("/", methods=["POST"])(assign_role)
 
