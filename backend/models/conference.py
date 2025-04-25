@@ -52,6 +52,11 @@ class Conference:
         self.created_by = created_by
         self.created_at = created_at or datetime.utcnow()
 
+        self.superchairs = [created_by]  # Initialize with the creator automatically
+        self.track_chairs = []
+        self.pc_members = []
+        self.authors = []
+
         # 🔽 Individual config values (value + scope)
         self.double_blind_review = double_blind_review
         self.can_pc_see_unassigned_submissions = can_pc_see_unassigned_submissions
