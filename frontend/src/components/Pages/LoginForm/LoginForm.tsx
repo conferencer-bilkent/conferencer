@@ -5,7 +5,7 @@ import Topbar from "../../global/TopBar";
 import { useNavigate } from "react-router-dom";
 import { Box, Button, TextField, Typography, useTheme } from "@mui/material";
 import { useUser } from "../../../context/UserContext";
-import { dummyUserProfileResponse } from "../../../utils/dummyData/dummyUserData";
+import userService from '../../../services/userService';
 
 const LoginForm: React.FC = () => {
   const theme = useTheme();
@@ -17,58 +17,30 @@ const LoginForm: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     try {
-      // For development, using dummy data instead of actual API call
-      if (email && password) {
-        // Set the dummy user in the context
-        login(dummyUserProfileResponse.user);
-        setMessage(`Welcome, ${dummyUserProfileResponse.user.name} ${dummyUserProfileResponse.user.surname}!`);
-        navigate("/home");
-        return;
-      }
-
-      // Actual API call (commented out for now, will be used in production)
-      /*
-      const response = await fetch("http://localhost:5000/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include", // Ensures session cookies are sent for authentication
-        body: JSON.stringify({ email, password }),
-      });
-
-      const data = await response.json();
-      if (response.ok) {
-        login(data.user); // Store the user in context
-        setMessage(`Welcome, ${data.user.name} ${data.user.surname}!`);
-        navigate("/home");
-      } else {
-        setMessage(`Login failed: ${data.error}`);
-      }
-      */
-    } catch (error) {
-      setMessage(`Error occurred during login: ${error}`);
+      const data = await userService.loginUser(email, password);
+      login(data.user);
+      setMessage(`Welcome, ${data.user.name} ${data.user.surname}!`);
+      navigate('/home');
+    } catch (error: any) {
+      setMessage(`Login failed: ${error.message || error}`);
     }
   };
 
   // Handle Google login
   const handleGoogleLogin = () => {
-    // For development, using dummy data instead of redirecting to Google OAuth
-    login(dummyUserProfileResponse.user);
-    navigate("/home");
-    
-    // Actual Google login (commented out for now)
-    // window.location.href = "http://localhost:5000/auth/login/google";
+    // Redirect to backend Google OAuth
+    window.location.href = 'http://127.0.0.1:5000/auth/login/google';
+  
+    // other logic handled by backend redirect
   };
 
   // Handle Orcid login
   const handleOrcidLogin = () => {
-    // For development, using dummy data instead of redirecting to ORCID OAuth
-    login(dummyUserProfileResponse.user);
-    navigate("/home");
-    
-    // Actual ORCID login (would be implemented here)
-    // window.location.href = "http://localhost:5000/auth/login/orcid";
+    // Redirect to backend ORCID OAuth if implemented
+    window.location.href = 'http://127.0.0.1:5000/auth/login/orcid';
+  
+    // other logic handled by backend redirect
   };
 
   return (

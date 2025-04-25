@@ -29,29 +29,14 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
   useEffect(() => {
     const loadUser = async () => {
       try {
-        // First try to get user from session storage
-        const storedUser = sessionStorage.getItem('currentUser');
-        if (storedUser) {
-          setUser(JSON.parse(storedUser));
-          setLoading(false);
-          return;
-        }
-        // Skip fetching if not authenticated
-        const isAuth = sessionStorage.getItem('isAuthenticated');
-        if (!isAuth) {
-          setLoading(false);
-          return;
-        }
-        // If authenticated but no stored user, fetch profile
-        const response = await userService.getCurrentUserProfile();
-        if (response.status === 'success' && response.user) {
-          setUser(response.user);
-          // Store in session storage
-          sessionStorage.setItem('currentUser', JSON.stringify(response.user));
+        const data = await userService.checkSession();
+        if (data.logged_in && data.user) {
+          setUser(data.user);
+          sessionStorage.setItem('currentUser', JSON.stringify(data.user));
+          sessionStorage.setItem('isAuthenticated', 'true');
         }
       } catch (err) {
-        setError('Failed to load user profile');
-        console.error('Error loading user:', err);
+        console.error('Error loading user session:', err);
       } finally {
         setLoading(false);
       }
@@ -67,12 +52,15 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     setError(null);
   };
 
-  const logout = () => {
+  const logout = async () => {
+    try {
+      await userService.logoutUser();
+    } catch (err) {
+      console.error('Error during logout:', err);
+    }
     setUser(null);
     sessionStorage.removeItem('currentUser');
     sessionStorage.removeItem('isAuthenticated');
-    // In a real app, you would also make an API call to invalidate the session
-    // For example: userService.logout()
   };
 
   const updateUser = (userData: Partial<UserData>) => {

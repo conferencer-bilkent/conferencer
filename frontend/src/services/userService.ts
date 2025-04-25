@@ -6,15 +6,14 @@ import {
 } from '../models/user';
 
 import { 
-  dummyUsers, 
   dummyUserProfileResponse, 
   getDummyUserById, 
   getDummyUserByEmail 
 } from '../utils/dummyData/dummyUserData';
 
 // This would typically come from environment variables
-// const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
-const API_BASE_URL = 'http://localhost:5000/api';
+// const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+const API_BASE_URL = 'http://127.0.0.1:5000';
 
 /**
  * Fetches the profile for the currently logged-in user
@@ -254,6 +253,75 @@ export const getUserStats = async (userId?: string) => {
   */
 };
 
+/**
+ * Logs in a user with email and password
+ */
+export const loginUser = async (
+  email: string,
+  password: string
+): Promise<{ user: UserData; message: string }> => {
+  const response = await fetch(`${API_BASE_URL}/auth/login`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+    body: JSON.stringify({ email, password }),
+  });
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.error || 'Login failed');
+  }
+  return data;
+};
+
+/**
+ * Registers a new user
+ */
+export const signupUser = async (
+  requestData: { name: string; surname: string; email: string; password: string }
+): Promise<{ user: UserData; message: string }> => {
+  const response = await fetch(`${API_BASE_URL}/auth/signup`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+    body: JSON.stringify(requestData),
+  });
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.error || 'Registration failed');
+  }
+  return data;
+};
+
+/**
+ * Logs out the current user
+ */
+export const logoutUser = async (): Promise<{ message: string }> => {
+  const response = await fetch(`${API_BASE_URL}/auth/logout`, {
+    method: 'POST',
+    credentials: 'include',
+  });
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.error || 'Logout failed');
+  }
+  return data;
+};
+
+/**
+ * Checks current session validity and retrieves user
+ */
+export const checkSession = async (): Promise<{ logged_in: boolean; user?: any; error?: string }> => {
+  const response = await fetch(`${API_BASE_URL}/auth/session`, {
+    method: 'GET',
+    credentials: 'include',
+  });
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.error || 'Session check failed');
+  }
+  return data;
+};
+
 // Export all user service functions
 const userService = {
   getCurrentUserProfile,
@@ -261,7 +329,11 @@ const userService = {
   getUserByEmail,
   updateUserProfile,
   getCurrentUserRoles,
-  getUserStats
+  getUserStats,
+  loginUser,
+  signupUser,
+  logoutUser,
+  checkSession,
 };
 
 export default userService;
