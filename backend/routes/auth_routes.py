@@ -14,7 +14,7 @@ google = oauth.register(
     authorize_params=None,
     api_base_url='https://www.googleapis.com/oauth2/v2/',
     userinfo_endpoint='https://www.googleapis.com/oauth2/v2/userinfo',
-    jwks_uri="https://www.googleapis.com/oauth2/v3/certs",  # ✅ Add this line
+    jwks_uri="https://www.googleapis.com/oauth2/v3/certs",
     client_kwargs={'scope': 'openid email profile'},
 )
 
@@ -128,4 +128,4 @@ def google_callback():
     session.permanent = True
     session.modified = True
 
-    return redirect("http://localhost:5173/home")  # or wherever your frontend points
+    return redirect("http://localhost:5173/home")
