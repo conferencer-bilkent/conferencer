@@ -3,6 +3,7 @@ from models.chad import ChadMail
 from bson import ObjectId
 from datetime import datetime
 from extensions import mongo
+from routes.notification_routes import send_notification
 
 def get_sent_chad():
     user_id = session.get('user_id')
@@ -58,6 +59,15 @@ def send_chad():
         content=content
     )
     
+    # send notification
+    send_notification(
+        to_whom=to_user,
+        title=f"New message!",
+        content=f"You have a new message from {from_user} with subject: {subject}",
+        is_interactive=False
+    )
+
+
     try:
         # Insert to MongoDB
         result = mongo.db.chad_mail.insert_one(new_message.to_dict())
