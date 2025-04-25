@@ -55,7 +55,7 @@ export const getCurrentUserProfile = async (): Promise<UserProfileResponse> => {
  */
 export const getUserById = async (userId: string): Promise<UserData> => {
   try {
-    const response = await fetch(`${API_BASE_URL}/profile/${userId}`, {
+        const response = await fetch(`${API_BASE_URL}/profile/${userId}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -64,11 +64,16 @@ export const getUserById = async (userId: string): Promise<UserData> => {
     });
 
     if (!response.ok) {
+      // If we get a 401 (Unauthorized), don't invalidate the session
+      // Just throw an error about the profile being inaccessible
+      if (response.status === 401) {
+        throw new Error('Cannot access this user profile');
+      }
+      
       const errorData = await response.json();
       throw new Error(errorData.error || 'Failed to fetch user profile');
     }
 
-    // Return the direct UserData response without wrapping
     return await response.json();
   } catch (error) {
     console.error(`Error fetching user with ID ${userId}:`, error);
@@ -297,17 +302,26 @@ export const logoutUser = async (): Promise<{ message: string }> => {
  * Checks if the user is logged in and returns session data
  */ 
 export const checkSession = async (): Promise<{ logged_in: boolean; user: UserData | null }> => {
-  const response = await fetch(`${API_BASE_URL}/auth/session`, {
-    method: 'GET',
-    credentials: 'include',
-  });
-  const responseStable = await response.json(); 
-  console.log('Session check response:', responseStable);
-  const data = responseStable;
-  if (!response.ok) {
-    throw new Error(data.error || 'Session check failed');
+  try {
+    const response = await fetch(`${API_BASE_URL}/auth/session`, {
+      method: 'GET',
+      credentials: 'include',
+    });
+    
+    const data = await response.json();
+    console.log('Session check response:', data);
+    
+    if (!response.ok) {
+      // Return a standardized response instead of throwing an error
+      return { logged_in: false, user: null };
+    }
+    
+    return data;
+  } catch (error) {
+    console.error('Session check error:', error);
+    // Return a consistent response even if the request fails
+    return { logged_in: false, user: null };
   }
-  return data;
 };
 
 const userService = {

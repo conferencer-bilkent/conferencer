@@ -21,7 +21,6 @@ const ProfilePage: React.FC = () => {
   const navigate = useNavigate();
   const { user: currentUser, loading: contextLoading } = useUser();
   const { id } = useParams<{ id: string }>();
-  
   const [profileUser, setProfileUser] = useState<UserData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -30,8 +29,12 @@ const ProfilePage: React.FC = () => {
   useEffect(() => {
     const fetchUserData = async () => {
       try {
+        console.log("Fetching user data...");
+        console.log("Current user:", currentUser);
+        console.log("User ID from URL:", id);
+        
         // If ID is "me" or not provided, use the current logged-in user
-        if (id === "me" || !id) {
+        if (id == currentUser?.id || !id) {
           if (currentUser) {
             setProfileUser(currentUser);
           } else if (!contextLoading) {
