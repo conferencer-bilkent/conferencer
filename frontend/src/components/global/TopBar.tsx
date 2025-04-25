@@ -89,7 +89,13 @@ const Topbar: React.FC = () => {
     <Box display="flex" flexDirection="column" position="relative">
       <Box display="flex" justifyContent="space-between" p={2}>
         {/* Logo on the left */}
-        <Box display="flex" alignItems="center" mr={3}>
+        <Box
+          display="flex"
+          alignItems="center"
+          mr={3}
+          sx={{ cursor: "pointer" }}
+          onClick={() => navigate("/home")}
+        >
           <Typography
             variant="h4"
             fontWeight="bold"
