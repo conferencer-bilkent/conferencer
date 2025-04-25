@@ -4,10 +4,12 @@ import { FaUser, FaLock } from "react-icons/fa";
 import Topbar from "../../global/TopBar";
 import { useNavigate } from "react-router-dom";
 import { Box, Button, TextField, Typography, useTheme } from "@mui/material";
+import { useUser } from "../../../context/UserContext";
+import { dummyUserProfileResponse } from "../../../utils/dummyData/dummyUserData";
 
 const LoginForm: React.FC = () => {
   const theme = useTheme();
-
+  const { login } = useUser();
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -17,6 +19,17 @@ const LoginForm: React.FC = () => {
     e.preventDefault();
 
     try {
+      // For development, using dummy data instead of actual API call
+      if (email && password) {
+        // Set the dummy user in the context
+        login(dummyUserProfileResponse.user);
+        setMessage(`Welcome, ${dummyUserProfileResponse.user.name} ${dummyUserProfileResponse.user.surname}!`);
+        navigate("/home");
+        return;
+      }
+
+      // Actual API call (commented out for now, will be used in production)
+      /*
       const response = await fetch("http://localhost:5000/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -26,14 +39,36 @@ const LoginForm: React.FC = () => {
 
       const data = await response.json();
       if (response.ok) {
+        login(data.user); // Store the user in context
         setMessage(`Welcome, ${data.user.name} ${data.user.surname}!`);
         navigate("/home");
       } else {
         setMessage(`Login failed: ${data.error}`);
       }
+      */
     } catch (error) {
       setMessage(`Error occurred during login: ${error}`);
     }
+  };
+
+  // Handle Google login
+  const handleGoogleLogin = () => {
+    // For development, using dummy data instead of redirecting to Google OAuth
+    login(dummyUserProfileResponse.user);
+    navigate("/home");
+    
+    // Actual Google login (commented out for now)
+    // window.location.href = "http://localhost:5000/auth/login/google";
+  };
+
+  // Handle Orcid login
+  const handleOrcidLogin = () => {
+    // For development, using dummy data instead of redirecting to ORCID OAuth
+    login(dummyUserProfileResponse.user);
+    navigate("/home");
+    
+    // Actual ORCID login (would be implemented here)
+    // window.location.href = "http://localhost:5000/auth/login/orcid";
   };
 
   return (
@@ -130,7 +165,7 @@ const LoginForm: React.FC = () => {
             <Button
               variant="outlined"
               fullWidth
-              onClick={() => window.location.href = "http://localhost:5000/auth/login/google"}
+              onClick={handleGoogleLogin}
               sx={{
                 color: theme.palette.text.primary,
                 borderColor: theme.palette.text.primary,
@@ -147,6 +182,7 @@ const LoginForm: React.FC = () => {
             <Button
               variant="outlined"
               fullWidth
+              onClick={handleOrcidLogin}
               sx={{
                 color: theme.palette.text.primary,
                 borderColor: theme.palette.text.primary,
