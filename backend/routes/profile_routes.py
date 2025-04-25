@@ -2,12 +2,31 @@ from flask import request, jsonify, session
 from extensions import mongo
 from bson.objectid import ObjectId
 
-def get_profile(user_id):
+def get_profile(user_id=None):
+    if not user_id:
+        if "user_id" not in session:
+            return jsonify({"error": "Unauthorized"}), 401
+        user_id = session["user_id"]
+
     user = mongo.db.users.find_one({"_id": ObjectId(user_id)})
     if not user:
         return jsonify({"error": "User not found"}), 404
 
-    return jsonify(user, 200)
+    stats_id = user.get("stat_id")
+    stats_data = None
+    if stats_id:
+        stats_data = mongo.db.stats.find_one({"_id": ObjectId(stats_id)}),
+  
+
+    user_data = {
+        "email": user.get("email"),
+        "name": user.get("name"),
+        "surname": user.get("surname"),
+        "bio": user.get("bio"),
+        "stats": stats_data
+    }
+
+    return jsonify(user_data), 200
 
 def update_profile():
     if "user_id" not in session:
@@ -47,3 +66,17 @@ def update_profile():
     session.modified = True
 
     return jsonify({"message": "Profile updated successfully"}), 200
+
+def get_all_users():
+    # Add authorization check (example - adjust based on your auth system)
+    if "user_id" not in session:
+        return jsonify({"error": "Unauthorized"}), 401
+    
+    users = list(mongo.db.users.find({}))
+    
+    # Convert ObjectId to string for JSON serialization
+    for user in users:
+        user["_id"] = str(user["_id"])
+    
+    # Return the list of users
+    return jsonify(users), 200

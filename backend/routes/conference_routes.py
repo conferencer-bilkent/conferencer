@@ -27,7 +27,6 @@ def create_conference():
             forwarding_emails_tracks=data.get("forwarding_emails_tracks"),
             created_by=session["user_id"],
 
-            # Configs as top-level attributes (value + scope)
             double_blind_review=data.get("double_blind_review"),
             can_pc_see_unassigned_submissions=data.get("can_pc_see_unassigned_submissions"),
             abstract_before_full=data.get("abstract_before_full"),

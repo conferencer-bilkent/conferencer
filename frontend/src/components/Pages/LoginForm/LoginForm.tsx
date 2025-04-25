@@ -4,10 +4,12 @@ import { FaUser, FaLock } from "react-icons/fa";
 import Topbar from "../../global/TopBar";
 import { useNavigate } from "react-router-dom";
 import { Box, Button, TextField, Typography, useTheme } from "@mui/material";
+import { useUser } from "../../../context/UserContext";
+import userService from '../../../services/userService';
 
 const LoginForm: React.FC = () => {
   const theme = useTheme();
-
+  const { login } = useUser();
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -15,25 +17,38 @@ const LoginForm: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     try {
-      const response = await fetch("http://localhost:5000/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include", // Ensures session cookies are sent for authentication
-        body: JSON.stringify({ email, password }),
-      });
-
-      const data = await response.json();
-      if (response.ok) {
-        setMessage(`Welcome, ${data.user.name} ${data.user.surname}!`);
-        navigate("/home");
-      } else {
-        setMessage(`Login failed: ${data.error}`);
-      }
-    } catch (error) {
-      setMessage(`Error occurred during login: ${error}`);
+      const loginResponse = await userService.loginUser(email, password);
+      console.log("Login response:", loginResponse);
+      // Fetch full user profile by ID
+      
+      const profileResponse = await userService.getUserById(loginResponse.user.id);
+      console.log("prodf:", profileResponse);
+      loginResponse.user.stats = profileResponse.stats;
+      console.log("Login response with stats:", loginResponse);
+      login(loginResponse.user);
+      console.log("U");
+      setMessage(`Welcome, ${loginResponse.user.name} ${loginResponse.user.surname}!`);
+      navigate('/home');
+    } catch (error: any) {
+      setMessage(`Login failed: ${error.message || error}`);
     }
+  };
+
+  // Handle Google login
+  const handleGoogleLogin = () => {
+    // Redirect to backend Google OAuth
+    window.location.href = 'http://127.0.0.1:5000/auth/login/google';
+  
+    // other logic handled by backend redirect
+  };
+
+  // Handle Orcid login
+  const handleOrcidLogin = () => {
+    // Redirect to backend ORCID OAuth if implemented
+    window.location.href = 'http://127.0.0.1:5000/auth/login/orcid';
+  
+    // other logic handled by backend redirect
   };
 
   return (
@@ -130,7 +145,7 @@ const LoginForm: React.FC = () => {
             <Button
               variant="outlined"
               fullWidth
-              onClick={() => window.location.href = "http://localhost:5000/auth/login/google"}
+              onClick={handleGoogleLogin}
               sx={{
                 color: theme.palette.text.primary,
                 borderColor: theme.palette.text.primary,
@@ -147,6 +162,7 @@ const LoginForm: React.FC = () => {
             <Button
               variant="outlined"
               fullWidth
+              onClick={handleOrcidLogin}
               sx={{
                 color: theme.palette.text.primary,
                 borderColor: theme.palette.text.primary,

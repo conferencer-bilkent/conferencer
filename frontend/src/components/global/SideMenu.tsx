@@ -1,15 +1,56 @@
 import React from "react";
 import { useTheme, Box } from "@mui/material";
-import { tokens } from "../../theme"; // Import the theme tokens
+import { useNavigate } from "react-router-dom";
+import { tokens } from "../../theme";
+import { useUser } from "../../context/UserContext"; // ✅ added
 
 interface SideMenuProps {
   items: string[];
-  onItemClick: (item: string) => void;
+  onItemClick?: (item: string) => void; // Optional callback for item click
 }
 
-const SideMenu: React.FC<SideMenuProps> = ({ items, onItemClick }) => {
+const SideMenu: React.FC<SideMenuProps> = ({ items }) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
+  const navigate = useNavigate();
+  const { user } = useUser(); // ✅ use user context
+
+  const handleItemClick = (item: string) => {
+    console.log("Clicked:", item);
+
+    switch (item) {
+      case "CONFERENCES":
+        navigate("/home");
+        break;
+      case "PROFILE":
+        if (user && user.id) {
+          navigate(`/profile/${user.id}`); // ✅ dynamic /profile/id
+        } else {
+          navigate("/login");
+        }
+        break;
+      case "MY TASKS":
+        navigate("/tasks");
+        break;
+      case "MY ROLES":
+        navigate("/roles");
+        break;
+      case "NOTIFICATIONS":
+        navigate("/notifications");
+        break;
+      case "CHATS":
+        navigate("/chat");
+        break;
+      case "SETTINGS":
+        navigate("/settings");
+        break;
+      case "LOG OUT":
+        console.log("Log out should be handled separately");
+        break;
+      default:
+        console.log("No navigation defined for:", item);
+    }
+  };
 
   return (
     <Box
@@ -23,7 +64,7 @@ const SideMenu: React.FC<SideMenuProps> = ({ items, onItemClick }) => {
         {items.map((item, index) => (
           <li
             key={index}
-            onClick={() => onItemClick(item)}
+            onClick={() => handleItemClick(item)}
             style={{
               padding: "10px 20px",
               color: colors.grey[100],

@@ -55,11 +55,23 @@ def signup():
         return jsonify({"error": "User already exists"}), 400
 
     hashed_password = bcrypt.generate_password_hash(password).decode("utf-8")
+
+    stat_id = mongo.db.stats.insert_one({
+        "avg_time_to_review": 0,
+        "avg_submit_time_before_deadline": 0,
+        "deadline_compliance_rate": 0,
+        "avg_rating_given": 0,
+        "avg_words_per_review": 0,
+        "review_rating": 0
+    }).inserted_id 
+
+    
     user_id = mongo.db.users.insert_one({
         "name": name,
         "surname": surname,
         "email": email,
-        "password": hashed_password
+        "password": hashed_password,
+        "stat_id": str(stat_id)
     }).inserted_id
 
     return jsonify({
