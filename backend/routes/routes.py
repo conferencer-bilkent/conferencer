@@ -4,7 +4,7 @@ from routes.conference_routes import create_conference
 from routes.ping_routes import ping
 from routes.profile_routes import get_profile, update_profile, get_all_users
 from routes.role_routes import assign_role
-
+from routes.chad_routes import send_chad, get_received_chad, get_sent_chad
 
 # Define blueprints
 auth_bp = Blueprint("auth", __name__)
@@ -12,6 +12,7 @@ conference_bp = Blueprint("conference", __name__)
 ping_bp = Blueprint("ping", __name__)
 profile_bp = Blueprint("profile", __name__)
 role_bp = Blueprint("role", __name__)
+chad_bp = Blueprint("chad", __name__)
 
 # Route bindings (logic attached here)
 auth_bp.route("/login", methods=["POST"])(login)
@@ -31,6 +32,9 @@ profile_bp.route("/users", methods=["GET"])(get_all_users)
 
 role_bp.route("/", methods=["POST"])(assign_role)
 
+chad_bp.route("/send", methods=["POST"])(send_chad)
+chad_bp.route("/inbox", methods=["GET"])(get_received_chad)
+chad_bp.route("/outbox", methods=["GET"])(get_sent_chad)
 
 # Register list
 all_routes = [
@@ -39,4 +43,5 @@ all_routes = [
     (ping_bp, "/ping"),
     (profile_bp, "/profile"),
     (role_bp, "/role"),
+    (chad_bp, "/chad")
 ]
