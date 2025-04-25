@@ -2,18 +2,21 @@ import React from "react";
 import { useTheme } from "@mui/material/styles";
 import AppTitle from "../../global/AppTitle";
 import SideMenu from "../../global/SideMenu";
-import TopBar from "../../global/TopBar"; // Import TopBar component
+import TopBar from "../../global/TopBar";
 import { getMenuItemsForPage } from "../../global/sideMenuConfig";
 import ProfileUserRoles from "./components/ProfileUserRoles";
 import { tokens } from "../../../theme";
 import { useNavigate } from "react-router-dom";
 import { handleMenuItemClick } from "../../../utils/navigation/menuNavigation";
+import { useUser } from "../../../context/UserContext";
+import { CircularProgress } from "@mui/material";
 
 const ProfilePage: React.FC = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const menuItems = getMenuItemsForPage("default");
   const navigate = useNavigate();
+  const { user, loading } = useUser();
 
   const handleItemClick = (item: string) => {
     handleMenuItemClick(item, navigate);
@@ -98,8 +101,6 @@ const ProfilePage: React.FC = () => {
     width: "45%",
   };
 
- 
-
   const statsContainerStyle: React.CSSProperties = {
     border: `1px solid ${colors.grey[100]}`,// Match ProfileUserRoles border
     borderRadius: "12px",
@@ -121,6 +122,30 @@ const ProfilePage: React.FC = () => {
     textAlign: "left",
     width: "45%",
   };
+  
+  const loadingContainerStyle: React.CSSProperties = {
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    height: "100%",
+  };
+
+  if (loading) {
+    return (
+      <div style={loadingContainerStyle}>
+        <CircularProgress />
+      </div>
+    );
+  }
+
+  if (!user) {
+    // Redirect to login if no user is available
+    navigate("/login");
+    return null;
+  }
+
+  // Get formatted stats
+  const otherStats = user.stats.otherStats || [];
 
   return (
     <div style={profilePageStyle}>
@@ -132,33 +157,28 @@ const ProfilePage: React.FC = () => {
         <div style={contentWrapperStyle}>
           <TopBar />
           <div style={contentContainerStyle}>
-            <AppTitle text="PROFILE NAME" />
+            <AppTitle text={`${user.name} ${user.surname}`} />
             <div style={headerOuterStyle}>
               <div style={headerInnerStyle}>
                 <div style={userPartStyle}>
-                  <p>Atilla Emre Söylemez</p>
-                  <p>Bio: I am a CS Student....</p>
+                  <p>{`${user.name} ${user.surname}`}</p>
+                  <p>Bio: {user.bio || "No bio provided"}</p>
                 </div>
                 <div style={numericPartStyle}>
-                  <p>Total Reviews: 210</p>
-                  <p>Conferences Worked: 3</p>
-                  <p>Submissions: 1 View</p>
+                  <p>Total Reviews: {user.stats.totalReviews || 0}</p>
+                  <p>Conferences Worked: {user.stats.conferencesWorked || 0}</p>
+                  <p>Submissions: {user.stats.submissions || 0}</p>
                 </div>
               </div>
               <div style={contactContainerStyle}>
-                <p style={contactStyle}>Contact: emre.soylemez@bilkent.edu.tr</p>
+                <p style={contactStyle}>Contact: {user.email}</p>
               </div>
             </div>
             <div style={bottomContainerStyle}>
               <div style={roleContainerStyle}>
                 <ProfileUserRoles
-                  activeRoles={[
-                    { name: "RECOMB2023, PC Member(TRACK1), Track Chair (YTTW2)" },
-                    { name: "CS FAIR, Superchair" },
-                  ]}
-                  pastRoles={[
-                    { name: "RECOMB2022, PC Member(TRACK1), Track Chair (TRACK2)" },
-                  ]}
+                  activeRoles={user.roles.active.map(role => ({ name: role.name }))}
+                  pastRoles={user.roles.past.map(role => ({ name: role.name }))}
                 />
               </div>
               <div style={statsContainerStyle}>
@@ -166,10 +186,10 @@ const ProfilePage: React.FC = () => {
                 <div>
                   <table style={statsTableStyle}>
                     <tbody>
-                      {Array.from({ length: 5 }).map((_, index) => (
+                      {otherStats.map((stat, index) => (
                         <tr key={index}>
-                          <td style={statsCellStyle}>Average fala filan</td>
-                          <td style={statsCellStyle}>Average fala filan</td>
+                          <td style={statsCellStyle}>{stat.label}</td>
+                          <td style={statsCellStyle}>{stat.value}</td>
                         </tr>
                       ))}
                     </tbody>

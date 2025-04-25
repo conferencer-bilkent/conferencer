@@ -18,6 +18,7 @@ import ReviewDetailPage from "./components/Pages/Conference/components/Reviews/R
 import SubmissionsList from "./components/Pages/AddSubmissions/components/homePage/submissionsList/submissionsList";
 import AddSubmissionPage from "./components/Pages/AddSubmissions/components/homePage/addSubmission/addSubmission";
 import { SubmissionProvider } from "./context/addSubmissionContext";
+import { UserProvider } from "./context/UserContext";
 
 const App: React.FC = () => {
   const [theme, colorMode] = useMode();
@@ -26,46 +27,48 @@ const App: React.FC = () => {
     <ColorModeContext.Provider value={colorMode}>
       <ThemeProvider theme={theme}>
         <CssBaseline />
-        <Box
-          sx={{
-            minHeight: "100vh",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            bgcolor: theme.palette.background.default,
-            transition:
-              "background-color 0.3s ease-in-out, color 0.3s ease-in-out",
-          }}
-        >
-          <Router>
-            <div className="App">
-              <Routes>
-                <Route path="/login" element={<LoginForm />} />
-                <Route path="/register" element={<RegisterForm />} />
-                <Route path="/home" element={<HomePage />} />
-                <Route path="/conference" element={<ConferencePage />} />
-                <Route path="/conference/create" element={<CreateConference />} />
-                <Route path="/mytasks" element={<MyTasks />} />
-                <Route path="/review" element={<ReviewsPage />} />
+        <UserProvider>
+          <Box
+            sx={{
+              minHeight: "100vh",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              bgcolor: theme.palette.background.default,
+              transition:
+                "background-color 0.3s ease-in-out, color 0.3s ease-in-out",
+            }}
+          >
+            <Router>
+              <div className="App">
+                <Routes>
+                  <Route path="/login" element={<LoginForm />} />
+                  <Route path="/register" element={<RegisterForm />} />
+                  <Route path="/home" element={<HomePage />} />
+                  <Route path="/conference" element={<ConferencePage />} />
+                  <Route path="/conference/create" element={<CreateConference />} />
+                  <Route path="/mytasks" element={<MyTasks />} />
+                  <Route path="/review" element={<ReviewsPage />} />
 
-                <Route path="/profile" element={<ProfilePage />} />
+                  <Route path="/profile" element={<ProfilePage />} />
 
-                <Route path="/reviews" element={<ReviewDetailPage />} />
-                <Route path="/ex" element={<SubmissionsList />}></Route>
-                <Route
-                  path="/addSubmission"
-                  element={
-                    <SubmissionProvider>
-                      <AddSubmissionPage />
-                    </SubmissionProvider>
-                  }
-                />
+                  <Route path="/reviews" element={<ReviewDetailPage />} />
+                  <Route path="/ex" element={<SubmissionsList />}></Route>
+                  <Route
+                    path="/addSubmission"
+                    element={
+                      <SubmissionProvider>
+                        <AddSubmissionPage />
+                      </SubmissionProvider>
+                    }
+                  />
 
-                <Route path="/" element={<LoginForm />} />
-              </Routes>
-            </div>
-          </Router>
-        </Box>
+                  <Route path="/" element={<LoginForm />} />
+                </Routes>
+              </div>
+            </Router>
+          </Box>
+        </UserProvider>
       </ThemeProvider>
     </ColorModeContext.Provider>
   );
