@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useTheme } from "@mui/material/styles";
 import AppTitle from "../../global/AppTitle";
 import SideMenu from "../../global/SideMenu";
@@ -6,10 +6,12 @@ import TopBar from "../../global/TopBar";
 import { getMenuItemsForPage } from "../../global/sideMenuConfig";
 import ProfileUserRoles from "./components/ProfileUserRoles";
 import { tokens } from "../../../theme";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { handleMenuItemClick } from "../../../utils/navigation/menuNavigation";
 import { useUser } from "../../../context/UserContext";
 import { CircularProgress } from "@mui/material";
+import { emptyRole, getUserStats, UserData } from "../../../models/user";
+import { getUserById } from "../../../services/userService";
 
 
 const ProfilePage: React.FC = () => {
@@ -17,14 +19,46 @@ const ProfilePage: React.FC = () => {
   const colors = tokens(theme.palette.mode);
   const menuItems = getMenuItemsForPage("default");
   const navigate = useNavigate();
-  const { user, loading } = useUser();
+  const { user: currentUser, loading: contextLoading } = useUser();
+  const { id } = useParams<{ id: string }>();
+  
+  const [profileUser, setProfileUser] = useState<UserData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // Add this effect to log the user data structure
+  // Fetch user data based on URL parameter
   useEffect(() => {
-    if (user) {
-      console.log("User data structure:", JSON.stringify(user, null, 2));
+    const fetchUserData = async () => {
+      try {
+        // If ID is "me" or not provided, use the current logged-in user
+        if (id === "me" || !id) {
+          if (currentUser) {
+            setProfileUser(currentUser);
+          } else if (!contextLoading) {
+            navigate("/login");
+          }
+        } else {
+          // Otherwise fetch the user with the specified ID
+          const userData = await getUserById(id);
+          setProfileUser(userData);
+        }
+      } catch (err) {
+        console.error("Error fetching user profile:", err);
+        setError("Failed to load user profile");
+      } finally {
+        setLoading(contextLoading ? true : false);
+      }
+    };
+
+    fetchUserData();
+  }, [id, currentUser, contextLoading, navigate]);
+
+  // Log the user data structure for debugging
+  useEffect(() => {
+    if (profileUser) {
+      console.log("User data structure:", JSON.stringify(profileUser, null, 2));
     }
-  }, [user]);
+  }, [profileUser]);
 
   const handleItemClick = (item: string) => {
     handleMenuItemClick(item, navigate);
@@ -138,6 +172,14 @@ const ProfilePage: React.FC = () => {
     height: "100%",
   };
 
+  const errorContainerStyle: React.CSSProperties = {
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    height: "100%",
+    color: colors.redAccent[500],
+  };
+
   if (loading) {
     return (
       <div style={loadingContainerStyle}>
@@ -146,18 +188,27 @@ const ProfilePage: React.FC = () => {
     );
   }
 
-  if (!user) {
-    // Redirect to login if no user is available
-    navigate("/login");
-    return null;
+  if (error) {
+    return (
+      <div style={errorContainerStyle}>
+        <p>{error}</p>
+      </div>
+    );
+  }
+
+  if (!profileUser) {
+    return (
+      <div style={errorContainerStyle}>
+        <p>User not found</p>
+      </div>
+    );
   }
 
   // Add safe access to potentially undefined properties
-  const userStats = user.stats || {};
-  const otherStats = userStats.otherStats || [];
-  const userRoles = user.roles || {};
-  const activeRoles = userRoles.active || [];
-  const pastRoles = userRoles.past || [];
+  const userStats = getUserStats(profileUser);
+  const userRoles = profileUser.roles;
+  const activeRoles = userRoles?.active || [emptyRole];
+  const pastRoles = userRoles?.past ||  [emptyRole];
 
   return (
     <div style={profilePageStyle}>
@@ -169,12 +220,12 @@ const ProfilePage: React.FC = () => {
         <div style={contentWrapperStyle}>
           <TopBar />
           <div style={contentContainerStyle}>
-            <AppTitle text={`${user.name || ""} ${user.surname || ""}`} />
+            <AppTitle text={`${profileUser.name || ""} ${profileUser.surname || ""}`} />
             <div style={headerOuterStyle}>
               <div style={headerInnerStyle}>
                 <div style={userPartStyle}>
-                  <p>{`${user.name || ""} ${user.surname || ""}`}</p>
-                  <p>Bio: {user.bio || "No bio provided"}</p>
+                  <p>{`${profileUser.name || ""} ${profileUser.surname || ""}`}</p>
+                  <p>Bio: {profileUser.bio || "No bio provided"}</p>
                 </div>
                 <div style={numericPartStyle}>
                   <p>Total Reviews: {userStats.totalReviews || 0}</p>
@@ -183,7 +234,7 @@ const ProfilePage: React.FC = () => {
                 </div>
               </div>
               <div style={contactContainerStyle}>
-                <p style={contactStyle}>Contact: {user.email || ""}</p>
+                <p style={contactStyle}>Contact: {profileUser.email || ""}</p>
               </div>
             </div>
             <div style={bottomContainerStyle}>
@@ -198,12 +249,26 @@ const ProfilePage: React.FC = () => {
                 <div>
                   <table style={statsTableStyle}>
                     <tbody>
-                      {otherStats.map((stat, index) => (
-                        <tr key={index}>
-                          <td style={statsCellStyle}>{stat?.label || "Unknown"}</td>
-                          <td style={statsCellStyle}>{stat?.value || ""}</td>
-                        </tr>
-                      ))}
+                      <tr>
+                        <td style={statsCellStyle}>Average Rating Given</td>
+                        <td style={statsCellStyle}>{userStats.avg_rating_given}</td>
+                      </tr>
+                      <tr>
+                        <td style={statsCellStyle}>Avg Time Before Deadline</td>
+                        <td style={statsCellStyle}>{userStats.avg_submit_time_before_deadline}</td>
+                      </tr>
+                      <tr>
+                        <td style={statsCellStyle}>Avg Time to Review</td>
+                        <td style={statsCellStyle}>{userStats.avg_time_to_review}</td>
+                      </tr>
+                      <tr>
+                        <td style={statsCellStyle}>Deadline Compliance Rate</td>
+                        <td style={statsCellStyle}>{userStats.deadline_compliance_rate}</td>
+                      </tr>
+                      <tr>
+                        <td style={statsCellStyle}>Review Rating</td>
+                        <td style={statsCellStyle}>{userStats.review_rating}</td>
+                      </tr>
                     </tbody>
                   </table>
                 </div>

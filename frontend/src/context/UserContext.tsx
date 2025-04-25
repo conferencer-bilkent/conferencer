@@ -29,7 +29,9 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
   useEffect(() => {
     const loadUser = async () => {
       try {
+        console.log('Loading user session...');
         const data = await userService.checkSession();
+        console.log('Session data:', data);
         if (data.logged_in && data.user) {
           setUser(data.user);
           sessionStorage.setItem('currentUser', JSON.stringify(data.user));
