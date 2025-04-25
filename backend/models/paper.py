@@ -9,7 +9,7 @@ class Paper:
         self.title = title
         self.abstract = abstract
         self.keywords = keywords
-        self.paper_path = paper_path
+        self.paper = paper_path
         self.authors = authors
         self.decision = decision
         self.track = track
@@ -32,7 +32,7 @@ class Paper:
             "title": self.title,
             "abstract": self.abstract,
             "keywords": self.keywords,
-            "paper_path": self.paper_path,
+            "paper": self.paper,
             "authors": self.authors,
             "decision": self.decision,
             "track": self.track,
