@@ -11,12 +11,14 @@ import { handleMenuItemClick } from "../../../utils/navigation/menuNavigation";
 import { useUser } from "../../../context/UserContext";
 import { CircularProgress } from "@mui/material";
 
+
 const ProfilePage: React.FC = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const menuItems = getMenuItemsForPage("default");
   const navigate = useNavigate();
   const { user, loading } = useUser();
+
 
   const handleItemClick = (item: string) => {
     handleMenuItemClick(item, navigate);

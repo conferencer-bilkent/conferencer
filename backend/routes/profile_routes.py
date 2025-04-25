@@ -47,3 +47,23 @@ def update_profile():
     session.modified = True
 
     return jsonify({"message": "Profile updated successfully"}), 200
+
+def get_all_users():
+    # Add authorization check (example - adjust based on your auth system)
+    if "user_id" not in session:
+        return jsonify({"error": "Unauthorized"}), 401
+    
+    # Optional: Check if user is admin (if you have such a role in your system)
+    # user = mongo.db.users.find_one({"_id": ObjectId(session["user_id"])})
+    # if not user or not user.get("is_admin"):
+    #     return jsonify({"error": "Forbidden - Admin access required"}), 403
+
+    # Get all users from the database
+    users = list(mongo.db.users.find({}))
+    
+    # Convert ObjectId to string for JSON serialization
+    for user in users:
+        user["_id"] = str(user["_id"])
+    
+    # Return the list of users
+    return jsonify(users), 200

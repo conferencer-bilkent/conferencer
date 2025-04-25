@@ -4,6 +4,7 @@ import { FaBookOpen, FaPlusCircle } from "react-icons/fa";
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import { ConferenceData, conference1, conference2 } from "../../../../utils/dummyData/dummyConferenceData";
 
+
 interface TextInfo {
   title?: string;
   content: string;
