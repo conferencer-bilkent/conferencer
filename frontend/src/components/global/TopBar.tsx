@@ -15,13 +15,14 @@ import {
 import { useContext, useState } from "react";
 import { ColorModeContext, tokens } from "../../theme";
 import LightModeOutlinedIcon from "@mui/icons-material/LightModeOutlined";
-import DarkModeOutlinedIcon from "@mui/icons-material/DarkModeOutlined";
+import DarkModeOutlinedIcon from "@mui/icons-material/LightModeOutlined";
 import NotificationsOutlinedIcon from "@mui/icons-material/NotificationsOutlined";
 import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
 import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
 import SearchIcon from "@mui/icons-material/Search";
 import { useUser } from "../../context/UserContext";
 import { useNavigate } from "react-router-dom";
+import ClickAwayListener from "@mui/material/ClickAwayListener";
 
 const Topbar: React.FC = () => {
   const theme = useTheme();
@@ -87,12 +88,28 @@ const Topbar: React.FC = () => {
   return (
     <Box display="flex" flexDirection="column" position="relative">
       <Box display="flex" justifyContent="space-between" p={2}>
+        {/* Logo on the left */}
+        <Box display="flex" alignItems="center" mr={3}>
+          <Typography
+            variant="h4"
+            fontWeight="bold"
+            sx={{
+              color: colors.greenAccent[500],
+            }}
+          >
+            CONFERENCER
+          </Typography>
+        </Box>
+
         <Box
           display="flex"
           sx={{
             backgroundColor: colors.primary[400],
             borderRadius: "3px",
             position: "relative",
+            flexGrow: 1,
+            maxWidth: "600px",
+            mr: 2,
           }}
         >
           <InputBase
@@ -167,53 +184,55 @@ const Topbar: React.FC = () => {
         </Box>
       </Box>
 
-      {/* Scrollable user list */}
+      {/* Scrollable user list with ClickAwayListener */}
       {showUsers && (
-        <Paper
-          sx={{
-            position: "absolute",
-            top: "70px",
-            left: "16px",
-            right: "16px",
-            maxHeight: "300px",
-            overflowY: "auto",
-            zIndex: 1300,
-            p: 1,
-          }}
-        >
-          <List>
-            {users
-              .filter((u) =>
-                `${u.name} ${u.surname}`
-                  .toLowerCase()
-                  .includes(searchTerm.toLowerCase())
-              )
-              .map((u) => (
-                <ListItem key={u._id} divider>
-                  <Box
-                    display="flex"
-                    justifyContent="space-between"
-                    alignItems="center"
-                    width="100%"
-                  >
-                    <Typography
-                      sx={{ cursor: "pointer", fontWeight: 500 }}
-                      onClick={() => handleUserClick(u._id)}
+        <ClickAwayListener onClickAway={() => setShowUsers(false)}>
+          <Paper
+            sx={{
+              position: "absolute",
+              top: "70px",
+              left: "16px",
+              right: "16px",
+              maxHeight: "300px",
+              overflowY: "auto",
+              zIndex: 1300,
+              p: 1,
+            }}
+          >
+            <List>
+              {users
+                .filter((u) =>
+                  `${u.name} ${u.surname}`
+                    .toLowerCase()
+                    .includes(searchTerm.toLowerCase())
+                )
+                .map((u) => (
+                  <ListItem key={u._id} divider>
+                    <Box
+                      display="flex"
+                      justifyContent="space-between"
+                      alignItems="center"
+                      width="100%"
                     >
-                      {u.name} {u.surname}
-                    </Typography>
-                    <Button
-                      size="small"
-                      variant="outlined"
-                      onClick={() => handleChatClick(u._id)}
-                    >
-                      Chat
-                    </Button>
-                  </Box>
-                </ListItem>
-              ))}
-          </List>
-        </Paper>
+                      <Typography
+                        sx={{ cursor: "pointer", fontWeight: 500 }}
+                        onClick={() => handleUserClick(u._id)}
+                      >
+                        {u.name} {u.surname}
+                      </Typography>
+                      <Button
+                        size="small"
+                        variant="outlined"
+                        onClick={() => handleChatClick(u._id)}
+                      >
+                        Chat
+                      </Button>
+                    </Box>
+                  </ListItem>
+                ))}
+            </List>
+          </Paper>
+        </ClickAwayListener>
       )}
     </Box>
   );
