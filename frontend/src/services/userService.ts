@@ -51,35 +51,27 @@ export const getCurrentUserProfile = async (): Promise<UserProfileResponse> => {
  * Fetches a user profile by ID
  * 
  * @param userId - The ID of the user to fetch
- * @returns Promise with user profile response
+ * @returns Promise with user data directly
  */
-export const getUserById = async (userId: string): Promise<UserProfileResponse> => {
-  // DUMMY DATA IMPLEMENTATION
-  const user = getDummyUserById(userId);
-  
-  if (!user) {
-    return Promise.reject(new Error('User not found'));
-  }
-  
-  return Promise.resolve({
-    user,
-    status: 'success',
-    message: 'User profile retrieved successfully'
-  });
-
-  /* ACTUAL API IMPLEMENTATION WOULD BE:
+export const getUserById = async (userId: string): Promise<UserData> => {
   try {
-    const response = await fetch(`${API_BASE_URL}/users/${userId}`, {
+        const response = await fetch(`${API_BASE_URL}/profile/${userId}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
       },
-      credentials: 'include', // Includes cookies for session authentication
+      credentials: 'include',
     });
 
     if (!response.ok) {
+      // If we get a 401 (Unauthorized), don't invalidate the session
+      // Just throw an error about the profile being inaccessible
+      if (response.status === 401) {
+        throw new Error('Cannot access this user profile');
+      }
+      
       const errorData = await response.json();
-      throw new Error(errorData.message || 'Failed to fetch user profile');
+      throw new Error(errorData.error || 'Failed to fetch user profile');
     }
 
     return await response.json();
@@ -87,7 +79,6 @@ export const getUserById = async (userId: string): Promise<UserProfileResponse> 
     console.error(`Error fetching user with ID ${userId}:`, error);
     throw error;
   }
-  */
 };
 
 /**
@@ -308,21 +299,31 @@ export const logoutUser = async (): Promise<{ message: string }> => {
 };
 
 /**
- * Checks current session validity and retrieves user
- */
-export const checkSession = async (): Promise<{ logged_in: boolean; user?: any; error?: string }> => {
-  const response = await fetch(`${API_BASE_URL}/auth/session`, {
-    method: 'GET',
-    credentials: 'include',
-  });
-  const data = await response.json();
-  if (!response.ok) {
-    throw new Error(data.error || 'Session check failed');
+ * Checks if the user is logged in and returns session data
+ */ 
+export const checkSession = async (): Promise<{ logged_in: boolean; user: UserData | null }> => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/auth/session`, {
+      method: 'GET',
+      credentials: 'include',
+    });
+    
+    const data = await response.json();
+    console.log('Session check response:', data);
+    
+    if (!response.ok) {
+      // Return a standardized response instead of throwing an error
+      return { logged_in: false, user: null };
+    }
+    
+    return data;
+  } catch (error) {
+    console.error('Session check error:', error);
+    // Return a consistent response even if the request fails
+    return { logged_in: false, user: null };
   }
-  return data;
 };
 
-// Export all user service functions
 const userService = {
   getCurrentUserProfile,
   getUserById,
@@ -333,7 +334,7 @@ const userService = {
   loginUser,
   signupUser,
   logoutUser,
-  checkSession,
+  checkSession,  // Add checkSession to the exported object
 };
 
 export default userService;

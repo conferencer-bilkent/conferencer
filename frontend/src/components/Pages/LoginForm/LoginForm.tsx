@@ -18,9 +18,17 @@ const LoginForm: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const data = await userService.loginUser(email, password);
-      login(data.user);
-      setMessage(`Welcome, ${data.user.name} ${data.user.surname}!`);
+      const loginResponse = await userService.loginUser(email, password);
+      console.log("Login response:", loginResponse);
+      // Fetch full user profile by ID
+      
+      const profileResponse = await userService.getUserById(loginResponse.user.id);
+      console.log("prodf:", profileResponse);
+      loginResponse.user.stats = profileResponse.stats;
+      console.log("Login response with stats:", loginResponse);
+      login(loginResponse.user);
+      console.log("U");
+      setMessage(`Welcome, ${loginResponse.user.name} ${loginResponse.user.surname}!`);
       navigate('/home');
     } catch (error: any) {
       setMessage(`Login failed: ${error.message || error}`);
