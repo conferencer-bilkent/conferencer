@@ -2,12 +2,17 @@ from flask import request, jsonify, session
 from extensions import mongo
 from bson.objectid import ObjectId
 
-def get_profile(user_id):
+def get_profile(user_id=None):
+    if not user_id:
+        if "user_id" not in session:
+            return jsonify({"error": "Unauthorized"}), 401
+        user_id = session["user_id"]
+
     user = mongo.db.users.find_one({"_id": ObjectId(user_id)})
     if not user:
         return jsonify({"error": "User not found"}), 404
 
-    return jsonify(user, 200)
+    return jsonify(user), 200
 
 def update_profile():
     if "user_id" not in session:
