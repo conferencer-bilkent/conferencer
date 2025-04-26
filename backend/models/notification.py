@@ -10,6 +10,7 @@ class Notification:
         self.is_answered = False
         self.created_at = datetime.now()
         self.to_whom = to_whom
+        self.is_accepted = False
 
     to_dict = lambda self: {
         "id": self.id,
@@ -18,5 +19,6 @@ class Notification:
         "is_interactive": self.is_interactive,
         "is_answered": self.is_answered,
         "created_at": self.created_at.isoformat(),
-        "to_whom": self.to_whom
+        "to_whom": self.to_whom,
+        "is_accepted": self.is_accepted
     }

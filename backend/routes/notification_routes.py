@@ -17,7 +17,8 @@ def get_notification():
             'content': notification['content'],
             'is_interactive': notification['is_interactive'],
             'is_answered': notification.get('is_answered', False),
-            'created_at': notification.get('created_at', datetime.now().isoformat())
+            'created_at': notification.get('created_at', datetime.now().isoformat()),
+            'is_accepted': notification.get('is_accepted', False)
         })
     
     result = sorted(result, key=lambda x: x['created_at'], reverse=True)
@@ -45,8 +46,10 @@ def send_notification(to_whom ,title, content, is_interactive=False):
     except Exception as e:
         return jsonify({'error': f'Failed to send notification: {str(e)}'}), 500
     
-def mark_notification_as_answered(notification_id):
+def mark_notification_as_answered(notification_id, is_accepted):
     user_id = session.get('user_id')
+
+    is_accepted = True if is_accepted == "true" else False
     
     if not user_id:
         return jsonify({'error': 'User not logged in'}), 401
@@ -54,7 +57,7 @@ def mark_notification_as_answered(notification_id):
     try:
         result = mongo.db.notifications.update_one(
             {'_id': ObjectId(notification_id), 'to_whom': user_id},
-            {'$set': {'is_answered': True}}
+            {'$set': {'is_answered': True, 'is_accepted': is_accepted}}
         )
         
         if result.modified_count > 0:

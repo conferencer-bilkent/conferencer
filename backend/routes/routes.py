@@ -51,7 +51,7 @@ review_bp.route("/submit/<paper_id>", methods=["POST"])(submit_review)
 upload_bp.route("/<conference_id>/<track_name>", methods=["POST"])(upload_file)
 
 notification_bp.route("/", methods=["GET"])(get_notification)
-notification_bp.route("/mark_answered/<notification_id>", methods=["POST"])(mark_notification_as_answered)
+notification_bp.route("/mark_answered/<notification_id>/<is_accepted>", methods=["POST"])(mark_notification_as_answered)
 
 # Register list
 all_routes = [
