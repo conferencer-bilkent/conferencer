@@ -4,7 +4,7 @@
     max-width: 1000px;
     margin: 40px auto;
     padding: 40px;
-    background-color: #1c2230;
+    background-color: #f3f3f5;
     border-radius: 12px;
     box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
     color: white;
@@ -45,13 +45,13 @@
   }
   
   th {
-    background-color: #2d354a;
+    background-color: #a8afc2;
     color: #ffffff;
     font-weight: 500;
   }
   
   td {
-    background-color: #262f42;
+    background-color: #bbc0cc;
   }
   
   input,
@@ -60,8 +60,8 @@
     padding: 6px 8px;
     border: 1px solid #666;
     border-radius: 4px;
-    background-color: #1e2433;
-    color: white;
+    background-color: #c7cacf;
+    color: rgb(0, 0, 0);
     font-size: 14px;
   }
   
