@@ -2,6 +2,8 @@ from flask import Blueprint, request, jsonify, session
 from models.conference import Conference
 from bson import ObjectId
 from extensions import mongo
+from models.pc_member_invitation import PCMemberInvitation
+from routes.notification_routes import send_notification
 
 def create_conference():
     if "user_id" not in session:
@@ -65,3 +67,44 @@ def create_conference():
     except Exception as e:
         print("Conference creation error:", e)
         return jsonify({"error": "Failed to create conference"}), 500
+
+def invite_pc_member(conference_id):
+    if "user_id" not in session:
+        return jsonify({"error": "Unauthorized"}), 401
+
+    try:
+        data = request.get_json()
+        user_id = data.get("user_id")
+        conference_name = data.get("conference_name")
+
+        if not user_id or not conference_name:
+            return jsonify({"error": "Missing user_id or conference_name"}), 400
+
+        invitation = PCMemberInvitation(
+            conference_id=conference_id,
+            user_id=user_id
+        )
+        mongo.db.pcmember_invitations.insert_one(invitation.to_dict())
+
+        title = "PC Member Invitation"
+        content = f"You are invited to be a PC Member for '{conference_name}'. Please Accept or Reject."
+
+        response, status_code = send_notification(
+            to_whom=user_id,
+            title=title,
+            content=content,
+            is_interactive=True,
+            invitation_id=str(invitation.id)
+        )
+
+        if status_code != 201:
+            return jsonify({"error": "Failed to send notification"}), 500
+
+        return jsonify({
+            "message": "Invitation and notification sent successfully",
+            "invitation_id": str(invitation.id)
+        }), 201
+
+    except Exception as e:
+        return jsonify({"error": f"Failed to invite PC Member: {str(e)}"}), 500  
+

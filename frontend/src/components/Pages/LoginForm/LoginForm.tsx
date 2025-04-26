@@ -38,7 +38,7 @@ const LoginForm: React.FC = () => {
   // Handle Google login
   const handleGoogleLogin = () => {
     // Redirect to backend Google OAuth
-    window.location.href = 'http://127.0.0.1:5000/auth/login/google';
+    window.location.href = 'http://localhost:5000/auth/login/google';
   
     // other logic handled by backend redirect
   };
@@ -46,7 +46,7 @@ const LoginForm: React.FC = () => {
   // Handle Orcid login
   const handleOrcidLogin = () => {
     // Redirect to backend ORCID OAuth if implemented
-    window.location.href = 'http://127.0.0.1:5000/auth/login/orcid';
+    window.location.href = 'http://localhost:5000/auth/login/orcid';
   
     // other logic handled by backend redirect
   };

@@ -54,7 +54,7 @@ class Conference:
 
         self.superchairs = [created_by]  # Initialize with the creator automatically
         self.track_chairs = []
-        self.pc_members = []
+        self.pc_members = [created_by]
         self.authors = []
 
         # 🔽 Individual config values (value + scope)
@@ -86,4 +86,4 @@ class Conference:
         self.track_chair_notifications = track_chair_notifications
 
     def to_dict(self):
-        return self.__dict__
+        return self.__dict__    
