@@ -26,6 +26,7 @@ import {
   Edit as EditIcon,
   Inbox as InboxIcon,
   Send as SentIcon,
+  Forum as ForumIcon,
   Search as SearchIcon,
 } from "@mui/icons-material";
 import { useUser } from "../../../context/UserContext";
@@ -47,40 +48,36 @@ const ChatPage: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useUser();
 
-  const [activeView, setActiveView] = useState<"inbox" | "sent">("inbox");
+  const [activeView, setActiveView] = useState<"inbox" | "sent" | "chats">(
+    "inbox"
+  );
   const [selectedContact, setSelectedContact] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [inboxMessages, setInboxMessages] = useState<Message[]>([]);
   const [sentMessages, setSentMessages] = useState<Message[]>([]);
-  const [currentMessages, setCurrentMessages] = useState<Message[]>([]);
-
   const [composeOpen, setComposeOpen] = useState(false);
   const [composeTo, setComposeTo] = useState("");
   const [composeSubject, setComposeSubject] = useState("");
   const [composeContent, setComposeContent] = useState("");
-
-  const [replyToMessage, setReplyToMessage] = useState<Message | null>(null); // NEW STATE
+  const [replyToMessage, setReplyToMessage] = useState<Message | null>(null);
 
   const fetchMessages = async () => {
     try {
       setLoading(true);
       setError("");
-
       const inboxResponse = await fetch("http://127.0.0.1:5000/chad/inbox", {
         credentials: "include",
       });
       if (!inboxResponse.ok) throw new Error("Failed to fetch inbox");
       const inboxData = await inboxResponse.json();
       setInboxMessages(inboxData.received_chads || []);
-
       const sentResponse = await fetch("http://127.0.0.1:5000/chad/outbox", {
         credentials: "include",
       });
       if (!sentResponse.ok) throw new Error("Failed to fetch sent messages");
       const sentData = await sentResponse.json();
       setSentMessages(sentData.sent_chads || []);
-
       setLoading(false);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to fetch messages");
@@ -91,18 +88,22 @@ const ChatPage: React.FC = () => {
   useEffect(() => {
     fetchMessages();
   }, []);
-  useEffect(() => {
-    setCurrentMessages(activeView === "inbox" ? inboxMessages : sentMessages);
-  }, [activeView, inboxMessages, sentMessages]);
 
-  const handleItemClick = (item: string) => {
-    handleMenuItemClick(item, navigate);
-  };
-  const handleViewChange = (view: "inbox" | "sent") => {
-    setActiveView(view);
-  };
-  const handleContactSelect = (contactId: string) => {
-    setSelectedContact(contactId);
+  const groupMessagesBySubject = () => {
+    const allMessages = [...inboxMessages, ...sentMessages];
+    const grouped: { [subject: string]: Message[] } = {};
+    allMessages.forEach((msg) => {
+      const key = msg.subject || "No Subject";
+      if (!grouped[key]) grouped[key] = [];
+      grouped[key].push(msg);
+    });
+    Object.values(grouped).forEach((msgs) =>
+      msgs.sort(
+        (a, b) =>
+          new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+      )
+    );
+    return grouped;
   };
 
   const navButtonStyle = (active: boolean): React.CSSProperties => ({
@@ -120,12 +121,10 @@ const ChatPage: React.FC = () => {
   if (loading) {
     return (
       <Box
-        sx={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          height: "100vh",
-        }}
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        height="100vh"
       >
         <CircularProgress />
       </Box>
@@ -135,17 +134,62 @@ const ChatPage: React.FC = () => {
   if (error) {
     return (
       <Box
-        sx={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          height: "100vh",
-        }}
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        height="100vh"
       >
         <Typography color="error">{error}</Typography>
       </Box>
     );
   }
+
+  const displayedContacts =
+    activeView === "chats"
+      ? Object.entries(groupMessagesBySubject())
+          .map(([subject, messages]) => ({
+            id: subject,
+            name: subject,
+            lastMessage: messages[messages.length - 1],
+          }))
+          .sort(
+            (a, b) =>
+              new Date(b.lastMessage.timestamp).getTime() -
+              new Date(a.lastMessage.timestamp).getTime()
+          )
+      : Array.from(
+          new Map(
+            (activeView === "inbox" ? inboxMessages : sentMessages).map(
+              (msg) => {
+                const contactId = activeView === "inbox" ? msg.from : msg.to;
+                return [
+                  contactId,
+                  {
+                    id: contactId,
+                    name: contactId ?? "Unknown",
+                    subject: msg.subject,
+                    timestamp: msg.timestamp,
+                  },
+                ];
+              }
+            )
+          ).values()
+        ).sort(
+          (a, b) =>
+            new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+        );
+
+  const displayedMessages =
+    activeView === "chats"
+      ? selectedContact
+        ? groupMessagesBySubject()[selectedContact] || []
+        : []
+      : selectedContact
+      ? (activeView === "inbox" ? inboxMessages : sentMessages).filter(
+          (msg) =>
+            (activeView === "inbox" ? msg.from : msg.to) === selectedContact
+        )
+      : [];
 
   return (
     <div
@@ -157,25 +201,18 @@ const ChatPage: React.FC = () => {
         backgroundColor: theme.palette.background.default,
       }}
     >
-      {/* TopBar */}
       <TopBar />
-
-      {/* SideMenu + Content */}
       <div style={{ display: "flex", flex: 1, overflow: "hidden" }}>
-        <SideMenu items={menuItems} onItemClick={handleItemClick} />
-
+        <SideMenu
+          items={menuItems}
+          onItemClick={(item) => handleMenuItemClick(item, navigate)}
+        />
         <div
-          style={{
-            flex: 1,
-            display: "flex",
-            overflow: "hidden",
-            padding: "16px",
-          }}
+          style={{ flex: 1, display: "flex", overflow: "hidden", padding: 16 }}
         >
-          {/* Left Panel */}
           <Paper
             style={{
-              width: "300px",
+              width: 300,
               borderRight: `1px solid ${colors.grey[700]}`,
               display: "flex",
               flexDirection: "column",
@@ -189,27 +226,26 @@ const ChatPage: React.FC = () => {
               color="primary"
               startIcon={<EditIcon />}
               style={{
-                margin: "16px",
-                padding: "12px",
+                margin: 16,
+                padding: 12,
                 textTransform: "none",
-                borderRadius: "24px",
+                borderRadius: 24,
                 boxShadow: "none",
                 backgroundColor: colors.blueAccent[700],
               }}
               onClick={() => {
                 setComposeOpen(true);
-                setReplyToMessage(null); // NEW: normal compose resets reply
+                setReplyToMessage(null);
               }}
             >
               New Message
             </Button>
-
             <Box>
               <Button
                 fullWidth
                 startIcon={<InboxIcon />}
                 style={navButtonStyle(activeView === "inbox")}
-                onClick={() => handleViewChange("inbox")}
+                onClick={() => setActiveView("inbox")}
               >
                 Inbox
               </Button>
@@ -217,12 +253,19 @@ const ChatPage: React.FC = () => {
                 fullWidth
                 startIcon={<SentIcon />}
                 style={navButtonStyle(activeView === "sent")}
-                onClick={() => handleViewChange("sent")}
+                onClick={() => setActiveView("sent")}
               >
                 Sent
               </Button>
+              <Button
+                fullWidth
+                startIcon={<ForumIcon />}
+                style={navButtonStyle(activeView === "chats")}
+                onClick={() => setActiveView("chats")}
+              >
+                Chats
+              </Button>
             </Box>
-
             <Box sx={{ p: 2 }}>
               <TextField
                 fullWidth
@@ -233,39 +276,25 @@ const ChatPage: React.FC = () => {
                 }}
               />
             </Box>
-
             <Box sx={{ flexGrow: 1, overflowY: "auto" }}>
               <Typography variant="subtitle1" sx={{ p: 2, fontWeight: "bold" }}>
-                Recent Conversations
+                Recent
               </Typography>
               <List>
-                {Array.from(
-                  new Map(
-                    currentMessages.map((msg) => {
-                      const contactId =
-                        activeView === "inbox" ? msg.from : msg.to;
-                      return [
-                        contactId,
-                        {
-                          id: contactId,
-                          name: contactId ?? "Unknown",
-                          subject: msg.subject,
-                        },
-                      ];
-                    })
-                  ).values()
-                ).map((contact) => (
+                {displayedContacts.map((item: any) => (
                   <ListItem
-                    key={contact.id}
-                    style={contactItemStyle(selectedContact === contact.id)}
-                    onClick={() => handleContactSelect(contact.id ?? "Unknown")}
+                    key={typeof item === "string" ? item : item.id}
+                    style={contactItemStyle(
+                      selectedContact === (item.id || item)
+                    )}
+                    onClick={() => setSelectedContact(item.id || item)}
                   >
                     <Avatar sx={{ bgcolor: colors.greenAccent[500], mr: 2 }}>
-                      {contact.name.substring(0, 2).toUpperCase()}
+                      {(item.name || item).substring(0, 2).toUpperCase()}
                     </Avatar>
                     <ListItemText
-                      primary={contact.name}
-                      secondary={contact.subject}
+                      primary={item.name || item}
+                      secondary={item.subject || ""}
                       primaryTypographyProps={{ fontWeight: "bold" }}
                       secondaryTypographyProps={{
                         whiteSpace: "nowrap",
@@ -279,13 +308,12 @@ const ChatPage: React.FC = () => {
             </Box>
           </Paper>
 
-          {/* Chat Content */}
           <div
             style={{
               flex: 1,
               display: "flex",
               flexDirection: "column",
-              padding: "20px",
+              padding: 20,
               overflow: "hidden",
             }}
           >
@@ -293,64 +321,36 @@ const ChatPage: React.FC = () => {
               style={{
                 display: "flex",
                 alignItems: "center",
-                marginBottom: "16px",
+                marginBottom: 16,
               }}
             >
               <AppTitle text={selectedContact || "Select a conversation"} />
-              {selectedContact && (
-                <Button
-                  variant="outlined"
-                  size="small"
-                  startIcon={<SendIcon />}
-                  onClick={() => {
-                    const firstMessage = currentMessages.find(
-                      (msg) =>
-                        (activeView === "inbox" ? msg.from : msg.to) ===
-                        selectedContact
-                    );
-                    if (firstMessage) {
-                      setReplyToMessage(firstMessage);
-                      setComposeTo(firstMessage.from || "");
-                      setComposeSubject("Re: " + firstMessage.subject);
-                      setComposeContent("");
-                      setComposeOpen(true);
-                    }
-                  }}
-                  style={{ marginLeft: "16px" }}
-                >
-                  Reply
-                </Button>
-              )}
             </div>
 
-            {selectedContact ? (
-              <Box
-                sx={{
-                  flexGrow: 1,
-                  overflowY: "auto",
-                  backgroundColor: "transparent",
-                  borderRadius: "8px",
-                  padding: "15px",
-                  marginBottom: "20px",
-                }}
-              >
-                <List>
-                  {currentMessages
-                    .filter(
-                      (msg) =>
-                        (activeView === "inbox" ? msg.from : msg.to) ===
-                        selectedContact
-                    )
-                    .map((message) => (
+            {selectedContact && displayedMessages.length > 0 ? (
+              activeView === "chats" ? (
+                // ⭐️ Keep CHAT view as BUBBLE MESSAGES
+                <Box
+                  sx={{
+                    flexGrow: 1,
+                    overflowY: "auto",
+                    backgroundColor: "transparent",
+                    borderRadius: 2,
+                    padding: 2,
+                    mb: 2,
+                  }}
+                >
+                  <List>
+                    {displayedMessages.map((message) => (
                       <React.Fragment key={message.id}>
                         <ListItem
                           style={{
                             display: "flex",
                             justifyContent:
                               message.from === user?.id
-                                ? "flex-start"
-                                : "flex-end",
-                            marginBottom: "10px",
+                                ? "flex-end"
+                                : "flex-start",
+                            marginBottom: 10,
                             width: "100%",
                           }}
                         >
@@ -368,13 +368,11 @@ const ChatPage: React.FC = () => {
                               ),
                               borderRadius:
                                 message.from === user?.id
-                                  ? "18px 18px 18px 0"
-                                  : "18px 18px 0 18px",
+                                  ? "18px 18px 0 18px"
+                                  : "18px 18px 18px 0",
                               p: 2,
                               display: "flex",
                               flexDirection: "column",
-                              overflowWrap: "break-word",
-                              wordBreak: "break-word",
                               whiteSpace: "pre-wrap",
                             }}
                           >
@@ -397,7 +395,10 @@ const ChatPage: React.FC = () => {
                             >
                               {new Date(message.timestamp).toLocaleTimeString(
                                 [],
-                                { hour: "2-digit", minute: "2-digit" }
+                                {
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                }
                               )}
                             </Typography>
                           </Box>
@@ -405,8 +406,93 @@ const ChatPage: React.FC = () => {
                         <Divider component="li" />
                       </React.Fragment>
                     ))}
-                </List>
-              </Box>
+                  </List>
+                </Box>
+              ) : (
+                // ⭐️ New MAIL view for Inbox/Sent
+                <Box
+                  sx={{
+                    flexGrow: 1,
+                    overflowY: "auto",
+                    backgroundColor: "background.paper",
+                    borderRadius: 2,
+                    padding: 2,
+                    mb: 2,
+                  }}
+                >
+                  <List>
+                    {displayedMessages.map((message) => (
+                      <Paper
+                        key={message.id}
+                        elevation={2}
+                        sx={{
+                          mb: 2,
+                          p: 2,
+                          borderRadius: 2,
+                          backgroundColor: theme.palette.background.default,
+                        }}
+                      >
+                        <Box
+                          display="flex"
+                          justifyContent="space-between"
+                          alignItems="center"
+                          mb={1}
+                        >
+                          <Typography
+                            variant="subtitle1"
+                            sx={{
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                              whiteSpace: "normal", // ⭐ allow wrapping
+                            }}
+                          >
+                            <Box component="span" fontWeight="bold">
+                              From user:
+                            </Box>{" "}
+                            <Box component="span" fontWeight="normal">
+                              {activeView === "inbox"
+                                ? message.from
+                                : message.to}
+                            </Box>
+                          </Typography>
+
+                          <Typography variant="caption" color="text.secondary">
+                            {new Date(message.timestamp).toLocaleString([], {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                              day: "2-digit",
+                              month: "short",
+                              year: "numeric",
+                            })}
+                          </Typography>
+                        </Box>
+                        <Typography
+                          variant="h6"
+                          sx={{ mb: 1, whiteSpace: "normal" }}
+                        >
+                          <Box component="span" fontWeight="bold">
+                            Subject:
+                          </Box>{" "}
+                          <Box component="span" fontWeight="normal">
+                            {message.subject || "No Subject"}
+                          </Box>
+                        </Typography>
+
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            color: theme.palette.text.secondary,
+                            wordBreak: "break-word", // ⭐ allows long words like URLs to break
+                            whiteSpace: "pre-wrap", // ⭐ respects new lines and wraps properly
+                          }}
+                        >
+                          {message.content}
+                        </Typography>
+                      </Paper>
+                    ))}
+                  </List>
+                </Box>
+              )
             ) : (
               <Box
                 sx={{
@@ -418,113 +504,13 @@ const ChatPage: React.FC = () => {
                 }}
               >
                 <Typography variant="h6">
-                  Select a conversation to start chatting
+                  Select a conversation to view messages
                 </Typography>
               </Box>
             )}
           </div>
         </div>
       </div>
-
-      {/* Compose Modal */}
-      <Modal open={composeOpen} onClose={() => setComposeOpen(false)}>
-        <Box
-          sx={{
-            position: "absolute",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-            width: 500,
-            bgcolor: "background.paper",
-            borderRadius: 2,
-            boxShadow: 24,
-            p: 4,
-            display: "flex",
-            flexDirection: "column",
-            gap: 2,
-          }}
-        >
-          <Typography variant="h6" textAlign="center">
-            {replyToMessage ? "Reply to Message" : "New Message"}
-          </Typography>
-
-          <TextField
-            label="To (User ID)"
-            value={composeTo}
-            onChange={(e) => setComposeTo(e.target.value)}
-            fullWidth
-            size="small"
-            disabled={!!replyToMessage}
-          />
-          <TextField
-            label="Subject"
-            value={composeSubject}
-            onChange={(e) => setComposeSubject(e.target.value)}
-            fullWidth
-            size="small"
-            disabled={!!replyToMessage}
-          />
-          <TextField
-            label="Content"
-            value={composeContent}
-            onChange={(e) => setComposeContent(e.target.value)}
-            multiline
-            maxRows={10}
-            minRows={4}
-            fullWidth
-          />
-
-          <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 2 }}>
-            <Button
-              variant="outlined"
-              color="error"
-              onClick={() => {
-                setComposeOpen(false);
-                setComposeTo("");
-                setComposeSubject("");
-                setComposeContent("");
-                setReplyToMessage(null);
-              }}
-            >
-              Discard
-            </Button>
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={async () => {
-                if (
-                  !composeTo.trim() ||
-                  !composeSubject.trim() ||
-                  !composeContent.trim()
-                )
-                  return;
-                try {
-                  await fetch("http://127.0.0.1:5000/chad/send", {
-                    credentials: "include",
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                      to_user: composeTo,
-                      subject: composeSubject,
-                      content: composeContent,
-                    }),
-                  });
-                  await fetchMessages();
-                  setComposeOpen(false);
-                  setComposeTo("");
-                  setComposeSubject("");
-                  setComposeContent("");
-                  setReplyToMessage(null);
-                } catch (err) {
-                  console.error("Error sending composed message:", err);
-                }
-              }}
-            >
-              Send
-            </Button>
-          </Box>
-        </Box>
-      </Modal>
     </div>
   );
 };
