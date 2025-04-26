@@ -2,15 +2,8 @@ import React, { useState } from "react";
 import "./CreateConference.css";
 import { useNavigate } from "react-router-dom";
 
-//type Scope = "conference" | "track";
-
-// type ConfigValue = {
-//   value: string | number | boolean;
-//   scope: Scope;
-// };
-
 type ConferenceForm = {
-  [key: string]: any; // 💡 Enable dynamic typing for flexible key access
+  [key: string]: any;
 };
 
 const yesNoOptions = [
@@ -39,7 +32,9 @@ const abstractLengths = [100, 200, 300, 400, 500];
 const decisionRanges = [3, 5, 7, 10];
 const defaultScope = "conference";
 
-const oneYearLater = new Date(new Date().setFullYear(new Date().getFullYear() + 1))
+const oneYearLater = new Date(
+  new Date().setFullYear(new Date().getFullYear() + 1)
+)
   .toISOString()
   .split("T")[0];
 
@@ -53,7 +48,7 @@ const defaultForm: ConferenceForm = {
   state: "none",
   country: "not set",
   submission_page: "not set",
-  license_expiry: oneYearLater, // ✅ read-only
+  license_expiry: oneYearLater,
   auto_update_submission_dates: "",
 
   contact_emails: "",
@@ -87,45 +82,85 @@ const defaultForm: ConferenceForm = {
   track_chair_notifications: { value: false, scope: "track" },
 };
 
-const groupedFields: { [section: string]: string[] } = {
-  "Conference Information": [
-    "name", "acronym", "short_acronym", "website", "city", "venue", "state", "country",
-    "submission_page", "license_expiry", "auto_update_submission_dates",
-    "contact_emails", "forwarding_emails_conference", "forwarding_emails_tracks"
-  ],
-  "Access Information": [
-    "double_blind_review", "can_pc_see_unassigned_submissions"
-  ],
-  "Submission Information": [
-    "abstract_before_full", "abstract_section_hidden", "multiple_authors_allowed",
-    "max_abstract_length", "submission_instructions", "additional_fields_enabled",
-    "file_upload_fields", "presenter_selection_required", "submission_updates_allowed",
-    "new_submission_allowed"
-  ],
-  "Paper Assignment": [
-    "use_bidding_or_relevance", "bidding_enabled", "chairs_can_view_bids",
-    "llm_fraud_detection", "reviewers_per_paper"
-  ],
-  "Reviewing Information": [
-    "can_pc_see_reviewer_names", "status_menu_enabled", "pc_can_enter_review",
-    "pc_can_access_reviews", "decision_range", "subreviewers_allowed",
-    "subreviewer_anonymous"
-  ],
-  "Notifications": [
-    "track_chair_notifications"
-  ]
-};
+const steps = [
+  {
+    title: "Conference Information",
+    fields: [
+      "name",
+      "acronym",
+      "short_acronym",
+      "website",
+      "city",
+      "venue",
+      "state",
+      "country",
+      "submission_page",
+      "license_expiry",
+      "auto_update_submission_dates",
+      "contact_emails",
+      "forwarding_emails_conference",
+      "forwarding_emails_tracks",
+    ],
+  },
+  {
+    title: "Access Information",
+    fields: ["double_blind_review", "can_pc_see_unassigned_submissions"],
+  },
+  {
+    title: "Submission Information",
+    fields: [
+      "abstract_before_full",
+      "abstract_section_hidden",
+      "multiple_authors_allowed",
+      "max_abstract_length",
+      "submission_instructions",
+      "additional_fields_enabled",
+      "file_upload_fields",
+      "presenter_selection_required",
+      "submission_updates_allowed",
+      "new_submission_allowed",
+    ],
+  },
+  {
+    title: "Paper Assignment",
+    fields: [
+      "use_bidding_or_relevance",
+      "bidding_enabled",
+      "chairs_can_view_bids",
+      "llm_fraud_detection",
+      "reviewers_per_paper",
+    ],
+  },
+  {
+    title: "Reviewing Information",
+    fields: [
+      "can_pc_see_reviewer_names",
+      "status_menu_enabled",
+      "pc_can_enter_review",
+      "pc_can_access_reviews",
+      "decision_range",
+      "subreviewers_allowed",
+      "subreviewer_anonymous",
+    ],
+  },
+  {
+    title: "Notifications",
+    fields: ["track_chair_notifications"],
+  },
+];
 
 const CreateConference: React.FC = () => {
   const [form, setForm] = useState<ConferenceForm>(defaultForm);
+  const [currentStep, setCurrentStep] = useState(0);
   const navigate = useNavigate();
 
   const handleChange = (key: string, value: any, field = "value") => {
     setForm((prev: ConferenceForm) => ({
       ...prev,
-      [key]: typeof prev[key] === "object" && prev[key] !== null
-        ? { ...prev[key], [field]: value }
-        : value,
+      [key]:
+        typeof prev[key] === "object" && prev[key] !== null
+          ? { ...prev[key], [field]: value }
+          : value,
     }));
   };
 
@@ -137,9 +172,15 @@ const CreateConference: React.FC = () => {
 
     const payload = {
       ...form,
-      contact_emails: form.contact_emails?.split(",").map((e: string) => e.trim()),
-      forwarding_emails_conference: form.forwarding_emails_conference?.split(",").map((e: string) => e.trim()),
-      forwarding_emails_tracks: form.forwarding_emails_tracks?.split(",").map((e: string) => e.trim()),
+      contact_emails: form.contact_emails
+        ?.split(",")
+        .map((e: string) => e.trim()),
+      forwarding_emails_conference: form.forwarding_emails_conference
+        ?.split(",")
+        .map((e: string) => e.trim()),
+      forwarding_emails_tracks: form.forwarding_emails_tracks
+        ?.split(",")
+        .map((e: string) => e.trim()),
     };
 
     try {
@@ -174,9 +215,15 @@ const CreateConference: React.FC = () => {
 
       if (typeof value === "boolean") {
         return (
-          <select value={value ? "true" : "false"} onChange={(e) => handleChange(key, e.target.value === "true")}>
+          <select
+            value={value ? "true" : "false"}
+            onChange={(e) => handleChange(key, e.target.value === "true")}
+            className="form-select"
+          >
             {yesNoOptions.map((opt) => (
-              <option key={opt.label} value={String(opt.value)}>{opt.label}</option>
+              <option key={opt.label} value={String(opt.value)}>
+                {opt.label}
+              </option>
             ))}
           </select>
         );
@@ -184,9 +231,15 @@ const CreateConference: React.FC = () => {
 
       if (key === "use_bidding_or_relevance") {
         return (
-          <select value={value} onChange={(e) => handleChange(key, e.target.value)}>
+          <select
+            value={value}
+            onChange={(e) => handleChange(key, e.target.value)}
+            className="form-select"
+          >
             {biddingOptions.map((opt) => (
-              <option key={opt.label} value={opt.value}>{opt.label}</option>
+              <option key={opt.label} value={opt.value}>
+                {opt.label}
+              </option>
             ))}
           </select>
         );
@@ -194,9 +247,15 @@ const CreateConference: React.FC = () => {
 
       if (key === "pc_can_access_reviews") {
         return (
-          <select value={String(value)} onChange={(e) => handleChange(key, e.target.value === "true")}>
+          <select
+            value={String(value)}
+            onChange={(e) => handleChange(key, e.target.value === "true")}
+            className="form-select"
+          >
             {reviewAccessOptions.map((opt) => (
-              <option key={opt.label} value={String(opt.value)}>{opt.label}</option>
+              <option key={opt.label} value={String(opt.value)}>
+                {opt.label}
+              </option>
             ))}
           </select>
         );
@@ -204,9 +263,15 @@ const CreateConference: React.FC = () => {
 
       if (key === "max_abstract_length") {
         return (
-          <select value={value} onChange={(e) => handleChange(key, Number(e.target.value))}>
+          <select
+            value={value}
+            onChange={(e) => handleChange(key, Number(e.target.value))}
+            className="form-select"
+          >
             {abstractLengths.map((val) => (
-              <option key={val} value={val}>{val}</option>
+              <option key={val} value={val}>
+                {val}
+              </option>
             ))}
           </select>
         );
@@ -214,9 +279,15 @@ const CreateConference: React.FC = () => {
 
       if (key === "decision_range") {
         return (
-          <select value={value} onChange={(e) => handleChange(key, Number(e.target.value))}>
+          <select
+            value={value}
+            onChange={(e) => handleChange(key, Number(e.target.value))}
+            className="form-select"
+          >
             {decisionRanges.map((val) => (
-              <option key={val} value={val}>{val}</option>
+              <option key={val} value={val}>
+                {val}
+              </option>
             ))}
           </select>
         );
@@ -224,9 +295,15 @@ const CreateConference: React.FC = () => {
 
       if (key === "reviewers_per_paper") {
         return (
-          <select value={value} onChange={(e) => handleChange(key, Number(e.target.value))}>
+          <select
+            value={value}
+            onChange={(e) => handleChange(key, Number(e.target.value))}
+            className="form-select"
+          >
             {numberOptions.map((val) => (
-              <option key={val} value={val}>{val}</option>
+              <option key={val} value={val}>
+                {val}
+              </option>
             ))}
           </select>
         );
@@ -237,47 +314,85 @@ const CreateConference: React.FC = () => {
           type="text"
           value={value}
           onChange={(e) => handleChange(key, e.target.value)}
+          className="form-input"
         />
       );
     };
 
     return (
-      <tr key={key}>
-        <td>{key.replace(/_/g, " ")}</td>
-        <td>{renderValueInput()}</td>
-        <td>
-          {scope ? (
-            <select value={scope} onChange={(e) => handleChange(key, e.target.value, "scope")}>
+      <div key={key} className="form-group">
+        <label>{key.replace(/_/g, " ")}</label>
+        <div className="input-group">
+          {renderValueInput()}
+          {scope && (
+            <select
+              value={scope}
+              onChange={(e) => handleChange(key, e.target.value, "scope")}
+              className="scope-select"
+            >
               <option value="conference">conference</option>
               <option value="track">track</option>
             </select>
-          ) : (
-            <span>conference</span>
           )}
-        </td>
-      </tr>
+        </div>
+      </div>
     );
   };
+
+  const nextStep = () => {
+    if (
+      currentStep === 0 &&
+      (!form.name || !form.acronym || !form.short_acronym)
+    ) {
+      alert("Please fill in all required conference information fields");
+      return;
+    }
+    setCurrentStep(currentStep + 1);
+  };
+
+  const prevStep = () => {
+    setCurrentStep(currentStep - 1);
+  };
+
+  const progressPercentage = ((currentStep + 1) / steps.length) * 100;
 
   return (
     <div className="create-conference-container">
       <h2>Create Conference</h2>
-      {Object.entries(groupedFields).map(([section, keys]) => (
-        <div key={section} className="section">
-          <h3>{section}</h3>
-          <table>
-            <thead>
-              <tr>
-                <th>Setting</th>
-                <th>Value</th>
-                <th>Scope</th>
-              </tr>
-            </thead>
-            <tbody>{keys.map((key) => renderInput(key))}</tbody>
-          </table>
+
+      <div className="progress-container">
+        <div
+          className="progress-bar"
+          style={{ width: `${progressPercentage}%` }}
+        ></div>
+        <div className="progress-text">
+          Step {currentStep + 1} of {steps.length}: {steps[currentStep].title}
         </div>
-      ))}
-      <button className="submit-button" onClick={handleSubmit}>Create Conference</button>
+      </div>
+
+      <div className="form-section">
+        <h3>{steps[currentStep].title}</h3>
+        <div className="form-fields">
+          {steps[currentStep].fields.map((key) => renderInput(key))}
+        </div>
+      </div>
+
+      <div className="navigation-buttons">
+        {currentStep > 0 && (
+          <button className="nav-button prev-button" onClick={prevStep}>
+            Previous
+          </button>
+        )}
+        {currentStep < steps.length - 1 ? (
+          <button className="nav-button next-button" onClick={nextStep}>
+            Next
+          </button>
+        ) : (
+          <button className="submit-button" onClick={handleSubmit}>
+            Create Conference
+          </button>
+        )}
+      </div>
     </div>
   );
 };
