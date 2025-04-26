@@ -38,6 +38,10 @@ const Homepage: React.FC = () => {
     }
   };
 
+  const handleCreateConference = () => {
+    navigate("/conference/create");
+  };
+
   return (
     <>
       <Topbar></Topbar>
@@ -47,6 +51,16 @@ const Homepage: React.FC = () => {
 
         {/* Container on the right */}
         <div className="content-container">
+          {/* Create Conference Button */}
+          <div className="create-conference-button-container">
+            <button
+              className="create-conference-button"
+              onClick={handleCreateConference}
+            >
+              Create New Conference
+            </button>
+          </div>
+
           {/* Upcoming Conferences Section */}
           <div className="section">
             <SectionTitle text="Upcoming Conferences" />
