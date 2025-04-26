@@ -356,6 +356,7 @@ const ChatPage: React.FC = () => {
                         >
                           <Box
                             sx={{
+                              minWidth: "120px",
                               maxWidth: "70%",
                               bgcolor:
                                 message.from === user?.id
@@ -374,6 +375,7 @@ const ChatPage: React.FC = () => {
                               display: "flex",
                               flexDirection: "column",
                               whiteSpace: "pre-wrap",
+                              wordBreak: "break-word",
                             }}
                           >
                             <Typography
@@ -511,6 +513,89 @@ const ChatPage: React.FC = () => {
           </div>
         </div>
       </div>
+      <Modal open={composeOpen} onClose={() => setComposeOpen(false)}>
+        <Box
+          sx={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            width: 400,
+            bgcolor: theme.palette.background.default,
+            borderRadius: 2,
+            boxShadow: 24,
+            p: 4,
+          }}
+        >
+          <Typography variant="h6" mb={2}>
+            New Message
+          </Typography>
+          <TextField
+            fullWidth
+            label="To User ID"
+            value={composeTo}
+            onChange={(e) => setComposeTo(e.target.value)}
+            sx={{ mb: 2 }}
+          />
+          <TextField
+            fullWidth
+            label="Subject"
+            value={composeSubject}
+            onChange={(e) => setComposeSubject(e.target.value)}
+            sx={{ mb: 2 }}
+          />
+          <TextField
+            fullWidth
+            label="Message"
+            multiline
+            minRows={4}
+            value={composeContent}
+            onChange={(e) => setComposeContent(e.target.value)}
+            sx={{ mb: 2 }}
+          />
+          <Button
+            variant="contained"
+            color="primary"
+            startIcon={<SendIcon />}
+            fullWidth
+            onClick={async () => {
+              try {
+                const response = await fetch(
+                  "http://127.0.0.1:5000/chad/send",
+                  {
+                    method: "POST",
+                    headers: {
+                      "Content-Type": "application/json",
+                    },
+                    credentials: "include",
+                    body: JSON.stringify({
+                      to_user: composeTo,
+                      subject: composeSubject,
+                      content: composeContent,
+                    }),
+                  }
+                );
+
+                if (!response.ok) throw new Error("Failed to send message");
+
+                // Refresh messages after sending
+                await fetchMessages();
+
+                // Clear fields and close modal
+                setComposeTo("");
+                setComposeSubject("");
+                setComposeContent("");
+                setComposeOpen(false);
+              } catch (error) {
+                console.error(error);
+                alert("Failed to send message. Try again.");
+              }
+            }}
+          >
+            Send
+          </Button>
+        </Box>
+      </Modal>
     </div>
   );
 };
