@@ -23,7 +23,11 @@ def get_profile(user_id=None):
         "name": user.get("name"),
         "surname": user.get("surname"),
         "bio": user.get("bio"),
-        "stats": stats_data
+        "stats": stats_data,
+        "preferred_keywords": user.get("preferred_keywords"),
+        "not_preferred_keywords": user.get("not_preferred_keywords"),
+        "affiliation": user.get("affiliation"),
+        "past_affiliations": user.get("past_affiliations"),
     }
 
     return jsonify(user_data), 200
@@ -37,10 +41,9 @@ def update_profile():
         return jsonify({"message": "No data provided to update"}), 400
 
     # Define allowed fields in the user model
-    allowed_fields = ["email", "name", "surname", "bio"]
+    allowed_fields = ["email", "name", "surname", "bio", "preferred_keywords", "not_preferred_keywords", "affiliation", "past_affiliations"]
     
     update_fields = {}
-    # Only include fields that are allowed in the user model
     for field, value in data.items():
         if field != "_id" and field in allowed_fields:
             update_fields[field] = value
@@ -48,7 +51,6 @@ def update_profile():
     if not update_fields:
         return jsonify({"message": "No valid fields provided to update"}), 400
 
-    # If email update is requested, make sure no other user has it
     if "email" in update_fields and update_fields["email"] != session.get("email"):
         if mongo.db.users.find_one({"email": update_fields["email"]}):
             return jsonify({"error": "Email already exists"}), 400

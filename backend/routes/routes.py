@@ -9,6 +9,7 @@ from routes.paper_routes import submit_paper
 from routes.review_routes import submit_review
 from routes.upload_routes import upload_file
 from routes.notification_routes import get_notification, mark_notification_as_answered
+from routes.keywords_routes import get_keywords, add_keyword, set_keywords
 
 # Define blueprints
 auth_bp = Blueprint("auth", __name__)
@@ -21,6 +22,7 @@ paper_bp = Blueprint("paper", __name__)
 review_bp = Blueprint("review", __name__)
 upload_bp = Blueprint("upload", __name__)
 notification_bp = Blueprint("notification", __name__)
+keywords_bp = Blueprint("keywords", __name__)
 
 # Route bindings (logic attached here)
 auth_bp.route("/login", methods=["POST"])(login)
@@ -53,6 +55,10 @@ upload_bp.route("/<conference_id>/<track_name>", methods=["POST"])(upload_file)
 notification_bp.route("/", methods=["GET"])(get_notification)
 notification_bp.route("/mark_answered/<notification_id>/<is_accepted>", methods=["POST"])(mark_notification_as_answered)
 
+keywords_bp.route("/", methods=["GET"])(get_keywords)
+keywords_bp.route("/<keyword>", methods=["POST"])(add_keyword)
+keywords_bp.route("/", methods=["POST"])(set_keywords)
+
 # Register list
 all_routes = [
     (auth_bp, "/auth"),
@@ -64,5 +70,6 @@ all_routes = [
     (paper_bp, "/paper"),
     (review_bp, "/review"), 
     (upload_bp, "/upload"),
-    (notification_bp, "/notification")
+    (notification_bp, "/notification"),
+    (keywords_bp, "/keywords")
 ]
