@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Topbar from "../../global/TopBar";
 import SideMenu from "../../global/SideMenu";
-import AppTitle, { SectionTitle } from "../../global/AppTitle";
+import { SectionTitle } from "../../global/AppTitle";
 import { getMenuItemsForPage } from "../../global/sideMenuConfig";
 import { handleMenuItemClick } from "../../../utils/navigation/menuNavigation";
 import { tokens } from "../../../theme";

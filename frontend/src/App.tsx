@@ -19,7 +19,6 @@ import SubmissionsList from "./components/Pages/AddSubmissions/components/homePa
 import AddSubmissionPage from "./components/Pages/AddSubmissions/components/homePage/addSubmission/addSubmission";
 import { SubmissionProvider } from "./context/addSubmissionContext";
 import { UserProvider } from "./context/UserContext";
-import NotFoundPage from "./components/Pages/NotFound/NotFoundPage";
 import ChatPage from "./components/Pages/Chat/ChatPage";
 import NotificationsPage from "./components/Pages/Notifications/Notifications";
 

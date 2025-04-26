@@ -10,7 +10,6 @@ import { handleMenuItemClick } from "../../../utils/navigation/menuNavigation";
 import {
   Box,
   TextField,
-  IconButton,
   List,
   ListItem,
   ListItemText,
@@ -50,7 +49,6 @@ const ChatPage: React.FC = () => {
 
   const [activeView, setActiveView] = useState<"inbox" | "sent">("inbox");
   const [selectedContact, setSelectedContact] = useState<string | null>(null);
-  const [newMessage, setNewMessage] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [inboxMessages, setInboxMessages] = useState<Message[]>([]);
