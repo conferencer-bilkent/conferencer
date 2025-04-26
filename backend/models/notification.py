@@ -2,7 +2,7 @@ from bson import ObjectId
 from datetime import datetime
 
 class Notification:
-    def __init__(self, id: int, title: str, content: str, is_interactive: bool, to_whom):
+    def __init__(self, id: int, title: str, content: str, is_interactive: bool, to_whom, invitation_id=None):
         self.id = ObjectId() if id is None else id
         self.title = title
         self.content = content
@@ -11,6 +11,7 @@ class Notification:
         self.created_at = datetime.now()
         self.to_whom = to_whom
         self.is_accepted = False
+        self.invitation_id = invitation_id
 
     to_dict = lambda self: {
         "id": self.id,
@@ -20,5 +21,6 @@ class Notification:
         "is_answered": self.is_answered,
         "created_at": self.created_at.isoformat(),
         "to_whom": self.to_whom,
-        "is_accepted": self.is_accepted
+        "is_accepted": self.is_accepted,
+        "invitation_id": self.invitation_id
     }
