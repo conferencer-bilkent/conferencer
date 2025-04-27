@@ -166,13 +166,13 @@ const Topbar: React.FC = () => {
 
   const filteredUsers = users.filter(
     (u) =>
-      u._id !== user?._id && // Exclude the current user
+      u.id !== user?.id && // Exclude the current user
       `${u.name} ${u.surname} ${u.email}`
         .toLowerCase()
         .includes(searchTerm.toLowerCase())
   );
   console.log("Filtered users:", filteredUsers);
-  console.log(user?._id, "Current user ID");
+  console.log(user?.id, "Current user ID");
   return (
     <Box display="flex" justifyContent="space-between" p={2}>
       {/* Logo */}
@@ -235,7 +235,7 @@ const Topbar: React.FC = () => {
               <List>
                 {filteredUsers.length > 0 ? (
                   filteredUsers.map((u) => (
-                    <ListItem key={u._id} divider>
+                    <ListItem key={u.id} divider>
                       <Box display="flex" flexDirection="column" width="100%">
                         <Box
                           display="flex"
@@ -245,14 +245,14 @@ const Topbar: React.FC = () => {
                         >
                           <Typography
                             sx={{ cursor: "pointer", fontWeight: 500 }}
-                            onClick={() => handleUserClick(u._id)}
+                            onClick={() => handleUserClick(u.id)}
                           >
                             {u.name} {u.surname}
                           </Typography>
                           <Button
                             size="small"
                             variant="outlined"
-                            onClick={() => handleChatClick(u._id)}
+                            onClick={() => handleChatClick(u.id)}
                           >
                             Chat
                           </Button>
@@ -261,7 +261,7 @@ const Topbar: React.FC = () => {
                           variant="body2"
                           color="textSecondary"
                           sx={{ cursor: "pointer" }}
-                          onClick={() => handleUserClick(u._id)}
+                          onClick={() => handleUserClick(u.id)}
                         >
                           {u.email}
                         </Typography>
