@@ -164,15 +164,15 @@ const Topbar: React.FC = () => {
     }
   };
 
+  // Filter out the logged-in user by comparing MongoDB _id
   const filteredUsers = users.filter(
     (u) =>
-      u.id !== user?.id && // Exclude the current user
+      u._id !== user?.id &&
       `${u.name} ${u.surname} ${u.email}`
         .toLowerCase()
         .includes(searchTerm.toLowerCase())
   );
-  console.log("Filtered users:", filteredUsers);
-  console.log(user?.id, "Current user ID");
+
   return (
     <Box display="flex" justifyContent="space-between" p={2}>
       {/* Logo */}
@@ -235,7 +235,7 @@ const Topbar: React.FC = () => {
               <List>
                 {filteredUsers.length > 0 ? (
                   filteredUsers.map((u) => (
-                    <ListItem key={u.id} divider>
+                    <ListItem key={u._id} divider>
                       <Box display="flex" flexDirection="column" width="100%">
                         <Box
                           display="flex"
@@ -245,14 +245,14 @@ const Topbar: React.FC = () => {
                         >
                           <Typography
                             sx={{ cursor: "pointer", fontWeight: 500 }}
-                            onClick={() => handleUserClick(u.id)}
+                            onClick={() => handleUserClick(u._id)}
                           >
                             {u.name} {u.surname}
                           </Typography>
                           <Button
                             size="small"
                             variant="outlined"
-                            onClick={() => handleChatClick(u.id)}
+                            onClick={() => handleChatClick(u._id)}
                           >
                             Chat
                           </Button>
@@ -261,7 +261,7 @@ const Topbar: React.FC = () => {
                           variant="body2"
                           color="textSecondary"
                           sx={{ cursor: "pointer" }}
-                          onClick={() => handleUserClick(u.id)}
+                          onClick={() => handleUserClick(u._id)}
                         >
                           {u.email}
                         </Typography>
@@ -269,7 +269,7 @@ const Topbar: React.FC = () => {
                     </ListItem>
                   ))
                 ) : (
-                  <ListItem>
+                  <ListItem key="no-users-found">
                     <Typography>No users found</Typography>
                   </ListItem>
                 )}
@@ -296,8 +296,6 @@ const Topbar: React.FC = () => {
             <IconButton onClick={handleNotificationsClick}>
               <NotificationsOutlinedIcon />
             </IconButton>
-
-            {/* --- Smooth open/close Grow --- */}
             <Grow
               in={showNotifications}
               style={{ transformOrigin: "top right" }}
@@ -317,9 +315,7 @@ const Topbar: React.FC = () => {
                   border: `1px solid ${colors.grey[300]}`,
                   borderRadius: "8px",
                   transition: "background-color 0.3s, box-shadow 0.3s",
-                  "&::-webkit-scrollbar": {
-                    width: "6px",
-                  },
+                  "&::-webkit-scrollbar": { width: "6px" },
                   "&::-webkit-scrollbar-thumb": {
                     backgroundColor: colors.grey[500],
                     borderRadius: "10px",
@@ -341,7 +337,7 @@ const Topbar: React.FC = () => {
                   {notifications.length > 0 ? (
                     notifications.map((notif) => (
                       <ListItem
-                        key={notif.id}
+                        key={`notification-${notif.id}`}
                         sx={{
                           mb: 1,
                           borderRadius: "4px",
@@ -355,12 +351,9 @@ const Topbar: React.FC = () => {
                           flexDirection: "column",
                           alignItems: "flex-start",
                           transition: "background-color 0.3s ease",
-                          "&:hover": {
-                            bgcolor: colors.primary[700],
-                          },
+                          "&:hover": { bgcolor: colors.primary[700] },
                         }}
                       >
-                        {" "}
                         <Typography fontWeight="bold">{notif.title}</Typography>
                         <Typography variant="body2">{notif.content}</Typography>
                         {notif.is_interactive && !notif.is_answered && (
@@ -390,9 +383,11 @@ const Topbar: React.FC = () => {
                       </ListItem>
                     ))
                   ) : (
-                    <Typography variant="body2" color="textSecondary">
-                      No new notifications
-                    </Typography>
+                    <ListItem key="no-notifications">
+                      <Typography variant="body2" color="textSecondary">
+                        No new notifications
+                      </Typography>
+                    </ListItem>
                   )}
                 </List>
               </Paper>
