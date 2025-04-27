@@ -1,187 +1,214 @@
-.create-conference-container {
-  max-width: 1200px;
-  margin: 2rem auto;
-  padding: 40px;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background-color: #f8f9fa;
-  border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+/* Main container styles */
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
 }
 
+
+.form-card {
+  background: white;
+  border-radius: 1rem;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 1000px;
+  padding: 2rem;
+  margin: 1rem;
+}
+
+/* Progress steps */
 .progress-container {
-  width: 100%;
-  height: 15px;
-  background-color: #e9ecef;
-  border-radius: 8px;
-  margin-bottom: 40px;
-  position: relative;
-  overflow: hidden;
+  padding: 1rem 0;
+  margin-bottom: 2rem;
 }
 
-.progress-bar {
-  height: 100%;
-  background-color: #28a745;
-  border-radius: 8px;
-  transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.progress-text {
-  position: absolute;
-  width: 100%;
-  text-align: center;
-  top: 50%;
-  transform: translateY(-50%);
-  font-weight: 600;
-  color: #495057;
-  font-size: 0.95rem;
-}
-
-.form-section {
-  background-color: #ffffff;
-  padding: 40px;
-  border-radius: 12px;
-  box-shadow: 0 2px 15px rgba(0, 0, 0, 0.05);
-  margin-bottom: 30px;
-}
-
-.form-section h3 {
-  margin: 0 0 30px 0;
-  color: #2c3e50;
-  font-size: 1.5rem;
-  font-weight: 600;
-  padding-bottom: 15px;
-  border-bottom: 2px solid #e9ecef;
-}
-
-.form-group {
-  margin-bottom: 30px;
-}
-
-.form-group label {
-  display: block;
-  margin-bottom: 12px;
-  font-weight: 600;
-  color: #495057;
-  font-size: 1rem;
-}
-
-.input-group {
+.progress-steps-container {
   display: flex;
   align-items: center;
-  gap: 20px;
+  justify-content: space-between;
 }
 
-.form-input, 
-.form-select, 
-.scope-select {
-  padding: 14px 18px;
-  border: 2px solid #dee2e6;
-  border-radius: 8px;
-  font-size: 1rem;
+.step-container {
+  display: flex;
+  align-items: center;
   flex: 1;
-  transition: all 0.3s ease;
 }
 
-.form-input:focus, 
-.form-select:focus, 
-.scope-select:focus {
+.step-circle {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.875rem;
+  font-weight: 500;
+  background-color: #e5e7eb;
+  color: #374151;
+}
+
+.step-circle.active {
+  background-color: #3b82f6;
+  color: white;
+}
+
+.step-line {
+  flex: 1;
+  height: 2px;
+  background-color: #e5e7eb;
+}
+
+.step-line.active {
+  background-color: #3b82f6;
+}
+
+
+.form-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin-bottom: 1.5rem;
+}
+
+.form-field {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 1.5rem;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.form-label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #374151;
+  text-align: right;
+}
+
+.scope-badge {
+  display: inline-block;
+  margin-left: 0.5rem;
+  padding: 0.25rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  background-color: #f3f4f6;
+  color: #4b5563;
+  border-radius: 9999px;
+}
+
+.form-input {
+  display: block;
+  width: 100%;
+  padding: 0.625rem 0.875rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.form-input:focus {
+  border-color: #3b82f6;
   outline: none;
-  border-color: #28a745;
-  box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.15);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
 }
 
-.scope-select {
-  flex: 0 0 150px;
-  background-color: #f8f9fa;
+.form-checkbox {
+  width: 1.25rem;
+  height: 1.25rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.375rem;
+  transition: all 0.2s;
+  justify-self: start;
 }
 
-.navigation-buttons {
+.form-checkbox:checked {
+  background-color: #3b82f6;
+  border-color: #3b82f6;
+}
+
+/* Button styles */
+.button-container {
   display: flex;
   justify-content: space-between;
-  margin-top: 40px;
-  gap: 20px;
-}
-
-.nav-button, 
-.submit-button {
-  padding: 15px 35px;
-  border: none;
-  border-radius: 8px;
-  font-size: 1.1rem;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  font-weight: 600;
+  gap: 1rem;
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 1px solid #e2e8f0;
 }
 
 .nav-button {
-  background-color: #e9ecef;
-  color: #495057;
+  padding: 0.75rem 1.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  border-radius: 0.5rem;
+  transition: all 0.2s;
+  cursor: pointer;
+  border: none;
 }
 
-.nav-button:hover {
-  background-color: #dee2e6;
-  transform: translateY(-1px);
+.button-back {
+  background-color: #f3f4f6;
+  color: #374151;
 }
 
-.next-button {
-  background-color: #28a745;
+.button-back:hover {
+  background-color: #e5e7eb;
+}
+
+.button-back:disabled {
+  background-color: #f3f4f6;
+  color: #9ca3af;
+  cursor: not-allowed;
+}
+
+.button-primary {
+  background-color: #3b82f6;
   color: white;
-  margin-left: auto;
 }
 
-.next-button:hover {
-  background-color: #218838;
-  transform: translateY(-1px);
+.button-primary:hover {
+  background-color: #2563eb;
 }
 
-.prev-button {
-  background-color: #6c757d;
-  color: white;
-}
-
-.prev-button:hover {
-  background-color: #5a6268;
-}
-
-.submit-button {
-  background-color: #007bff;
-  color: white;
-  width: 100%;
-  padding: 18px;
-  font-size: 1.2rem;
-}
-
-.submit-button:hover {
-  background-color: #0069d9;
-  transform: translateY(-1px);
-}
-
-@media (max-width: 992px) {
-  .create-conference-container {
-    margin: 1rem;
-    padding: 30px;
+/* Responsive design */
+@media (max-width: 768px) {
+  .main-container {
+    padding: 0.5rem;
   }
-  
-  .input-group {
-    flex-direction: column;
-    gap: 15px;
+
+  .form-card {
+    padding: 1.5rem;
+    margin: 0.5rem;
   }
-  
-  .scope-select {
+
+  .form-field {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+    text-align: left;
+  }
+
+  .form-label {
+    text-align: left;
+  }
+
+  .button-container {
+    flex-direction: column-reverse;
+    gap: 0.75rem;
+  }
+
+  .nav-button {
     width: 100%;
-    flex: 1;
   }
-  
-  .form-section {
-    padding: 30px;
+
+  .step-circle {
+    width: 1.75rem;
+    height: 1.75rem;
+    font-size: 0.75rem;
   }
-  
-  .navigation-buttons {
-    flex-direction: column;
-  }
-  
-  .nav-button, .submit-button {
-    width: 100%;
-    text-align: center;
+}
+
+@media (min-width: 1024px) {
+  .form-card {
+    padding: 3rem;
   }
 }

@@ -1,86 +1,10 @@
-import React, { useState } from "react";
-import "./CreateConference.css";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-
-type ConferenceForm = {
-  [key: string]: any;
-};
-
-const yesNoOptions = [
-  { label: "yes", value: true },
-  { label: "no", value: false },
-];
-
-const biddingOptions = [
-  { label: "paper bidding", value: "bidding" },
-  { label: "relevance detection", value: "relevance" },
-];
-
-const reviewAccessOptions = [
-  {
-    label: "ordinary PC members can access all reviews",
-    value: true,
-  },
-  {
-    label: "only the reviews of the papers assigned to them",
-    value: false,
-  },
-];
-
-const numberOptions = [1, 2, 3, 4, 5, 6, 7];
-const abstractLengths = [100, 200, 300, 400, 500];
-const decisionRanges = [3, 5, 7, 10];
-const defaultScope = "conference";
-
-const oneYearLater = new Date(
-  new Date().setFullYear(new Date().getFullYear() + 1)
-)
-  .toISOString()
-  .split("T")[0];
-
-const defaultForm: ConferenceForm = {
-  name: "",
-  acronym: "",
-  short_acronym: "",
-  website: "not set",
-  city: "not set",
-  venue: "none",
-  state: "none",
-  country: "not set",
-  submission_page: "not set",
-  license_expiry: oneYearLater,
-  auto_update_submission_dates: "",
-
-  contact_emails: "",
-  forwarding_emails_conference: "",
-  forwarding_emails_tracks: "",
-
-  double_blind_review: { value: false, scope: defaultScope },
-  can_pc_see_unassigned_submissions: { value: false, scope: defaultScope },
-  abstract_before_full: { value: true, scope: defaultScope },
-  abstract_section_hidden: { value: false, scope: "track" },
-  multiple_authors_allowed: { value: true, scope: "track" },
-  max_abstract_length: { value: 300, scope: "track" },
-  submission_instructions: { value: "no", scope: "track" },
-  additional_fields_enabled: { value: true, scope: "track" },
-  file_upload_fields: { value: "paper, additional", scope: "track" },
-  presenter_selection_required: { value: false, scope: "track" },
-  submission_updates_allowed: { value: false, scope: "track" },
-  new_submission_allowed: { value: false, scope: defaultScope },
-  use_bidding_or_relevance: { value: "relevance", scope: "track" },
-  bidding_enabled: { value: false, scope: "track" },
-  chairs_can_view_bids: { value: false, scope: "track" },
-  llm_fraud_detection: { value: false, scope: "track" },
-  reviewers_per_paper: { value: 5, scope: "track" },
-  can_pc_see_reviewer_names: { value: false, scope: "track" },
-  status_menu_enabled: { value: true, scope: "track" },
-  pc_can_enter_review: { value: false, scope: "track" },
-  pc_can_access_reviews: { value: false, scope: "track" },
-  decision_range: { value: 10, scope: "track" },
-  subreviewers_allowed: { value: true, scope: "track" },
-  subreviewer_anonymous: { value: true, scope: "track" },
-  track_chair_notifications: { value: false, scope: "track" },
-};
+import "./CreateConference.css";
+import { getMenuItemsForPage } from "../../../global/sideMenuConfig";
+import { handleMenuItemClick } from "../../../../utils/navigation/menuNavigation";
+import SideMenu from "../../../global/SideMenu";
+import Topbar from "../../../global/TopBar";
 
 const steps = [
   {
@@ -149,251 +73,291 @@ const steps = [
   },
 ];
 
+const defaultScope = "conference";
+const oneYearLater = new Date();
+oneYearLater.setFullYear(oneYearLater.getFullYear() + 1);
+
+const defaultForm = {
+  name: "",
+  acronym: "",
+  short_acronym: "",
+  website: "not set",
+  city: "not set",
+  venue: "none",
+  state: "none",
+  country: "not set",
+  submission_page: "not set",
+  license_expiry: oneYearLater.toISOString().split("T")[0],
+  auto_update_submission_dates: "",
+
+  contact_emails: "",
+  forwarding_emails_conference: "",
+  forwarding_emails_tracks: "",
+
+  double_blind_review: { value: false, scope: defaultScope },
+  can_pc_see_unassigned_submissions: { value: false, scope: defaultScope },
+  abstract_before_full: { value: true, scope: defaultScope },
+  abstract_section_hidden: { value: false, scope: "track" },
+  multiple_authors_allowed: { value: true, scope: "track" },
+  max_abstract_length: { value: 300, scope: "track" },
+  submission_instructions: { value: "no", scope: "track" },
+  additional_fields_enabled: { value: true, scope: "track" },
+  file_upload_fields: { value: "paper, additional", scope: "track" },
+  presenter_selection_required: { value: false, scope: "track" },
+  submission_updates_allowed: { value: false, scope: "track" },
+  new_submission_allowed: { value: false, scope: defaultScope },
+  use_bidding_or_relevance: { value: "relevance", scope: "track" },
+  bidding_enabled: { value: false, scope: "track" },
+  chairs_can_view_bids: { value: false, scope: "track" },
+  llm_fraud_detection: { value: false, scope: "track" },
+  reviewers_per_paper: { value: 5, scope: "track" },
+  can_pc_see_reviewer_names: { value: false, scope: "track" },
+  status_menu_enabled: { value: true, scope: "track" },
+  pc_can_enter_review: { value: false, scope: "track" },
+  pc_can_access_reviews: { value: false, scope: "track" },
+  decision_range: { value: 10, scope: "track" },
+  subreviewers_allowed: { value: true, scope: "track" },
+  subreviewer_anonymous: { value: true, scope: "track" },
+  track_chair_notifications: { value: false, scope: "track" },
+};
+
+type ConferenceForm = typeof defaultForm;
+
 const CreateConference: React.FC = () => {
-  const [form, setForm] = useState<ConferenceForm>(defaultForm);
-  const [currentStep, setCurrentStep] = useState(0);
   const navigate = useNavigate();
+  const menuItems = getMenuItemsForPage("default");
+  const [currentStep, setCurrentStep] = useState(0);
+  const [form, setForm] = useState<ConferenceForm>(defaultForm);
+  const [invalidFields, setInvalidFields] = useState<Set<string>>(new Set());
 
-  const handleChange = (key: string, value: any, field = "value") => {
-    setForm((prev: ConferenceForm) => ({
-      ...prev,
-      [key]:
-        typeof prev[key] === "object" && prev[key] !== null
-          ? { ...prev[key], [field]: value }
-          : value,
-    }));
-  };
+  useEffect(() => {
+    setInvalidFields(new Set());
+  }, [currentStep]);
 
-  const handleSubmit = async () => {
-    if (!form.name || !form.acronym || !form.short_acronym) {
-      alert("Please fill required fields.");
-      return;
-    }
-
-    const payload = {
-      ...form,
-      contact_emails: form.contact_emails
-        ?.split(",")
-        .map((e: string) => e.trim()),
-      forwarding_emails_conference: form.forwarding_emails_conference
-        ?.split(",")
-        .map((e: string) => e.trim()),
-      forwarding_emails_tracks: form.forwarding_emails_tracks
-        ?.split(",")
-        .map((e: string) => e.trim()),
-    };
-
+  const handleLogout = async () => {
     try {
-      const response = await fetch("http://localhost:5000/conference/create", {
+      const response = await fetch("http://localhost:5000/auth/logout", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify(payload),
       });
 
       if (response.ok) {
-        alert("Conference created!");
-        navigate("/home");
+        navigate("/login");
       } else {
-        alert("Creation failed");
+        console.error("Logout failed");
       }
     } catch (error) {
-      console.error("Error creating:", error);
+      console.error("Logout failed:", error);
     }
   };
 
-  const renderInput = (key: string) => {
-    const val = form[key];
-    const isObject = typeof val === "object" && val !== null && "value" in val;
-    const value = isObject ? val.value : val;
-    const scope = isObject ? val.scope : undefined;
-
-    const renderValueInput = () => {
-      if (key === "license_expiry") {
-        return <input type="date" value={value} readOnly />;
-      }
-
-      if (typeof value === "boolean") {
-        return (
-          <select
-            value={value ? "true" : "false"}
-            onChange={(e) => handleChange(key, e.target.value === "true")}
-            className="form-select"
-          >
-            {yesNoOptions.map((opt) => (
-              <option key={opt.label} value={String(opt.value)}>
-                {opt.label}
-              </option>
-            ))}
-          </select>
-        );
-      }
-
-      if (key === "use_bidding_or_relevance") {
-        return (
-          <select
-            value={value}
-            onChange={(e) => handleChange(key, e.target.value)}
-            className="form-select"
-          >
-            {biddingOptions.map((opt) => (
-              <option key={opt.label} value={opt.value}>
-                {opt.label}
-              </option>
-            ))}
-          </select>
-        );
-      }
-
-      if (key === "pc_can_access_reviews") {
-        return (
-          <select
-            value={String(value)}
-            onChange={(e) => handleChange(key, e.target.value === "true")}
-            className="form-select"
-          >
-            {reviewAccessOptions.map((opt) => (
-              <option key={opt.label} value={String(opt.value)}>
-                {opt.label}
-              </option>
-            ))}
-          </select>
-        );
-      }
-
-      if (key === "max_abstract_length") {
-        return (
-          <select
-            value={value}
-            onChange={(e) => handleChange(key, Number(e.target.value))}
-            className="form-select"
-          >
-            {abstractLengths.map((val) => (
-              <option key={val} value={val}>
-                {val}
-              </option>
-            ))}
-          </select>
-        );
-      }
-
-      if (key === "decision_range") {
-        return (
-          <select
-            value={value}
-            onChange={(e) => handleChange(key, Number(e.target.value))}
-            className="form-select"
-          >
-            {decisionRanges.map((val) => (
-              <option key={val} value={val}>
-                {val}
-              </option>
-            ))}
-          </select>
-        );
-      }
-
-      if (key === "reviewers_per_paper") {
-        return (
-          <select
-            value={value}
-            onChange={(e) => handleChange(key, Number(e.target.value))}
-            className="form-select"
-          >
-            {numberOptions.map((val) => (
-              <option key={val} value={val}>
-                {val}
-              </option>
-            ))}
-          </select>
-        );
-      }
-
-      return (
-        <input
-          type="text"
-          value={value}
-          onChange={(e) => handleChange(key, e.target.value)}
-          className="form-input"
-        />
-      );
-    };
-
-    return (
-      <div key={key} className="form-group">
-        <label>{key.replace(/_/g, " ")}</label>
-        <div className="input-group">
-          {renderValueInput()}
-          {scope && (
-            <select
-              value={scope}
-              onChange={(e) => handleChange(key, e.target.value, "scope")}
-              className="scope-select"
-            >
-              <option value="conference">conference</option>
-              <option value="track">track</option>
-            </select>
-          )}
-        </div>
-      </div>
-    );
+  const handleItemClick = (item: string) => {
+    if (item === "LOG OUT") {
+      handleLogout();
+    } else {
+      handleMenuItemClick(item, navigate);
+    }
   };
 
-  const nextStep = () => {
-    if (
-      currentStep === 0 &&
-      (!form.name || !form.acronym || !form.short_acronym)
-    ) {
-      alert("Please fill in all required conference information fields");
+  const validateCurrentStep = (): string[] => {
+    const invalid: string[] = [];
+    steps[currentStep].fields.forEach((field) => {
+      const formValue = form[field as keyof ConferenceForm];
+      let value: any;
+
+      if (
+        formValue !== null &&
+        typeof formValue === "object" &&
+        "value" in formValue
+      ) {
+        value = formValue.value;
+      } else {
+        value = formValue;
+      }
+
+      if (typeof value === "string" && value.trim() === "") {
+        invalid.push(field);
+      } else if (typeof value === "number" && isNaN(value)) {
+        invalid.push(field);
+      }
+    });
+    return invalid;
+  };
+
+  const handleChange = (field: keyof ConferenceForm, value: any) => {
+    setForm((prev) => ({ ...prev, [field]: value }));
+    setInvalidFields((prev) => {
+      const newSet = new Set(prev);
+      newSet.delete(field as string);
+      return newSet;
+    });
+  };
+
+  const handleFormSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const invalid = validateCurrentStep();
+
+    if (invalid.length > 0) {
+      setInvalidFields(new Set(invalid));
       return;
     }
-    setCurrentStep(currentStep + 1);
+
+    if (currentStep === steps.length - 1) {
+      console.log("Creating conference with:", form);
+      alert("Conference created successfully!");
+    } else {
+      setCurrentStep((prev) => Math.min(prev + 1, steps.length - 1));
+    }
   };
 
-  const prevStep = () => {
-    setCurrentStep(currentStep - 1);
+  const formatLabel = (str: string) => {
+    return str
+      .replace(/_/g, " ")
+      .replace(/\b\w/g, (char) => char.toUpperCase());
   };
 
-  const progressPercentage = ((currentStep + 1) / steps.length) * 100;
+  const step = steps[currentStep];
 
   return (
-    <div className="create-conference-container">
-      <h2>Create Conference</h2>
+    <>
+      <Topbar />
+      <div className="homepage-container">
+        <SideMenu items={menuItems} onItemClick={handleItemClick} />
+        <div className="content-container">
+          <div className="main-container">
+            <div className="card-container">
+              <div className="form-card">
+                <div className="progress-container">
+                  <div className="progress-steps-container">
+                    {steps.map((_, index) => (
+                      <div key={index} className="step-container">
+                        <div
+                          className={`step-circle ${
+                            index <= currentStep ? "active" : ""
+                          }`}
+                        >
+                          {index + 1}
+                        </div>
+                        {index < steps.length - 1 && (
+                          <div
+                            className={`step-line ${
+                              index < currentStep ? "active" : ""
+                            }`}
+                          />
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
 
-      <div className="progress-container">
-        <div
-          className="progress-bar"
-          style={{ width: `${progressPercentage}%` }}
-        ></div>
-        <div className="progress-text">
-          Step {currentStep + 1} of {steps.length}: {steps[currentStep].title}
+                <div className="form-content">
+                  <h2 className="form-title">{step.title}</h2>
+                  <form onSubmit={handleFormSubmit}>
+                    <div className="space-y-4">
+                      {step.fields.map((field) => {
+                        const rawValue = form[field as keyof ConferenceForm];
+                        const isObjectField =
+                          rawValue &&
+                          typeof rawValue === "object" &&
+                          "value" in rawValue;
+                        const value = isObjectField
+                          ? (rawValue as any).value
+                          : rawValue;
+                        const scope = isObjectField
+                          ? (rawValue as any).scope
+                          : null;
+                        const isInvalid = invalidFields.has(field);
+
+                        return (
+                          <div
+                            key={field}
+                            className={`form-field ${
+                              isInvalid ? "invalid" : ""
+                            }`}
+                          >
+                            <label className="form-label">
+                              {formatLabel(field)}
+                              {scope && (
+                                <span className="scope-badge">{scope}</span>
+                              )}
+                            </label>
+
+                            {typeof value === "boolean" ? (
+                              <input
+                                type="checkbox"
+                                checked={value}
+                                onChange={(e) =>
+                                  handleChange(
+                                    field as keyof ConferenceForm,
+                                    isObjectField
+                                      ? { value: e.target.checked, scope }
+                                      : e.target.checked
+                                  )
+                                }
+                                className="form-checkbox"
+                              />
+                            ) : typeof value === "number" ? (
+                              <input
+                                type="number"
+                                value={value}
+                                onChange={(e) =>
+                                  handleChange(
+                                    field as keyof ConferenceForm,
+                                    isObjectField
+                                      ? { value: Number(e.target.value), scope }
+                                      : Number(e.target.value)
+                                  )
+                                }
+                                className="form-input"
+                              />
+                            ) : (
+                              <input
+                                type="text"
+                                value={value as string}
+                                onChange={(e) =>
+                                  handleChange(
+                                    field as keyof ConferenceForm,
+                                    isObjectField
+                                      ? { value: e.target.value, scope }
+                                      : e.target.value
+                                  )
+                                }
+                                className="form-input"
+                              />
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    <div className="button-container">
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setCurrentStep((prev) => Math.max(prev - 1, 0))
+                        }
+                        disabled={currentStep === 0}
+                        className="nav-button button-back"
+                      >
+                        Back
+                      </button>
+                      <button
+                        type="submit"
+                        className="nav-button button-primary"
+                      >
+                        {currentStep === steps.length - 1
+                          ? "Create Conference"
+                          : "Next"}
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-
-      <div className="form-section">
-        <h3>{steps[currentStep].title}</h3>
-        <div className="form-fields">
-          {steps[currentStep].fields.map((key) => renderInput(key))}
-        </div>
-      </div>
-
-      <div className="navigation-buttons">
-        {currentStep > 0 && (
-          <button className="nav-button prev-button" onClick={prevStep}>
-            Previous
-          </button>
-        )}
-        {currentStep < steps.length - 1 ? (
-          <button className="nav-button next-button" onClick={nextStep}>
-            Next
-          </button>
-        ) : (
-          <button className="submit-button" onClick={handleSubmit}>
-            Create Conference
-          </button>
-        )}
-      </div>
-    </div>
+    </>
   );
 };
 
