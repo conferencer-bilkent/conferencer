@@ -21,6 +21,7 @@ import { SubmissionProvider } from "./context/addSubmissionContext";
 import { UserProvider } from "./context/UserContext";
 import ChatPage from "./components/Pages/Chat/ChatPage";
 import NotificationsPage from "./components/Pages/Notifications/Notifications";
+import AssignPaper from "./components/Pages/Conference/Paper/AssignPaper";
 
 const App: React.FC = () => {
   const [theme, colorMode] = useMode();
@@ -58,6 +59,7 @@ const App: React.FC = () => {
                     element={<NotificationsPage />}
                   />
                   <Route path="/chat" element={<ChatPage />} />
+                  <Route path="/paper/assign" element={<AssignPaper />} />
                   <Route path="/review" element={<ReviewsPage />} />
                   <Route path="/profile/:id" element={<ProfilePage />} />
                   <Route path="/reviews" element={<ReviewDetailPage />} />

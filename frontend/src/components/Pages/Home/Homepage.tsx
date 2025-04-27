@@ -41,7 +41,9 @@ const Homepage: React.FC = () => {
   const handleCreateConference = () => {
     navigate("/conference/create");
   };
-
+  const handleAssignPaper = () => {
+    navigate("/paper/assign");
+  };
   return (
     <>
       <Topbar></Topbar>
@@ -60,7 +62,14 @@ const Homepage: React.FC = () => {
               Create New Conference
             </button>
           </div>
-
+          <div className="create-conference-button-container">
+            <button
+              className="create-conference-button"
+              onClick={handleAssignPaper}
+            >
+              Assign paper
+            </button>
+          </div>
           {/* Upcoming Conferences Section */}
           <div className="section">
             <SectionTitle text="Upcoming Conferences" />

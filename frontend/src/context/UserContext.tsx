@@ -1,6 +1,12 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { UserData } from '../models/user';
-import userService from '../services/userService';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+} from "react";
+import { UserData } from "../models/user";
+import userService from "../services/userService";
 
 // Define the context type
 interface UserContextType {
@@ -30,27 +36,27 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     const loadUser = async () => {
       try {
         // First try to load from sessionStorage
-        const storedUser = sessionStorage.getItem('currentUser');
+        const storedUser = sessionStorage.getItem("currentUser");
         if (storedUser) {
           setUser(JSON.parse(storedUser));
         }
-        
+
         // Then check with the server
         const data = await userService.checkSession();
-        
+
         // Only update if the session is valid
         if (data.logged_in && data.user) {
           setUser(data.user);
-          sessionStorage.setItem('currentUser', JSON.stringify(data.user));
-        } 
+          sessionStorage.setItem("currentUser", JSON.stringify(data.user));
+        }
         // Don't clear the user if session check fails but we had a stored user
         else if (data.logged_in === false && !storedUser) {
           setUser(null);
         }
       } catch (err) {
-        console.error('Error loading user session:', err);
+        console.error("Error loading user session:", err);
         // Don't clear user on network errors if we had a stored user
-        if (!sessionStorage.getItem('currentUser')) {
+        if (!sessionStorage.getItem("currentUser")) {
           setUser(null);
         }
       } finally {
@@ -63,8 +69,8 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
 
   const login = (userData: UserData) => {
     setUser(userData);
-    sessionStorage.setItem('currentUser', JSON.stringify(userData));
-    sessionStorage.setItem('isAuthenticated', 'true');
+    sessionStorage.setItem("currentUser", JSON.stringify(userData));
+    sessionStorage.setItem("isAuthenticated", "true");
     setError(null);
   };
 
@@ -72,18 +78,19 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     try {
       await userService.logoutUser();
     } catch (err) {
-      console.error('Error during logout:', err);
+      console.error("Error during logout:", err);
     }
     setUser(null);
-    sessionStorage.removeItem('currentUser');
-    sessionStorage.removeItem('isAuthenticated');
+    sessionStorage.removeItem("currentUser");
+    sessionStorage.removeItem("isAuthenticated");
   };
 
   const updateUser = (userData: Partial<UserData>) => {
     if (user) {
       const updatedUser = { ...user, ...userData };
       setUser(updatedUser);
-      sessionStorage.setItem('currentUser', JSON.stringify(updatedUser));
+      console.log("Updated user context:", updatedUser);
+      sessionStorage.setItem("currentUser", JSON.stringify(updatedUser));
     }
   };
 
@@ -93,7 +100,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     error,
     login,
     logout,
-    updateUser
+    updateUser,
   };
 
   return <UserContext.Provider value={value}>{children}</UserContext.Provider>;
@@ -103,7 +110,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
 export const useUser = (): UserContextType => {
   const context = useContext(UserContext);
   if (context === undefined) {
-    throw new Error('useUser must be used within a UserProvider');
+    throw new Error("useUser must be used within a UserProvider");
   }
   return context;
 };
