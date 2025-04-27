@@ -27,38 +27,42 @@ interface UserProviderProps {
 }
 
 export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
-  const [user, setUser] = useState<UserData | null>(null);
+  // Try to load the user from sessionStorage first for immediate availability
+  const initialUser = (() => {
+    try {
+      const storedUser = sessionStorage.getItem("currentUser");
+      return storedUser ? JSON.parse(storedUser) : null;
+    } catch (e) {
+      console.error("Error parsing user from sessionStorage:", e);
+      return null;
+    }
+  })();
+
+  // Initialize user with the value from sessionStorage
+  const [user, setUser] = useState<UserData | null>(initialUser);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Load user from session storage on initial render
+  // Load user from session storage and validate with server
   useEffect(() => {
     const loadUser = async () => {
       try {
-        // First try to load from sessionStorage
-        const storedUser = sessionStorage.getItem("currentUser");
-        if (storedUser) {
-          setUser(JSON.parse(storedUser));
-        }
-
-        // Then check with the server
+        // Check with the server to validate the session
         const data = await userService.checkSession();
 
-        // Only update if the session is valid
         if (data.logged_in && data.user) {
+          // Update user data with the fresh data from the server
           setUser(data.user);
           sessionStorage.setItem("currentUser", JSON.stringify(data.user));
-        }
-        // Don't clear the user if session check fails but we had a stored user
-        else if (data.logged_in === false && !storedUser) {
+        } else if (data.logged_in === false) {
+          // If server says not logged in, clear the user
           setUser(null);
+          sessionStorage.removeItem("currentUser");
         }
+        // If we can't reach the server but have stored user data, keep using it
       } catch (err) {
         console.error("Error loading user session:", err);
-        // Don't clear user on network errors if we had a stored user
-        if (!sessionStorage.getItem("currentUser")) {
-          setUser(null);
-        }
+        // We keep the user from sessionStorage in case of server errors
       } finally {
         setLoading(false);
       }
@@ -91,6 +95,8 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
       setUser(updatedUser);
       console.log("Updated user context:", updatedUser);
       sessionStorage.setItem("currentUser", JSON.stringify(updatedUser));
+      const newcurrent = sessionStorage.getItem("currentUser");
+      console.log("Updated user in sessionStorage:", newcurrent);
     }
   };
 
