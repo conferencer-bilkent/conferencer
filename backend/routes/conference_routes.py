@@ -68,6 +68,53 @@ def create_conference():
         print("Conference creation error:", e)
         return jsonify({"error": "Failed to create conference"}), 500
 
+def get_conferences():
+    try:
+        user_id = request.args.get('user_id')  # optional query param
+
+        if user_id:
+            # Find conferences where user is in any important role
+            conferences = mongo.db.conferences.find({
+                "$or": [
+                    {"superchairs": user_id},
+                    {"track_chairs": user_id},
+                    {"pc_members": user_id},
+                    {"authors": user_id}
+                ]
+            })
+        else:
+            conferences = mongo.db.conferences.find()
+
+        result = []
+        for conference in conferences:
+            conf_dict = dict(conference)  # MongoDB document
+            conf_dict['conference_id'] = str(conf_dict.pop('id'))  # Handle ID properly
+            conf_dict['conference_id'] = str(conf_dict.pop('_id'))  # Handle ID properly
+            conf_obj = Conference(**conf_dict)  # Create Conference object
+            result.append(conf_obj.to_dict())  # Now you can safely call .to_dict()
+
+
+        return jsonify({"conferences": result}), 200
+
+    except Exception as e:
+        return jsonify({"error": f"Failed to retrieve conferences: {str(e)}"}), 500
+
+def get_conference(conference_id):
+    try:
+        conference = mongo.db.conferences.find_one({"_id": ObjectId(conference_id)})
+        
+        if not conference:
+            return jsonify({"error": "Conference not found"}), 404
+
+        conf_dict = dict(conference)  # MongoDB document
+        conf_dict['conference_id'] = str(conf_dict.pop('id'))  # Handle ID properly
+        conf_dict['conference_id'] = str(conf_dict.pop('_id'))  # Handle ID properly
+        conf_obj = Conference(**conf_dict)  # Create Conference object
+        return jsonify({"conference": conf_obj.to_dict()}), 200
+
+    except Exception as e:
+        return jsonify({"error": f"Failed to retrieve conference: {str(e)}"}), 500
+
 def invite_pc_member(conference_id):
     if "user_id" not in session:
         return jsonify({"error": "Unauthorized"}), 401

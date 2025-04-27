@@ -1,12 +1,12 @@
 from flask import Blueprint
 from routes.auth_routes import login, signup, logout, check_session, login_google, google_callback
-from routes.conference_routes import create_conference, invite_pc_member
+from routes.conference_routes import create_conference, get_conferences, get_conference, invite_pc_member
 from routes.ping_routes import ping
 from routes.profile_routes import get_profile, update_profile, get_all_users
 from routes.role_routes import assign_role
 from routes.chad_routes import send_chad, get_received_chad, get_sent_chad
-from routes.paper_routes import submit_paper
-from routes.review_routes import submit_review
+from routes.paper_routes import  get_paper, submit_paper
+from routes.review_routes import get_review, submit_review
 from routes.upload_routes import upload_file
 from routes.notification_routes import get_notification, mark_notification_as_answered
 from routes.keywords_routes import get_keywords, add_keyword, set_keywords
@@ -34,6 +34,8 @@ auth_bp.route("/login/google/callback")(google_callback)
 
 conference_bp.route("/<conference_id>/invite_pc_member", methods=["POST"])(invite_pc_member)
 conference_bp.route("/create", methods=["POST"])(create_conference)
+conference_bp.route("/", methods=["GET"])(get_conferences)
+conference_bp.route("/<conference_id>", methods=["GET"])(get_conference)
 
 ping_bp.route("/", methods=["GET"])(ping)
 
@@ -47,7 +49,10 @@ chad_bp.route("/send", methods=["POST"])(send_chad)
 chad_bp.route("/inbox", methods=["GET"])(get_received_chad)
 chad_bp.route("/outbox", methods=["GET"])(get_sent_chad)
 
+paper_bp.route("/<paper_id>", methods=["GET"])(get_paper)
 paper_bp.route("/submit", methods=["POST"])(submit_paper)
+
+review_bp.route("/<review_id>", methods=["GET"])(get_review)
 review_bp.route("/submit/<paper_id>", methods=["POST"])(submit_review)
 
 upload_bp.route("/<conference_id>/<track_name>", methods=["POST"])(upload_file)
