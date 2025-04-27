@@ -164,12 +164,15 @@ const Topbar: React.FC = () => {
     }
   };
 
-  const filteredUsers = users.filter((u) =>
-    `${u.name} ${u.surname} ${u.email}`
-      .toLowerCase()
-      .includes(searchTerm.toLowerCase())
+  const filteredUsers = users.filter(
+    (u) =>
+      u._id !== user?._id && // Exclude the current user
+      `${u.name} ${u.surname} ${u.email}`
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase())
   );
-
+  console.log("Filtered users:", filteredUsers);
+  console.log(user?._id, "Current user ID");
   return (
     <Box display="flex" justifyContent="space-between" p={2}>
       {/* Logo */}

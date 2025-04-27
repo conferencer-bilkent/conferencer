@@ -1,11 +1,9 @@
-
 import React, { useState } from "react";
 import "./RegisterForm.css";
 import { FaUser, FaLock, FaRegUser } from "react-icons/fa";
 import { Box, Button, TextField, Typography, useTheme } from "@mui/material";
 import Topbar from "../../global/TopBar"; // Import Topbar for theme toggle
 import { useNavigate } from "react-router-dom";
-
 
 const RegisterForm: React.FC = () => {
   const theme = useTheme();
@@ -31,8 +29,10 @@ const RegisterForm: React.FC = () => {
 
       const data = await response.json();
       if (response.ok) {
-        setMessage(`User ${data.name} ${data.surname} registered successfully!`);
-        navigate("/home")
+        setMessage(
+          `User ${data.name} ${data.surname} registered successfully!`
+        );
+        navigate("/home");
       } else {
         setMessage(`Registration failed: ${data.error}`);
       }

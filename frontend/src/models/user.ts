@@ -71,6 +71,8 @@ export interface UserData {
   orcid_id?: string | null;
   created_at?: string;
   updated_at?: string;
+  preferred_keywords?: string[];
+  unwanted_keywords?: string[];
 }
 
 // Add a utility function to get the first stats object

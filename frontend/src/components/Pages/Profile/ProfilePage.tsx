@@ -1,5 +1,20 @@
 import React, { useEffect, useState } from "react";
 import { useTheme } from "@mui/material/styles";
+import {
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  TextField,
+  CircularProgress,
+  MenuItem,
+  Select,
+  InputLabel,
+  FormControl,
+  Checkbox,
+  ListItemText,
+} from "@mui/material";
 import AppTitle from "../../global/AppTitle";
 import SideMenu from "../../global/SideMenu";
 import TopBar from "../../global/TopBar";
@@ -9,7 +24,6 @@ import { tokens } from "../../../theme";
 import { useNavigate, useParams } from "react-router-dom";
 import { handleMenuItemClick } from "../../../utils/navigation/menuNavigation";
 import { useUser } from "../../../context/UserContext";
-import { CircularProgress } from "@mui/material";
 import { emptyRole, getUserStats, UserData } from "../../../models/user";
 import { getUserById } from "../../../services/userService";
 
@@ -23,16 +37,20 @@ const ProfilePage: React.FC = () => {
   const [profileUser, setProfileUser] = useState<UserData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [editData, setEditData] = useState({
+    name: "",
+    surname: "",
+    bio: "",
+    email: "",
+  });
+  const [allKeywords, setAllKeywords] = useState<string[]>([]);
+  const [preferredKeywords, setPreferredKeywords] = useState<string[]>([]);
+  const [unwantedKeywords, setUnwantedKeywords] = useState<string[]>([]);
 
-  // Fetch user data based on URL parameter
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        console.log("Fetching user data...");
-        console.log("Current user:", currentUser);
-        console.log("User ID from URL:", id);
-        
-        // If ID is "me" or not provided, use the current logged-in user
         if (id == currentUser?.id || !id) {
           if (currentUser) {
             setProfileUser(currentUser);
@@ -40,7 +58,6 @@ const ProfilePage: React.FC = () => {
             navigate("/login");
           }
         } else {
-          // Otherwise fetch the user with the specified ID
           const userData = await getUserById(id);
           setProfileUser(userData);
         }
@@ -55,136 +72,103 @@ const ProfilePage: React.FC = () => {
     fetchUserData();
   }, [id, currentUser, contextLoading, navigate]);
 
-  // Log the user data structure for debugging
+  useEffect(() => {
+    const fetchKeywords = async () => {
+      try {
+        const response = await fetch("http://127.0.0.1:5000/keywords", {
+          credentials: "include",
+        });
+        const data = await response.json();
+        console.log("Keywords response:", data);
+        // Ensure that keywords is an array, otherwise set an empty array
+        setAllKeywords(Array.isArray(data.keywords) ? data.keywords : []);
+      } catch (error) {
+        console.error("Error fetching keywords:", error);
+      }
+    };
+
+    fetchKeywords();
+  }, []);
+
   useEffect(() => {
     if (profileUser) {
-      console.log("User data structure:", JSON.stringify(profileUser, null, 2));
+      setEditData({
+        name: profileUser.name || "",
+        surname: profileUser.surname || "",
+        bio: profileUser.bio || "",
+        email: profileUser.email || "",
+      });
+      setPreferredKeywords(profileUser.preferred_keywords || []);
+      setUnwantedKeywords(profileUser.unwanted_keywords || []);
     }
   }, [profileUser]);
+
+  const handleEditOpen = () => setIsEditOpen(true);
+  const handleEditClose = () => setIsEditOpen(false);
+  const handleEditChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setEditData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handlePreferredChange = (event: any) => {
+    setPreferredKeywords(event.target.value);
+  };
+
+  const handleUnwantedChange = (event: any) => {
+    setUnwantedKeywords(event.target.value);
+  };
+
+  const handleEditSave = async () => {
+    try {
+      const response = await fetch("http://127.0.0.1:5000/profile/update", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: editData.name,
+          surname: editData.surname,
+          bio: editData.bio,
+          preferred_keywords: preferredKeywords,
+          unwanted_keywords: unwantedKeywords,
+        }),
+      });
+      if (!response.ok) {
+        throw new Error("Failed to update profile");
+      }
+      console.log("Profile updated successfully");
+      setProfileUser((prev) =>
+        prev
+          ? {
+              ...prev,
+              name: editData.name,
+              surname: editData.surname,
+              bio: editData.bio,
+              preferred_keywords: preferredKeywords,
+              unwanted_keywords: unwantedKeywords,
+            }
+          : null
+      );
+      handleEditClose();
+    } catch (error) {
+      console.error("Error updating profile:", error);
+    }
+  };
 
   const handleItemClick = (item: string) => {
     handleMenuItemClick(item, navigate);
   };
 
-  // Inline styles using theme values
-  const profilePageStyle: React.CSSProperties = {
-    display: "flex",
-    height: "100vh",
-    width: "100vw",
-    backgroundColor: theme.palette.background.default,
-    color: theme.palette.text.primary,
-  };
-
-  const profileContainerStyle: React.CSSProperties = {
-    display: "flex",
-    width: "100%",
-    height: "100%",
-  };
-
-  const sideMenuContainerStyle: React.CSSProperties = {
-    width: "220px",
-    height: "100%",
-  };
-
-  // Add new container for content with TopBar
-  const contentWrapperStyle: React.CSSProperties = {
-    display: "flex",
-    flexDirection: "column",
-    flexGrow: 1,
-    height: "100%",
-    overflow: "hidden",
-  };
-
-  const contentContainerStyle: React.CSSProperties = {
-    flexGrow: 1,
-    padding: "20px",
-    overflowY: "auto",
-    display: "flex",
-    flexDirection: "column",
-  };
-
-  const headerOuterStyle: React.CSSProperties = {
-    display: "flex",
-    flexDirection: "column",
-    width: "100%",
-    marginTop: "20px",
-  };
-
-  const headerInnerStyle: React.CSSProperties = {
-    display: "flex",
-    flexDirection: "row",
-    justifyContent: "space-between",
-  };
-
-  const userPartStyle: React.CSSProperties = {
-    width: "50%",
-  };
-
-  const numericPartStyle: React.CSSProperties = {
-    width: "50%",
-  };
-
-  const contactContainerStyle: React.CSSProperties = {
-    width: "50%",
-  };
-
-  const contactStyle: React.CSSProperties = {
-    textAlign: "start",
-  };
-
-  const bottomContainerStyle: React.CSSProperties = {
-    display: "flex",
-    flexDirection: "row",
-    marginTop: "20px",
-    width: "100%",
-    justifyContent: "start",
-    gap: "20px", // Add spacing between containers
-  };
-
-  const roleContainerStyle: React.CSSProperties = {
-    width: "45%",
-  };
-
-  const statsContainerStyle: React.CSSProperties = {
-    border: `1px solid ${colors.grey[100]}`, // Match ProfileUserRoles border
-    borderRadius: "12px",
-    width: "45%",
-    padding: "15px", // Match ProfileUserRoles padding
-    color: colors.grey[100], // Match ProfileUserRoles text color
-  };
-
-  const statsTableStyle: React.CSSProperties = {
-    marginLeft: "5px",
-    borderCollapse: "collapse",
-    width: "95%",
-    marginTop: "10px", // Add some spacing after the title
-  };
-
-  const statsCellStyle: React.CSSProperties = {
-    border: `1px solid ${colors.grey[100]}`, // Match ProfileUserRoles border
-    padding: "8px",
-    textAlign: "left",
-    width: "45%",
-  };
-
-  const loadingContainerStyle: React.CSSProperties = {
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    height: "100%",
-  };
-
-  const errorContainerStyle: React.CSSProperties = {
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    height: "100%",
-    color: colors.redAccent[500],
-  };
-
   if (loading) {
     return (
-      <div style={loadingContainerStyle}>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "100vh",
+        }}
+      >
         <CircularProgress />
       </div>
     );
@@ -192,7 +176,7 @@ const ProfilePage: React.FC = () => {
 
   if (error) {
     return (
-      <div style={errorContainerStyle}>
+      <div style={{ color: "red", textAlign: "center", marginTop: "50px" }}>
         <p>{error}</p>
       </div>
     );
@@ -200,92 +184,157 @@ const ProfilePage: React.FC = () => {
 
   if (!profileUser) {
     return (
-      <div style={errorContainerStyle}>
+      <div style={{ color: "red", textAlign: "center", marginTop: "50px" }}>
         <p>User not found</p>
       </div>
     );
   }
 
-  // Add safe access to potentially undefined properties
-  const userStats = getUserStats(profileUser);
+  const userStats = profileUser.stats
+    ? getUserStats(profileUser)
+    : {
+        avg_rating_given: "-",
+        avg_submit_time_before_deadline: "-",
+        avg_time_to_review: "-",
+        deadline_compliance_rate: "-",
+        review_rating: "-",
+        totalReviews: 0,
+        conferencesWorked: 0,
+        submissions: 0,
+      };
+
   const userRoles = profileUser.roles;
   const activeRoles = userRoles?.active || [emptyRole];
-  const pastRoles = userRoles?.past ||  [emptyRole];
+  const pastRoles = userRoles?.past || [emptyRole];
 
   return (
-    <div style={profilePageStyle}>
-      {/* Rest of your component rendering */}
-      <div style={profileContainerStyle}>
-        <div style={sideMenuContainerStyle}>
-          <SideMenu items={menuItems} onItemClick={handleItemClick} />
-        </div>
-        <div style={contentWrapperStyle}>
-          <TopBar />
-          <div style={contentContainerStyle}>
-            <AppTitle text={`${profileUser.name || ""} ${profileUser.surname || ""}`} />
-            <div style={headerOuterStyle}>
-              <div style={headerInnerStyle}>
-                <div style={userPartStyle}>
-                  <p>{`${profileUser.name || ""} ${profileUser.surname || ""}`}</p>
-                  <p>Bio: {profileUser.bio || "No bio provided"}</p>
-                </div>
-                <div style={numericPartStyle}>
-                  <p>Total Reviews: {userStats.totalReviews || 0}</p>
-                  <p>Conferences Worked: {userStats.conferencesWorked || 0}</p>
-                  <p>Submissions: {userStats.submissions || 0}</p>
-                </div>
-              </div>
-              <div style={contactContainerStyle}>
-                <p style={contactStyle}>Contact: {profileUser.email || ""}</p>
-              </div>
-            </div>
-            <div style={bottomContainerStyle}>
-              <div style={roleContainerStyle}>
-                <ProfileUserRoles
-                  activeRoles={(activeRoles || []).map((role) => ({
-                    name: role?.name || "Unknown",
-                  }))}
-                  pastRoles={(pastRoles || []).map((role) => ({
-                    name: role?.name || "Unknown",
-                  }))}
-                />
-              </div>
-              <div style={statsContainerStyle}>
-                <h3 style={{ fontWeight: "bold", marginBottom: "10px" }}>
-                  Stats
-                </h3>
-                <div>
-                  <table style={statsTableStyle}>
-                    <tbody>
-                      <tr>
-                        <td style={statsCellStyle}>Average Rating Given</td>
-                        <td style={statsCellStyle}>{userStats.avg_rating_given}</td>
-                      </tr>
-                      <tr>
-                        <td style={statsCellStyle}>Avg Time Before Deadline</td>
-                        <td style={statsCellStyle}>{userStats.avg_submit_time_before_deadline}</td>
-                      </tr>
-                      <tr>
-                        <td style={statsCellStyle}>Avg Time to Review</td>
-                        <td style={statsCellStyle}>{userStats.avg_time_to_review}</td>
-                      </tr>
-                      <tr>
-                        <td style={statsCellStyle}>Deadline Compliance Rate</td>
-                        <td style={statsCellStyle}>{userStats.deadline_compliance_rate}</td>
-                      </tr>
-                      <tr>
-                        <td style={statsCellStyle}>Review Rating</td>
-                        <td style={statsCellStyle}>{userStats.review_rating}</td>
-                      </tr>
-
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
+    <div style={{ display: "flex", height: "100vh", width: "100vw" }}>
+      <div style={{ width: "220px" }}>
+        <SideMenu items={menuItems} onItemClick={handleItemClick} />
+      </div>
+      <div style={{ flexGrow: 1, display: "flex", flexDirection: "column" }}>
+        <TopBar />
+        <div style={{ padding: "20px", overflowY: "auto" }}>
+          <Button
+            variant="contained"
+            onClick={handleEditOpen}
+            style={{ alignSelf: "flex-end", marginBottom: "10px" }}
+          >
+            Edit Profile
+          </Button>
+          <AppTitle text={`${profileUser.name} ${profileUser.surname}`} />
+          <div style={{ marginTop: "20px" }}>
+            <p>Name: {profileUser.name}</p>
+            <p>Surname: {profileUser.surname}</p>
+            <p>Bio: {profileUser.bio || "No bio provided"}</p>
+            <p>Email: {profileUser.email}</p>
+          </div>
+          <div style={{ marginTop: "20px" }}>
+            <h3>Stats</h3>
+            <ul>
+              <li>Average Rating Given: {userStats.avg_rating_given}</li>
+              <li>
+                Avg Time Before Deadline:{" "}
+                {userStats.avg_submit_time_before_deadline}
+              </li>
+              <li>Avg Time to Review: {userStats.avg_time_to_review}</li>
+              <li>
+                Deadline Compliance Rate: {userStats.deadline_compliance_rate}
+              </li>
+              <li>Review Rating: {userStats.review_rating}</li>
+            </ul>
+          </div>
+          <div style={{ marginTop: "20px" }}>
+            <ProfileUserRoles
+              activeRoles={activeRoles.map((role) => ({
+                name: role?.name || "Unknown",
+              }))}
+              pastRoles={pastRoles.map((role) => ({
+                name: role?.name || "Unknown",
+              }))}
+            />
           </div>
         </div>
       </div>
+
+      <Dialog open={isEditOpen} onClose={handleEditClose}>
+        <DialogTitle>Edit Personal Information</DialogTitle>
+        <DialogContent
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            gap: "15px",
+            marginTop: "10px",
+          }}
+        >
+          <TextField
+            label="Name"
+            name="name"
+            value={editData.name}
+            onChange={handleEditChange}
+          />
+          <TextField
+            label="Surname"
+            name="surname"
+            value={editData.surname}
+            onChange={handleEditChange}
+          />
+          <TextField
+            label="Bio"
+            name="bio"
+            multiline
+            rows={3}
+            value={editData.bio}
+            onChange={handleEditChange}
+          />
+          <TextField
+            label="Email"
+            name="email"
+            value={editData.email}
+            onChange={handleEditChange}
+          />
+
+          <FormControl>
+            <InputLabel>Preferred Keywords</InputLabel>
+            <Select
+              multiple
+              value={preferredKeywords}
+              onChange={handlePreferredChange}
+              renderValue={(selected) => (selected as string[]).join(", ")}
+            >
+              {allKeywords.map((keyword) => (
+                <MenuItem key={keyword} value={keyword}>
+                  <Checkbox checked={preferredKeywords.indexOf(keyword) > -1} />
+                  <ListItemText primary={keyword} />
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+
+          <FormControl>
+            <InputLabel>Unwanted Keywords</InputLabel>
+            <Select
+              multiple
+              value={unwantedKeywords}
+              onChange={handleUnwantedChange}
+              renderValue={(selected) => (selected as string[]).join(", ")}
+            >
+              {/* {allKeywords.map((keyword) => (
+                <MenuItem key={keyword} value={keyword}>
+                  <Checkbox checked={unwantedKeywords.indexOf(keyword) > -1} />
+                  <ListItemText primary={keyword} />
+                </MenuItem>
+              ))} */}
+            </Select>
+          </FormControl>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleEditClose}>Cancel</Button>
+          <Button onClick={handleEditSave} variant="contained">
+            Save
+          </Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 };
