@@ -200,13 +200,16 @@ const Topbar: React.FC = () => {
           <Box
             display="flex"
             sx={{
-              backgroundColor: colors.primary[400],
+              backgroundColor: colors.transparent,
               borderRadius: "3px",
+              borderColor: colors.grey[300],
+              borderWidth: "1px",
+              borderStyle: "solid",
             }}
           >
             <InputBase
               sx={{ ml: 2, flex: 1 }}
-              placeholder="Search"
+              placeholder="Search for people..."
               value={searchTerm}
               onChange={handleSearchChange}
               onFocus={handleSearchFocus}

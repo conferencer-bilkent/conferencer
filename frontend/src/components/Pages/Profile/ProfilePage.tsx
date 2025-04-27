@@ -8,12 +8,14 @@ import {
   DialogTitle,
   TextField,
   CircularProgress,
-  MenuItem,
-  Select,
-  InputLabel,
-  FormControl,
   Checkbox,
   ListItemText,
+  Autocomplete,
+  Table,
+  TableHead,
+  TableBody,
+  TableRow,
+  TableCell,
 } from "@mui/material";
 import AppTitle from "../../global/AppTitle";
 import SideMenu from "../../global/SideMenu";
@@ -58,7 +60,7 @@ const ProfilePage: React.FC = () => {
             navigate("/login");
           }
         } else {
-          const userData = await getUserById(id);
+          const userData = await getUserById(id!);
           setProfileUser(userData);
         }
       } catch (err) {
@@ -68,7 +70,6 @@ const ProfilePage: React.FC = () => {
         setLoading(contextLoading ? true : false);
       }
     };
-
     fetchUserData();
   }, [id, currentUser, contextLoading, navigate]);
 
@@ -79,14 +80,13 @@ const ProfilePage: React.FC = () => {
           credentials: "include",
         });
         const data = await response.json();
-        console.log("Keywords response:", data);
-        // Ensure that keywords is an array, otherwise set an empty array
-        setAllKeywords(Array.isArray(data.keywords) ? data.keywords : []);
+        setAllKeywords(
+          Array.isArray(data.keywords.keywords) ? data.keywords.keywords : []
+        );
       } catch (error) {
         console.error("Error fetching keywords:", error);
       }
     };
-
     fetchKeywords();
   }, []);
 
@@ -101,6 +101,8 @@ const ProfilePage: React.FC = () => {
       setPreferredKeywords(profileUser.preferred_keywords || []);
       setUnwantedKeywords(profileUser.unwanted_keywords || []);
     }
+    console.log("Profile User:", profileUser);
+    console.log("Preferred Keywords:", preferredKeywords);
   }, [profileUser]);
 
   const handleEditOpen = () => setIsEditOpen(true);
@@ -110,21 +112,11 @@ const ProfilePage: React.FC = () => {
     setEditData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handlePreferredChange = (event: any) => {
-    setPreferredKeywords(event.target.value);
-  };
-
-  const handleUnwantedChange = (event: any) => {
-    setUnwantedKeywords(event.target.value);
-  };
-
   const handleEditSave = async () => {
     try {
       const response = await fetch("http://127.0.0.1:5000/profile/update", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name: editData.name,
           surname: editData.surname,
@@ -133,10 +125,7 @@ const ProfilePage: React.FC = () => {
           unwanted_keywords: unwantedKeywords,
         }),
       });
-      if (!response.ok) {
-        throw new Error("Failed to update profile");
-      }
-      console.log("Profile updated successfully");
+      if (!response.ok) throw new Error("Failed to update profile");
       setProfileUser((prev) =>
         prev
           ? {
@@ -223,12 +212,14 @@ const ProfilePage: React.FC = () => {
             Edit Profile
           </Button>
           <AppTitle text={`${profileUser.name} ${profileUser.surname}`} />
+
           <div style={{ marginTop: "20px" }}>
             <p>Name: {profileUser.name}</p>
             <p>Surname: {profileUser.surname}</p>
             <p>Bio: {profileUser.bio || "No bio provided"}</p>
             <p>Email: {profileUser.email}</p>
           </div>
+
           <div style={{ marginTop: "20px" }}>
             <h3>Stats</h3>
             <ul>
@@ -244,6 +235,7 @@ const ProfilePage: React.FC = () => {
               <li>Review Rating: {userStats.review_rating}</li>
             </ul>
           </div>
+
           <div style={{ marginTop: "20px" }}>
             <ProfileUserRoles
               activeRoles={activeRoles.map((role) => ({
@@ -254,10 +246,44 @@ const ProfilePage: React.FC = () => {
               }))}
             />
           </div>
+
+          <div style={{ marginTop: "20px" }}>
+            <h3>Keywords</h3>
+            <Table size="small">
+              <TableHead>
+                <TableRow>
+                  <TableCell>
+                    <strong>Preferred Keywords</strong>
+                  </TableCell>
+                  <TableCell>
+                    <strong>Unwanted Keywords</strong>
+                  </TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {Array.from({
+                  length: Math.max(
+                    preferredKeywords.length,
+                    unwantedKeywords.length
+                  ),
+                }).map((_, index) => (
+                  <TableRow key={index}>
+                    <TableCell>{preferredKeywords[index] || "-"}</TableCell>
+                    <TableCell>{unwantedKeywords[index] || "-"}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
         </div>
       </div>
 
-      <Dialog open={isEditOpen} onClose={handleEditClose}>
+      <Dialog
+        open={isEditOpen}
+        onClose={handleEditClose}
+        fullWidth
+        maxWidth="sm"
+      >
         <DialogTitle>Edit Personal Information</DialogTitle>
         <DialogContent
           style={{
@@ -294,39 +320,37 @@ const ProfilePage: React.FC = () => {
             onChange={handleEditChange}
           />
 
-          <FormControl>
-            <InputLabel>Preferred Keywords</InputLabel>
-            <Select
-              multiple
-              value={preferredKeywords}
-              onChange={handlePreferredChange}
-              renderValue={(selected) => (selected as string[]).join(", ")}
-            >
-              {allKeywords.map((keyword) => (
-                <MenuItem key={keyword} value={keyword}>
-                  <Checkbox checked={preferredKeywords.indexOf(keyword) > -1} />
-                  <ListItemText primary={keyword} />
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
+          <Autocomplete
+            multiple
+            options={allKeywords}
+            value={preferredKeywords}
+            onChange={(_, newValue) => setPreferredKeywords(newValue)}
+            filterSelectedOptions
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                variant="outlined"
+                label="Preferred Keywords"
+                placeholder="Search keywords"
+              />
+            )}
+          />
 
-          <FormControl>
-            <InputLabel>Unwanted Keywords</InputLabel>
-            <Select
-              multiple
-              value={unwantedKeywords}
-              onChange={handleUnwantedChange}
-              renderValue={(selected) => (selected as string[]).join(", ")}
-            >
-              {/* {allKeywords.map((keyword) => (
-                <MenuItem key={keyword} value={keyword}>
-                  <Checkbox checked={unwantedKeywords.indexOf(keyword) > -1} />
-                  <ListItemText primary={keyword} />
-                </MenuItem>
-              ))} */}
-            </Select>
-          </FormControl>
+          <Autocomplete
+            multiple
+            options={allKeywords}
+            value={unwantedKeywords}
+            onChange={(_, newValue) => setUnwantedKeywords(newValue)}
+            filterSelectedOptions
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                variant="outlined"
+                label="Unwanted Keywords"
+                placeholder="Search keywords"
+              />
+            )}
+          />
         </DialogContent>
         <DialogActions>
           <Button onClick={handleEditClose}>Cancel</Button>
