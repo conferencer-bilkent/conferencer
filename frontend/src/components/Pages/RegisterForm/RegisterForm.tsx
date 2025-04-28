@@ -32,7 +32,7 @@ const RegisterForm: React.FC = () => {
         setMessage(
           `User ${data.name} ${data.surname} registered successfully!`
         );
-        navigate("/home");
+        navigate("/loginc");
       } else {
         setMessage(`Registration failed: ${data.error}`);
       }

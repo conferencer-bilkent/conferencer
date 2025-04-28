@@ -8,13 +8,13 @@ interface Tokens {
   greenAccent: { [key: number]: string };
   redAccent: { [key: number]: string };
   blueAccent: { [key: number]: string };
+  transparent: string;
 }
 
 // color design tokens export
 export const tokens = (mode: "light" | "dark"): Tokens => ({
   ...(mode === "dark"
     ? {
-      
         grey: {
           100: "#e0e0e0",
           200: "#c2c2c2",
@@ -70,6 +70,7 @@ export const tokens = (mode: "light" | "dark"): Tokens => ({
           800: "#2a2d64",
           900: "#151632",
         },
+        transparent: "rgba(0, 0, 0, 0)", // Added transparent color
       }
     : {
         grey: {
@@ -87,7 +88,7 @@ export const tokens = (mode: "light" | "dark"): Tokens => ({
           100: "#040509",
           200: "#080b12",
           300: "#0c101b",
-          400: "#f2f0f0", 
+          400: "#f2f0f0",
           500: "#141b2d",
           600: "#1F2A40",
           700: "#727681",
@@ -127,9 +128,9 @@ export const tokens = (mode: "light" | "dark"): Tokens => ({
           800: "#c3c6fd",
           900: "#e1e2fe",
         },
+        transparent: "rgba(255, 255, 255, 0)", // Added transparent color
       }),
 });
-
 
 export const themeSettings = (mode: "light" | "dark"): object => {
   const colors = tokens(mode);
@@ -152,7 +153,7 @@ export const themeSettings = (mode: "light" | "dark"): object => {
             background: {
               default: colors.primary[500],
             },
-            border : {
+            border: {
               main: colors.grey[100],
             },
           }
@@ -171,7 +172,7 @@ export const themeSettings = (mode: "light" | "dark"): object => {
             background: {
               default: "#f1f2f3",
             },
-            border : {
+            border: {
               main: colors.grey[100],
             },
           }),
@@ -197,7 +198,7 @@ export const themeSettings = (mode: "light" | "dark"): object => {
       },
       h5: {
         fontFamily: ["Source Sans Pro", "sans-serif"].join(","),
-        fontSize: 16, 
+        fontSize: 16,
       },
       h6: {
         fontFamily: ["Source Sans Pro", "sans-serif"].join(","),
@@ -207,11 +208,9 @@ export const themeSettings = (mode: "light" | "dark"): object => {
   };
 };
 
-
 interface ColorModeContextType {
   toggleColorMode: () => void;
 }
-
 
 export const ColorModeContext = createContext<ColorModeContextType>({
   toggleColorMode: () => {},
@@ -225,15 +224,18 @@ export const useMode = (): [Theme, { toggleColorMode: () => void }] => {
     localStorage.setItem("theme", mode); // Save the theme to localStorage whenever it changes
   }, [mode]);
 
-  const colorMode = useMemo(() => ({
-    toggleColorMode: () => {
-      setMode((prev) => {
-        const newMode = prev === "light" ? "dark" : "light";
-        localStorage.setItem("theme", newMode); // Persist theme change
-        return newMode;
-      });
-    },
-  }), []);
+  const colorMode = useMemo(
+    () => ({
+      toggleColorMode: () => {
+        setMode((prev) => {
+          const newMode = prev === "light" ? "dark" : "light";
+          localStorage.setItem("theme", newMode); // Persist theme change
+          return newMode;
+        });
+      },
+    }),
+    []
+  );
 
   const theme = useMemo(() => createTheme(themeSettings(mode)), [mode]);
 

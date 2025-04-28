@@ -8,12 +8,14 @@ import {
   DialogTitle,
   TextField,
   CircularProgress,
-  MenuItem,
-  Select,
-  InputLabel,
-  FormControl,
   Checkbox,
   ListItemText,
+  Autocomplete,
+  Table,
+  TableHead,
+  TableBody,
+  TableRow,
+  TableCell,
 } from "@mui/material";
 import AppTitle from "../../global/AppTitle";
 import SideMenu from "../../global/SideMenu";
@@ -58,7 +60,7 @@ const ProfilePage: React.FC = () => {
             navigate("/login");
           }
         } else {
-          const userData = await getUserById(id);
+          const userData = await getUserById(id!);
           setProfileUser(userData);
         }
       } catch (err) {
@@ -68,7 +70,6 @@ const ProfilePage: React.FC = () => {
         setLoading(contextLoading ? true : false);
       }
     };
-
     fetchUserData();
   }, [id, currentUser, contextLoading, navigate]);
 
@@ -79,14 +80,13 @@ const ProfilePage: React.FC = () => {
           credentials: "include",
         });
         const data = await response.json();
-        console.log("Keywords response:", data);
-        // Ensure that keywords is an array, otherwise set an empty array
-        setAllKeywords(Array.isArray(data.keywords) ? data.keywords : []);
+        setAllKeywords(
+          Array.isArray(data.keywords.keywords) ? data.keywords.keywords : []
+        );
       } catch (error) {
         console.error("Error fetching keywords:", error);
       }
     };
-
     fetchKeywords();
   }, []);
 
@@ -101,6 +101,8 @@ const ProfilePage: React.FC = () => {
       setPreferredKeywords(profileUser.preferred_keywords || []);
       setUnwantedKeywords(profileUser.unwanted_keywords || []);
     }
+    console.log("Profile User:", profileUser);
+    console.log("Preferred Keywords:", preferredKeywords);
   }, [profileUser]);
 
   const handleEditOpen = () => setIsEditOpen(true);
@@ -110,21 +112,11 @@ const ProfilePage: React.FC = () => {
     setEditData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handlePreferredChange = (event: any) => {
-    setPreferredKeywords(event.target.value);
-  };
-
-  const handleUnwantedChange = (event: any) => {
-    setUnwantedKeywords(event.target.value);
-  };
-
   const handleEditSave = async () => {
     try {
       const response = await fetch("http://127.0.0.1:5000/profile/update", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name: editData.name,
           surname: editData.surname,
@@ -133,10 +125,7 @@ const ProfilePage: React.FC = () => {
           unwanted_keywords: unwantedKeywords,
         }),
       });
-      if (!response.ok) {
-        throw new Error("Failed to update profile");
-      }
-      console.log("Profile updated successfully");
+      if (!response.ok) throw new Error("Failed to update profile");
       setProfileUser((prev) =>
         prev
           ? {
@@ -207,6 +196,86 @@ const ProfilePage: React.FC = () => {
   const activeRoles = userRoles?.active || [emptyRole];
   const pastRoles = userRoles?.past || [emptyRole];
 
+  // Add this style for the flex container
+  const flexContainerStyle: React.CSSProperties = {
+    display: "flex",
+    gap: "20px",
+    marginTop: "20px",
+  };
+
+  // Update the roles container wrapper style
+  const rolesContainerStyle: React.CSSProperties = {
+    flex: "1",
+    maxHeight: "300px", // Set a fixed max height
+    minHeight: "250px", // Set a minimum height to match stats container
+    overflow: "auto", // Add scrollability
+  };
+
+  // Update stats container style
+  const statsContainerStyle: React.CSSProperties = {
+    flex: "1",
+    border: `1px solid ${colors.grey[100]}`,
+    borderRadius: "12px",
+    padding: "15px",
+    color: "white",
+    backgroundColor: colors.primary[500],
+    height: "fit-content", // Adapt to content size
+    minHeight: "190px", // Set minimum height
+  };
+
+  const statsTableStyle: React.CSSProperties = {
+    borderCollapse: "collapse",
+    width: "100%",
+    marginTop: "10px",
+  };
+
+  const statsCellStyle: React.CSSProperties = {
+    padding: "8px",
+    color: colors.grey[100], 
+    width: "50%",
+    borderBottom: `1px solid ${colors.grey[100]}`,
+    borderRight: `1px solid ${colors.grey[100]}`,
+    borderTop: `1px solid ${colors.grey[100]}`,
+    borderLeft: `1px solid ${colors.grey[100]}`,
+    backgroundColor: colors.primary[500], // Slightly lighter than container
+  };
+
+  // Add a style for the last column cells without right border
+  const lastCellStyle: React.CSSProperties = {
+    padding: "8px",
+    color: colors.grey[100],
+    width: "50%",
+    borderBottom: `1px solid ${colors.grey[100]}`,
+    borderRight: `1px solid ${colors.grey[100]}`,
+    borderTop: `1px solid ${colors.grey[100]}`,
+    borderLeft: `1px solid ${colors.grey[100]}`,
+    backgroundColor: colors.primary[500], // Match the first column
+  };
+
+  const statsTitleStyle: React.CSSProperties = {
+    fontWeight: "bold",
+    marginBottom: "10px",
+    color: colors.grey[100],
+    fontFamily: theme.typography.fontFamily,
+  };
+
+  // Define a new keywords container style
+  const keywordsContainerStyle: React.CSSProperties = {
+    marginTop: "20px",
+    border: `1px solid ${colors.grey[100]}`,
+    borderRadius: "12px",
+    padding: "15px",
+    color: "white",
+    backgroundColor: colors.primary[500],
+  };
+
+  const keywordsTitleStyle: React.CSSProperties = {
+    fontWeight: "bold",
+    marginBottom: "10px",
+    color: colors.grey[100],
+    fontFamily: theme.typography.fontFamily,
+  };
+
   return (
     <div style={{ display: "flex", height: "100vh", width: "100vw" }}>
       <div style={{ width: "220px" }}>
@@ -223,41 +292,101 @@ const ProfilePage: React.FC = () => {
             Edit Profile
           </Button>
           <AppTitle text={`${profileUser.name} ${profileUser.surname}`} />
+
           <div style={{ marginTop: "20px" }}>
             <p>Name: {profileUser.name}</p>
             <p>Surname: {profileUser.surname}</p>
             <p>Bio: {profileUser.bio || "No bio provided"}</p>
             <p>Email: {profileUser.email}</p>
           </div>
-          <div style={{ marginTop: "20px" }}>
-            <h3>Stats</h3>
-            <ul>
-              <li>Average Rating Given: {userStats.avg_rating_given}</li>
-              <li>
-                Avg Time Before Deadline:{" "}
-                {userStats.avg_submit_time_before_deadline}
-              </li>
-              <li>Avg Time to Review: {userStats.avg_time_to_review}</li>
-              <li>
-                Deadline Compliance Rate: {userStats.deadline_compliance_rate}
-              </li>
-              <li>Review Rating: {userStats.review_rating}</li>
-            </ul>
+
+          {/* New flex container for roles and stats */}
+          <div style={flexContainerStyle}>
+            {/* Roles section with scrollability */}
+            <div style={rolesContainerStyle}>
+              <ProfileUserRoles
+                activeRoles={activeRoles.map((role) => ({
+                  name: role?.name || "Unknown",
+                }))}
+                pastRoles={pastRoles.map((role) => ({
+                  name: role?.name || "Unknown",
+                }))}
+              />
+            </div>
+
+            {/* Stats section */}
+            <div style={statsContainerStyle}>
+              <h3 style={statsTitleStyle}>Stats</h3>
+              <div>
+                <table style={statsTableStyle}>
+                  <tbody>
+                    <tr>
+                      <td style={statsCellStyle}>Average Rating Given:</td>
+                      <td style={lastCellStyle}>{userStats.avg_rating_given}</td>
+                    </tr>
+                    <tr>
+                      <td style={statsCellStyle}>Avg Time Before Deadline:</td>
+                      <td style={lastCellStyle}>{userStats.avg_submit_time_before_deadline}</td>
+                    </tr>
+                    <tr>
+                      <td style={statsCellStyle}>Avg Time to Review:</td>
+                      <td style={lastCellStyle}>{userStats.avg_time_to_review}</td>
+                    </tr>
+                    <tr>
+                      <td style={statsCellStyle}>Deadline Compliance Rate:</td>
+                      <td style={lastCellStyle}>{userStats.deadline_compliance_rate}</td>
+                    </tr>
+                    <tr>
+                      <td style={statsCellStyle}>Review Rating:</td>
+                      <td style={lastCellStyle}>{userStats.review_rating}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
           </div>
-          <div style={{ marginTop: "20px" }}>
-            <ProfileUserRoles
-              activeRoles={activeRoles.map((role) => ({
-                name: role?.name || "Unknown",
-              }))}
-              pastRoles={pastRoles.map((role) => ({
-                name: role?.name || "Unknown",
-              }))}
-            />
+
+          <div style={keywordsContainerStyle}>
+            <h3 style={keywordsTitleStyle}>Keywords</h3>
+            <Table size="small" style={{ color: colors.grey[100] }}>
+              <TableHead>
+                <TableRow>
+                  <TableCell style={{ backgroundColor: colors.grey[400], color: colors.grey[100], borderBottom: `1px solid ${colors.grey[100]}` }}>
+                    <strong>Preferred Keywords</strong>
+                  </TableCell>
+                  <TableCell style={{ backgroundColor: colors.grey[400], color: colors.grey[100], borderBottom: `1px solid ${colors.grey[100]}` }}>
+                    <strong>Unwanted Keywords</strong>
+                  </TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {Array.from({
+                  length: Math.max(
+                    preferredKeywords.length,
+                    unwantedKeywords.length
+                  ),
+                }).map((_, index) => (
+                  <TableRow key={index}>
+                    <TableCell style={{ backgroundColor: colors.grey[400] ,color: colors.grey[400], borderBottom: `1px solid ${colors.grey[100]}` }}>
+                      {preferredKeywords[index] || "-"}
+                    </TableCell>
+                    <TableCell style={{ color: colors.grey[400], borderBottom: `1px solid ${colors.grey[100]}` }}>
+                      {unwantedKeywords[index] || "-"}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
           </div>
         </div>
       </div>
 
-      <Dialog open={isEditOpen} onClose={handleEditClose}>
+      <Dialog
+        open={isEditOpen}
+        onClose={handleEditClose}
+        fullWidth
+        maxWidth="sm"
+      >
         <DialogTitle>Edit Personal Information</DialogTitle>
         <DialogContent
           style={{
@@ -294,39 +423,37 @@ const ProfilePage: React.FC = () => {
             onChange={handleEditChange}
           />
 
-          <FormControl>
-            <InputLabel>Preferred Keywords</InputLabel>
-            <Select
-              multiple
-              value={preferredKeywords}
-              onChange={handlePreferredChange}
-              renderValue={(selected) => (selected as string[]).join(", ")}
-            >
-              {allKeywords.map((keyword) => (
-                <MenuItem key={keyword} value={keyword}>
-                  <Checkbox checked={preferredKeywords.indexOf(keyword) > -1} />
-                  <ListItemText primary={keyword} />
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
+          <Autocomplete
+            multiple
+            options={allKeywords}
+            value={preferredKeywords}
+            onChange={(_, newValue) => setPreferredKeywords(newValue)}
+            filterSelectedOptions
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                variant="outlined"
+                label="Preferred Keywords"
+                placeholder="Search keywords"
+              />
+            )}
+          />
 
-          <FormControl>
-            <InputLabel>Unwanted Keywords</InputLabel>
-            <Select
-              multiple
-              value={unwantedKeywords}
-              onChange={handleUnwantedChange}
-              renderValue={(selected) => (selected as string[]).join(", ")}
-            >
-              {/* {allKeywords.map((keyword) => (
-                <MenuItem key={keyword} value={keyword}>
-                  <Checkbox checked={unwantedKeywords.indexOf(keyword) > -1} />
-                  <ListItemText primary={keyword} />
-                </MenuItem>
-              ))} */}
-            </Select>
-          </FormControl>
+          <Autocomplete
+            multiple
+            options={allKeywords}
+            value={unwantedKeywords}
+            onChange={(_, newValue) => setUnwantedKeywords(newValue)}
+            filterSelectedOptions
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                variant="outlined"
+                label="Unwanted Keywords"
+                placeholder="Search keywords"
+              />
+            )}
+          />
         </DialogContent>
         <DialogActions>
           <Button onClick={handleEditClose}>Cancel</Button>
