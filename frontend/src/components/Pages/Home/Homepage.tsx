@@ -61,6 +61,8 @@ const Homepage: React.FC = () => {
   const handleAssignPaper = () => {
     navigate("/paper/assign");
   };
+
+  console.log("Conferences:", conferences); 
   return (
     <>
       <Topbar></Topbar>
@@ -95,12 +97,15 @@ const Homepage: React.FC = () => {
               : conferences.length > 0
                 ? (
                   <div className="conference-list">
-                    {conferences.map(conf => (
+                    {
+                    conferences.map(conf => (
+                      console.log(conf.id),
                       <AppTitle
                         key={conf.id}
                         text={conf.name}
                         onClick={() => handleConferenceClick(conf)}
                       />
+                      
                     ))}
                   </div>
                 )

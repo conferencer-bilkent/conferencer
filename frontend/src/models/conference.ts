@@ -7,7 +7,6 @@ export interface ReviewFlag {
   
   export interface Conference {
     id: string;                      // flatten ObjectId.$oid
-    conferenceId: string;            // from conference_id
     name: string;
     acronym: string;
     shortAcronym: string;

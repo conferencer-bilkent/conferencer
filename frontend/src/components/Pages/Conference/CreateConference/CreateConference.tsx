@@ -5,7 +5,7 @@ import { getMenuItemsForPage } from "../../../global/sideMenuConfig";
 import { handleMenuItemClick } from "../../../../utils/navigation/menuNavigation";
 import SideMenu from "../../../global/SideMenu";
 import Topbar from "../../../global/TopBar";
-import { createConference } from "../../../../services/conferenceService";
+import { createConference, mapApiResponseToConference } from "../../../../services/conferenceService";
 import { useConference } from "../../../../context/ConferenceContext";
 
 const steps = [
@@ -220,8 +220,12 @@ const CreateConference: React.FC = () => {
         const conferenceId = await createConference(payload);
 
         // build a Conference object and mark it active
-        const newConf = { conference_id: conferenceId, ...payload } as any;  // you may cast to your Conference type
-        setActiveConference(newConf);                                        // ← NEW
+        const newConf = mapApiResponseToConference({
+          conference_id: conferenceId,
+          ...payload,
+          created_at: new Date().toISOString()
+        });
+        setActiveConference(newConf);
 
         alert("Conference created!");
       } catch (err: any) {
