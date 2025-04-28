@@ -6,7 +6,6 @@ class Conference:
                  state, country, submission_page, license_expiry, contact_emails,
                  forwarding_emails_conference, forwarding_emails_tracks,
                  created_by,
-                 # 🔽 Configurable fields
                  double_blind_review,
                  can_pc_see_unassigned_submissions,
                  abstract_before_full,
@@ -38,6 +37,7 @@ class Conference:
                  pc_members = None,
                  authors = None,
                  created_at=None,
+                 description=None,
                  ):
 
         self.conference_id = str(ObjectId())
@@ -56,6 +56,7 @@ class Conference:
         self.forwarding_emails_tracks = forwarding_emails_tracks or []
         self.created_by = created_by
         self.created_at = created_at or datetime.utcnow()
+        description = description or ""
 
         self.superchairs = superchairs if superchairs is not None else [created_by]
         self.track_chairs = track_chairs
@@ -63,7 +64,6 @@ class Conference:
         self.authors = authors
 
 
-        # 🔽 Individual config values (value + scope)
         self.double_blind_review = double_blind_review
         self.can_pc_see_unassigned_submissions = can_pc_see_unassigned_submissions
         self.abstract_before_full = abstract_before_full
@@ -98,6 +98,7 @@ class Conference:
             "acronym": self.acronym,
             "short_acronym": self.short_acronym,
             "website": self.website,
+            "description": self.description,
             "city": self.city,
             "venue": self.venue,
             "state": self.state,

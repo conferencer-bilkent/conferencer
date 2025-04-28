@@ -22,6 +22,7 @@ def create_conference():
             venue=data.get("venue"),
             state=data.get("state"),
             country=data.get("country"),
+            description=data.get("description"),
             submission_page=data.get("submission_page"),
             license_expiry=data.get("license_expiry"),
             contact_emails=data.get("contact_emails"),
