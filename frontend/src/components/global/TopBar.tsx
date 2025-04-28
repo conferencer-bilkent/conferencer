@@ -13,8 +13,9 @@ import {
   Button,
   Grow,
   ClickAwayListener,
+  Badge,
 } from "@mui/material";
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { ColorModeContext, tokens } from "../../theme";
 import LightModeOutlinedIcon from "@mui/icons-material/LightModeOutlined";
 import DarkModeOutlinedIcon from "@mui/icons-material/DarkModeOutlined";
@@ -33,6 +34,7 @@ interface Notification {
   is_answered: boolean;
   created_at: string;
   is_accepted: boolean;
+  is_read: boolean;
 }
 
 const Topbar: React.FC = () => {
@@ -100,7 +102,13 @@ const Topbar: React.FC = () => {
       console.error("Error fetching notifications:", err);
     }
   };
+  useEffect(() => {
+    fetchNotifications();
+  }, []);
 
+  // 3. Compute unread count
+  const unreadCount = notifications.filter((n) => !n.is_read).length;
+  console.log("Unread notifications count:", unreadCount);
   const handleSearchFocus = async () => {
     if (users.length === 0) {
       await fetchUsers();
@@ -297,7 +305,14 @@ const Topbar: React.FC = () => {
         <ClickAwayListener onClickAway={() => setShowNotifications(false)}>
           <Box position="relative">
             <IconButton onClick={handleNotificationsClick}>
-              <NotificationsOutlinedIcon />
+              <Badge
+                badgeContent={unreadCount}
+                color="error"
+                overlap="circular"
+                invisible={unreadCount === 0}
+              >
+                <NotificationsOutlinedIcon />
+              </Badge>
             </IconButton>
             <Grow
               in={showNotifications}
