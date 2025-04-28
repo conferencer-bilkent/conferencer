@@ -1,6 +1,7 @@
 from flask import request, jsonify, session
 from extensions import mongo
 from bson.objectid import ObjectId
+from models.role import Role
 
 def assign_role():
     if 'user_id' not in session:
@@ -53,7 +54,6 @@ def assign_role():
 
 def get_roles():
     try:
-        # Get query parameters - using request.args for GET requests is more RESTful than using body
         filters = {}
         if request.args.get('conference_id'):
             filters['conference_id'] = request.args.get('conference_id')
@@ -62,10 +62,8 @@ def get_roles():
         if request.args.get('position'):
             filters['position'] = request.args.get('position')
         
-        # Execute query with filters (if any)
         roles = list(mongo.db.roles.find(filters))
         
-        # Convert MongoDB objects to dictionaries
         roles_list = []
         for role in roles:
             role_obj = Role(
@@ -102,11 +100,3 @@ def get_role(role_id):
     
 
 
-class Role:
-    def __init__(
-    self, id=None, conference_id=None, track_id=None, position=None, is_active=True):
-        self.id = ObjectId() if id is None else id
-        self.conference_id = conference_id
-        self.track_id = track_id
-        self.position = position
-        self.is_active = is_active
