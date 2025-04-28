@@ -19,10 +19,9 @@ import SubmissionsList from "./components/Pages/AddSubmissions/components/homePa
 import AddSubmissionPage from "./components/Pages/AddSubmissions/components/homePage/addSubmission/addSubmission";
 import { SubmissionProvider } from "./context/addSubmissionContext";
 import { UserProvider } from "./context/UserContext";
-import { ConferenceProvider } from "./context/ConferenceContext";  // add this
+import { ConferenceProvider } from "./context/ConferenceContext"; // add this
 import ChatPage from "./components/Pages/Chat/ChatPage";
 import NotificationsPage from "./components/Pages/Notifications/Notifications";
-import AssignPaper from "./components/Pages/Conference/Paper/AssignPaper";
 import CreateTrack from "./components/Pages/Conference/CreateTrack/CreateTrack";
 
 const App: React.FC = () => {
@@ -33,7 +32,7 @@ const App: React.FC = () => {
       <ThemeProvider theme={theme}>
         <CssBaseline />
         <UserProvider>
-         <ConferenceProvider>             
+          <ConferenceProvider>
             <Box
               sx={{
                 minHeight: "100vh",
@@ -66,7 +65,6 @@ const App: React.FC = () => {
                       element={<NotificationsPage />}
                     />
                     <Route path="/chat" element={<ChatPage />} />
-                    <Route path="/paper/assign" element={<AssignPaper />} />
                     <Route path="/review" element={<ReviewsPage />} />
                     <Route path="/profile/:id" element={<ProfilePage />} />
                     <Route path="/reviews" element={<ReviewDetailPage />} />
@@ -85,7 +83,7 @@ const App: React.FC = () => {
                 </div>
               </Router>
             </Box>
-         </ConferenceProvider>           
+          </ConferenceProvider>
         </UserProvider>
       </ThemeProvider>
     </ColorModeContext.Provider>
