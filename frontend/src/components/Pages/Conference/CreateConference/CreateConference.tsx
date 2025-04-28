@@ -5,7 +5,10 @@ import { getMenuItemsForPage } from "../../../global/sideMenuConfig";
 import { handleMenuItemClick } from "../../../../utils/navigation/menuNavigation";
 import SideMenu from "../../../global/SideMenu";
 import Topbar from "../../../global/TopBar";
-import { createConference, mapApiResponseToConference } from "../../../../services/conferenceService";
+import {
+  createConference,
+  mapApiResponseToConference,
+} from "../../../../services/conferenceService";
 import { useConference } from "../../../../context/ConferenceContext";
 
 const steps = [
@@ -131,7 +134,7 @@ const CreateConference: React.FC = () => {
   const [currentStep, setCurrentStep] = useState(0);
   const [form, setForm] = useState<ConferenceForm>(defaultForm);
   const [invalidFields, setInvalidFields] = useState<Set<string>>(new Set());
-  const { setActiveConference } = useConference();          // ← NEW
+  const { setActiveConference } = useConference(); // ← NEW
 
   useEffect(() => {
     setInvalidFields(new Set());
@@ -223,8 +226,9 @@ const CreateConference: React.FC = () => {
         const newConf = mapApiResponseToConference({
           conference_id: conferenceId,
           ...payload,
-          created_at: new Date().toISOString()
+          created_at: new Date().toISOString(),
         });
+        console.log("here: ");
         setActiveConference(newConf);
 
         alert("Conference created!");

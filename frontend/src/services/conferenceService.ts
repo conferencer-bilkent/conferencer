@@ -78,14 +78,16 @@ export const createConference = async (
   payload: Record<string, any>
 ): Promise<number> => {
   try {
-    const res = await fetch("http://localhost:5000/conference/create", {
+    const res = await fetch("http://127.0.0.1:5000/conference/create", {
       method: "POST",
       credentials: "include",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
     });
-    console.log("payload: ",payload)
+    console.log("res: ",res)
+    
     const data = await res.json();
+    console.log("data: ",data)
     if (!res.ok) {
       throw new Error(data.error || res.statusText);
     }
