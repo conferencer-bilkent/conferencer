@@ -6,11 +6,10 @@ import { getMenuItemsForPage } from "../../../global/sideMenuConfig";
 import { handleMenuItemClick } from "../../../../utils/navigation/menuNavigation";
 import SideMenu from "../../../global/SideMenu";
 import Topbar from "../../../global/TopBar";
- 
-// import {
-//   createTrack,
-//   mapApiResponseToTrack,
-// } from "../../../../services/trackService";
+import {
+  createTrack,
+  mapApiResponseToTrack,
+} from "../../../../services/trackService";
 import { useConference } from "../../../../context/ConferenceContext";
 
 const steps = [
@@ -73,7 +72,7 @@ const CreateTrack: React.FC = () => {
   const [currentStep, setCurrentStep] = useState(0);
   const [form, setForm] = useState<TrackForm>(defaultForm);
   const [invalidFields, setInvalidFields] = useState<Set<string>>(new Set());
- // const { addTrack } = useConference();
+  const { activeConference } = useConference();
 
   useEffect(() => {
     setInvalidFields(new Set());
@@ -125,11 +124,25 @@ const CreateTrack: React.FC = () => {
     });
     if (currentStep === steps.length - 1) {
       try {
-        // const trackId = await createTrack(payload);
-        // const newTrack = mapApiResponseToTrack({ track_id: trackId, ...payload, created_at: new Date().toISOString() });
-        //addTrack(newTrack);
-        alert("Track created!");
-        //navigate(`/conference/${newTrack.conferenceId}/tracks`);
+        if (!activeConference) {
+          throw new Error("No active conference selected");
+        }
+        
+        // Add conference_id to payload
+        payload.conference_id = activeConference.id;
+        
+        const trackId = await createTrack(payload);
+        const newTrack = mapApiResponseToTrack({ 
+          track_id: trackId, 
+          ...payload, 
+          created_at: new Date().toISOString() 
+        });
+        
+        // If you have an addTrack function in your context
+        // addTrack(newTrack);
+        
+        alert("Track created successfully!");
+        navigate(`/conference/`);
       } catch (err: any) {
         alert(`Error: ${err.message}`);
       }
