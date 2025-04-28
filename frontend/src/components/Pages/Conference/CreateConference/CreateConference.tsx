@@ -5,6 +5,11 @@ import { getMenuItemsForPage } from "../../../global/sideMenuConfig";
 import { handleMenuItemClick } from "../../../../utils/navigation/menuNavigation";
 import SideMenu from "../../../global/SideMenu";
 import Topbar from "../../../global/TopBar";
+import {
+  createConference,
+  mapApiResponseToConference,
+} from "../../../../services/conferenceService";
+import { useConference } from "../../../../context/ConferenceContext";
 
 const steps = [
   {
@@ -129,6 +134,7 @@ const CreateConference: React.FC = () => {
   const [currentStep, setCurrentStep] = useState(0);
   const [form, setForm] = useState<ConferenceForm>(defaultForm);
   const [invalidFields, setInvalidFields] = useState<Set<string>>(new Set());
+  const { setActiveConference } = useConference(); // ← NEW
 
   useEffect(() => {
     setInvalidFields(new Set());
@@ -193,7 +199,7 @@ const CreateConference: React.FC = () => {
     });
   };
 
-  const handleFormSubmit = (e: React.FormEvent) => {
+  const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const invalid = validateCurrentStep();
 
@@ -202,9 +208,32 @@ const CreateConference: React.FC = () => {
       return;
     }
 
+    // build payload by unwrapping any { value, scope } objects
+    const payload: Record<string, any> = {};
+    Object.entries(form).forEach(([key, val]) => {
+      if (val && typeof val === "object" && "value" in val) {
+        payload[key] = (val as any).value;
+      } else {
+        payload[key] = val;
+      }
+    });
+
     if (currentStep === steps.length - 1) {
-      console.log("Creating conference with:", form);
-      alert("Conference created successfully!");
+      try {
+        const conferenceId = await createConference(payload);
+
+        // build a Conference object and mark it active
+        const newConf = mapApiResponseToConference({
+          conference_id: conferenceId,
+          ...payload,
+          created_at: new Date().toISOString(),
+        });
+        setActiveConference(newConf);
+
+        alert("Conference created!");
+      } catch (err: any) {
+        alert(`Error: ${err.message || "Network error"}`);
+      }
     } else {
       setCurrentStep((prev) => Math.min(prev + 1, steps.length - 1));
     }
