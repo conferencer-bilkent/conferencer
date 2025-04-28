@@ -56,7 +56,7 @@ class Conference:
         self.forwarding_emails_tracks = forwarding_emails_tracks or []
         self.created_by = created_by
         self.created_at = created_at or datetime.utcnow()
-        description = description or ""
+        self.description = description or ""
 
         self.superchairs = superchairs if superchairs is not None else [created_by]
         self.track_chairs = track_chairs
