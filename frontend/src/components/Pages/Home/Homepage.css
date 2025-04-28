@@ -31,3 +31,11 @@
     margin-bottom: 10px; /* Space below the title */
     align-self: flex-start; /* Align title to the left */
   }
+
+/* make the mapped list a full‑width, vertical stack */
+.conference-list {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  gap: 8px;           /* optional spacing between items */
+}
