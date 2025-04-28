@@ -228,7 +228,6 @@ const CreateConference: React.FC = () => {
           ...payload,
           created_at: new Date().toISOString(),
         });
-        console.log("here: ");
         setActiveConference(newConf);
 
         alert("Conference created!");

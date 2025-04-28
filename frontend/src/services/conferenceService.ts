@@ -84,10 +84,8 @@ export const createConference = async (
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
     });
-    console.log("res: ",res)
     
     const data = await res.json();
-    console.log("data: ",data)
     if (!res.ok) {
       throw new Error(data.error || res.statusText);
     }
