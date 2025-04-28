@@ -5,6 +5,7 @@ from extensions import mongo
 from models.pc_member_invitation import PCMemberInvitation
 from routes.notification_routes import send_notification
 from models.role import Role
+from routes.track_routes import get_tracks_by_conference
 
 def create_conference():
     if "user_id" not in session:
@@ -115,6 +116,13 @@ def get_conferences():
         for conference in conferences:
             conf_dict = dict(conference)
             conf_dict['_id'] = str(conf_dict['_id'])
+            tracks = mongo.db.tracks.find({"conference_id": conf_dict["conference_id"]})
+            track_list = []
+            for track in tracks:
+                track_dict = dict(track)
+                track_dict['_id'] = str(track_dict['_id'])
+                track_list.append(track_dict)
+            conf_dict['tracks'] = track_list
             result.append(conf_dict)
 
         return jsonify({"conferences": result}), 200
@@ -124,16 +132,30 @@ def get_conferences():
 
 def get_conference(conference_id):
     try:
-        conference = mongo.db.conferences.find_one({"_id": ObjectId(conference_id)})
+        conference = mongo.db.conferences.find_one({"conference_id": conference_id})
         
         if not conference:
             return jsonify({"error": "Conference not found"}), 404
 
-        conf_dict = dict(conference)  # MongoDB document
-        conf_dict['conference_id'] = str(conf_dict.pop('id'))  # Handle ID properly
-        conf_dict['conference_id'] = str(conf_dict.pop('_id'))  # Handle ID properly
-        conf_obj = Conference(**conf_dict)  # Create Conference object
-        return jsonify({"conference": conf_obj.to_dict()}), 200
+        # return the conference details
+
+        conf_dict = dict(conference)
+        conf_dict['_id'] = str(conf_dict['_id'])
+
+        # Get tracks for the conference
+        tracks = mongo.db.tracks.find({"conference_id": conference_id})
+        track_list = []
+
+        for track in tracks:
+            track_dict = dict(track)
+            track_dict['_id'] = str(track_dict['_id'])
+            track_list.append(track_dict)
+        conf_dict['tracks'] = track_list
+
+
+        return jsonify({
+            "conference": conf_dict
+        }), 200        
 
     except Exception as e:
         return jsonify({"error": f"Failed to retrieve conference: {str(e)}"}), 500
