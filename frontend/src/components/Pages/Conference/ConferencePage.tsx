@@ -101,6 +101,7 @@ const ConferencePage: React.FC = () => {
               <AppButton
                 icon={<FaPlusCircle />}
                 text="Add Track"
+                onClick={() => navigate("/conference/createTrack")}
                 // no popup for this one
               />
             </div>

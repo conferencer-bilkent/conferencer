@@ -1,28 +1,19 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { FaSearch } from "react-icons/fa";
 import SelectPeopleItem, { Person } from "./SelectPeopleItem";
-
 import SelectPaperItem, { Paper } from "./SelectPaperItem";
-
 
 interface SelectPeoplePopupProps {
   buttonText: string; // e.g., "Invite People", "Assign Superchair(s)", etc.
   onClose: () => void; // callback to close the popup
 }
 
-// Five example people (just for demo)
-const EXAMPLE_PEOPLE: Person[] = [
-  { id: 1, name: "Alice Johnson" },
-  { id: 2, name: "Bob Smith" },
-  { id: 3, name: "Charlie Brown" },
-  { id: 4, name: "Diana Prince" },
-  { id: 5, name: "Evan Stone" },
-];
-
+// Example papers (demo)
 const EXAMPLE_PAPERS: Paper[] = [
   {
     id: 1,
-    title: "Impact of Virtual Reality on Cognitive Learning in Higher Education",
+    title:
+      "Impact of Virtual Reality on Cognitive Learning in Higher Education",
     authors: "Jane Doe, Memduh Tutus, Bilal Kar, et al.",
   },
   {
@@ -31,7 +22,6 @@ const EXAMPLE_PAPERS: Paper[] = [
     authors: "Alice Johnson, Bob Smith",
   },
 ];
-
 
 const styles = {
   overlay: {
@@ -64,15 +54,13 @@ const styles = {
     fontSize: "1.2rem",
     cursor: "pointer",
   },
-  // --- Search Bar Styles ---
   searchContainer: {
     display: "flex",
     alignItems: "center",
-    border: "2px solid #00aaff",   // Light blue border
+    border: "2px solid #00aaff",
     borderRadius: "20px",
     background: "#1f2a32",
     padding: "0.5rem 1rem",
-    // No margin-bottom here, we separate with the line below
     color: "#fff",
   } as React.CSSProperties,
   searchIcon: {
@@ -87,13 +75,11 @@ const styles = {
     color: "#fff",
     fontSize: "1rem",
   } as React.CSSProperties,
-  // Horizontal divider under the search bar
   divider: {
     border: "none",
     borderBottom: "2px solid #fff",
     margin: "1rem 0",
   } as React.CSSProperties,
-  // --- Button at the bottom ---
   popupButton: {
     padding: "0.75rem 1rem",
     border: "none",
@@ -109,63 +95,86 @@ const SelectPeoplePopup: React.FC<SelectPeoplePopupProps> = ({
   onClose,
 }) => {
   const [searchTerm, setSearchTerm] = useState("");
-
   const [selectedItems, setSelectedItems] = useState<number[]>([]);
-  
+  const [people, setPeople] = useState<Person[]>([]);
+  const [loading, setLoading] = useState(false);
+
   const isPaperMode = buttonText === "Select Paper(s)";
 
   const handleToggle = (id: number) => {
     setSelectedItems((prev) =>
-
       prev.includes(id) ? prev.filter((p) => p !== id) : [...prev, id]
     );
   };
 
-  // Choose data set based on mode
-  const dataList = isPaperMode ? EXAMPLE_PAPERS : EXAMPLE_PEOPLE;
-  
-  // Search filter
+  // Fetch people when popup opens (non-paper mode)
+  const fetchPeople = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch("http://127.0.0.1:5000/profile/users", {
+        credentials: "include",
+      });
+      if (!res.ok) throw new Error("Fetch failed");
+      const data: Person[] = await res.json();
+      setPeople(data);
+    } catch (err) {
+      console.error("Error fetching people:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!isPaperMode) {
+      fetchPeople();
+    }
+  }, [isPaperMode]);
+
+  // Choose correct data list
+  const dataList = isPaperMode ? EXAMPLE_PAPERS : people;
+
+  // Filter based on search term
   const filteredItems = dataList.filter((item) =>
-    (isPaperMode 
-      ? (item as Paper).title 
-      : (item as Person).name
-    ).toLowerCase().includes(searchTerm.toLowerCase())
+    (isPaperMode ? (item as Paper).title : (item as Person).name)
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase())
   );
 
   return (
     <div style={styles.overlay} onClick={onClose}>
       <div style={styles.popupContent} onClick={(e) => e.stopPropagation()}>
-        <button style={styles.closeButton} onClick={onClose}>✕</button>
+        <button style={styles.closeButton} onClick={onClose}>
+          ✕
+        </button>
 
         <div style={styles.searchContainer}>
           <FaSearch style={styles.searchIcon} />
-
           <input
             type="text"
-            placeholder="Search..."
+            placeholder={isPaperMode ? "Search papers..." : "Search people..."}
             value={searchTerm}
             style={styles.searchInput}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
 
-
         <hr style={styles.divider} />
 
         {isPaperMode ? (
-          <SelectPaperItem 
-            papers={filteredItems as Paper[]} 
-            selectedIds={selectedItems} 
-            onToggle={handleToggle} 
+          <SelectPaperItem
+            papers={filteredItems as Paper[]}
+            selectedIds={selectedItems}
+            onToggle={handleToggle}
           />
+        ) : loading ? (
+          <p style={{ color: "#fff" }}>Loading...</p>
         ) : (
-          <SelectPeopleItem 
-            people={filteredItems as Person[]} 
-            selectedIds={selectedItems} 
-            onToggle={handleToggle} 
+          <SelectPeopleItem
+            people={filteredItems as Person[]}
+            selectedIds={selectedItems}
+            onToggle={handleToggle}
           />
         )}
-
 
         <button style={styles.popupButton} onClick={onClose}>
           {buttonText}
@@ -174,6 +183,5 @@ const SelectPeoplePopup: React.FC<SelectPeoplePopupProps> = ({
     </div>
   );
 };
-
 
 export default SelectPeoplePopup;
