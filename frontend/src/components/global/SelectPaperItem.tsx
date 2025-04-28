@@ -1,6 +1,5 @@
 import React from "react";
-import { FaBook } from "react-icons/fa";
-import { FaRegSquare, FaCheckSquare } from "react-icons/fa";
+import { FaBook, FaRegSquare, FaCheckSquare } from "react-icons/fa";
 
 export interface Paper {
   id: number;
@@ -15,23 +14,23 @@ interface SelectPaperItemProps {
 }
 
 const styles = {
-  paperItem: {
+  item: {
     display: "flex",
     alignItems: "center",
     justifyContent: "space-between",
     padding: "0.75rem",
     margin: "0.5rem 0",
     borderRadius: "12px",
-    border: "2px solid #2cbbf7", // Light blue border
-    cursor: "pointer",
-    color: "#fff",
+    border: "2px solid #2cbbf7",
     background: "#1f2a32",
+    color: "#fff",
+    cursor: "pointer",
   } as React.CSSProperties,
-  selectedPaperItem: {
-    background: "#2cbbf7", // Highlight background
+  selected: {
+    background: "#2cbbf7",
     color: "#000",
   } as React.CSSProperties,
-  leftSection: {
+  left: {
     display: "flex",
     alignItems: "center",
     flex: 1,
@@ -63,33 +62,29 @@ const SelectPaperItem: React.FC<SelectPaperItemProps> = ({
   papers,
   selectedIds,
   onToggle,
-}) => {
-  return (
-    <div>
-      {papers.map((paper) => {
-        const isSelected = selectedIds.includes(paper.id);
-        const containerStyle = {
-          ...styles.paperItem,
-          ...(isSelected ? styles.selectedPaperItem : {}),
-        };
-        const checkboxIcon = isSelected ? <FaCheckSquare /> : <FaRegSquare />;
-
-        return (
-          <div key={paper.id} style={containerStyle} onClick={() => onToggle(paper.id)}>
-            <div style={styles.leftSection}>
-              <FaBook style={styles.icon} />
-              <div style={styles.details}>
-                <span style={styles.title}>{paper.title}</span>
-                <span style={styles.authors}>By {paper.authors}</span>
-                <span style={styles.seeMore}>See More Details</span>
-              </div>
+}) => (
+  <>
+    {papers.map((paper) => {
+      const isSelected = selectedIds.includes(paper.id);
+      return (
+        <div
+          key={paper.id}
+          style={{ ...styles.item, ...(isSelected ? styles.selected : {}) }}
+          onClick={() => onToggle(paper.id)}
+        >
+          <div style={styles.left}>
+            <FaBook style={styles.icon} />
+            <div style={styles.details}>
+              <span style={styles.title}>{paper.title}</span>
+              <span style={styles.authors}>By {paper.authors}</span>
+              <span style={styles.seeMore}>See more</span>
             </div>
-            {checkboxIcon}
           </div>
-        );
-      })}
-    </div>
-  );
-};
+          {isSelected ? <FaCheckSquare /> : <FaRegSquare />}
+        </div>
+      );
+    })}
+  </>
+);
 
 export default SelectPaperItem;

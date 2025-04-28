@@ -1,13 +1,25 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { FaSearch } from "react-icons/fa";
-import SelectPeopleItem, { Person } from "./SelectPeopleItem";
-import { UserData } from "../../models/user";
+import SelectPaperItem, { Paper } from "./SelectPaperItem";
 
 interface Props {
-  buttonText: string;
-  people?: UserData[]; // Optional prop for demo purposes
+  buttonText: string; // e.g. “Select Paper(s)”
   onClose: () => void;
 }
+
+// Demo data; replace with real fetch if needed
+const EXAMPLE_PAPERS: Paper[] = [
+  {
+    id: 1,
+    title: "Impact of Virtual Reality on Cognitive Learning",
+    authors: "Jane Doe, Memduh Tutus",
+  },
+  {
+    id: 2,
+    title: "AI-Powered Learning Tools: A Future Perspective",
+    authors: "Alice Johnson, Bob Smith",
+  },
+];
 
 const styles = {
   overlay: {
@@ -49,6 +61,11 @@ const styles = {
     color: "#fff",
     marginBottom: "1rem",
   } as React.CSSProperties,
+  divider: {
+    border: "none",
+    borderBottom: "2px solid #fff",
+    margin: "1rem 0",
+  } as React.CSSProperties,
   action: {
     marginTop: "1rem",
     padding: "0.75rem 1rem",
@@ -61,17 +78,18 @@ const styles = {
   } as React.CSSProperties,
 };
 
-const SelectPeoplePopup: React.FC<Props> = ({ buttonText, onClose }) => {
+const SelectPaperPopup: React.FC<Props> = ({ buttonText, onClose }) => {
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<number[]>([]);
 
-  // extracted fetch-people logic
-
-  // call it once on mount
   const toggle = (id: number) =>
     setSelected((s) =>
       s.includes(id) ? s.filter((x) => x !== id) : [...s, id]
     );
+
+  const filtered = EXAMPLE_PAPERS.filter((p) =>
+    p.title.toLowerCase().includes(search.toLowerCase())
+  );
 
   return (
     <div style={styles.overlay} onClick={onClose}>
@@ -83,7 +101,7 @@ const SelectPeoplePopup: React.FC<Props> = ({ buttonText, onClose }) => {
           <FaSearch style={{ marginRight: 8 }} />
           <input
             type="text"
-            placeholder="Search people..."
+            placeholder="Search papers..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             style={{
@@ -95,13 +113,11 @@ const SelectPeoplePopup: React.FC<Props> = ({ buttonText, onClose }) => {
             }}
           />
         </div>
-
-        <SelectPeopleItem
-          people={filtered}
+        <SelectPaperItem
+          papers={filtered}
           selectedIds={selected}
           onToggle={toggle}
         />
-
         <button style={styles.action} onClick={onClose}>
           {buttonText}
         </button>
@@ -110,4 +126,4 @@ const SelectPeoplePopup: React.FC<Props> = ({ buttonText, onClose }) => {
   );
 };
 
-export default SelectPeoplePopup;
+export default SelectPaperPopup;
