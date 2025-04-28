@@ -68,7 +68,7 @@ keywords_bp.route("/<keyword>", methods=["POST"])(add_keyword)
 keywords_bp.route("/", methods=["POST"])(set_keywords)
 
 track_bp.route("/", methods=["GET"])(get_all_tracks)
-track_bp.route("/<conference_id>", methods=["GET"])(get_tracks_by_conference)
+track_bp.route("/<conference_id>/conference", methods=["GET"])(get_tracks_by_conference)
 track_bp.route("/create", methods=["POST"])(create_track)
 track_bp.route("/appoint_track_chairs", methods=["POST"])(appoint_track_chair)
 track_bp.route("/<track_id>/people", methods=["GET"])(get_track_by_people)
