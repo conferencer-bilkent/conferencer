@@ -19,6 +19,7 @@ import SubmissionsList from "./components/Pages/AddSubmissions/components/homePa
 import AddSubmissionPage from "./components/Pages/AddSubmissions/components/homePage/addSubmission/addSubmission";
 import { SubmissionProvider } from "./context/addSubmissionContext";
 import { UserProvider } from "./context/UserContext";
+import { ConferenceProvider } from "./context/ConferenceContext";  // add this
 import ChatPage from "./components/Pages/Chat/ChatPage";
 import NotificationsPage from "./components/Pages/Notifications/Notifications";
 import AssignPaper from "./components/Pages/Conference/Paper/AssignPaper";
@@ -31,53 +32,55 @@ const App: React.FC = () => {
       <ThemeProvider theme={theme}>
         <CssBaseline />
         <UserProvider>
-          <Box
-            sx={{
-              minHeight: "100vh",
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              bgcolor: theme.palette.background.default,
-              transition:
-                "background-color 0.3s ease-in-out, color 0.3s ease-in-out",
-            }}
-          >
-            <Router>
-              <div className="App">
-                <Routes>
-                  <Route path="/login" element={<LoginForm />} />
-                  <Route path="/register" element={<RegisterForm />} />
-                  <Route path="/home" element={<HomePage />} />
-                  <Route path="/conference" element={<ConferencePage />} />
-                  <Route
-                    path="/conference/create"
-                    element={<CreateConference />}
-                  />
-                  <Route path="/mytasks" element={<MyTasks />} />
-                  <Route
-                    path="/notifications"
-                    element={<NotificationsPage />}
-                  />
-                  <Route path="/chat" element={<ChatPage />} />
-                  <Route path="/paper/assign" element={<AssignPaper />} />
-                  <Route path="/review" element={<ReviewsPage />} />
-                  <Route path="/profile/:id" element={<ProfilePage />} />
-                  <Route path="/reviews" element={<ReviewDetailPage />} />
-                  <Route path="/ex" element={<SubmissionsList />}></Route>
-                  <Route
-                    path="/addSubmission"
-                    element={
-                      <SubmissionProvider>
-                        <AddSubmissionPage />
-                      </SubmissionProvider>
-                    }
-                  />
+         <ConferenceProvider>             
+            <Box
+              sx={{
+                minHeight: "100vh",
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                bgcolor: theme.palette.background.default,
+                transition:
+                  "background-color 0.3s ease-in-out, color 0.3s ease-in-out",
+              }}
+            >
+              <Router>
+                <div className="App">
+                  <Routes>
+                    <Route path="/login" element={<LoginForm />} />
+                    <Route path="/register" element={<RegisterForm />} />
+                    <Route path="/home" element={<HomePage />} />
+                    <Route path="/conference" element={<ConferencePage />} />
+                    <Route
+                      path="/conference/create"
+                      element={<CreateConference />}
+                    />
+                    <Route path="/mytasks" element={<MyTasks />} />
+                    <Route
+                      path="/notifications"
+                      element={<NotificationsPage />}
+                    />
+                    <Route path="/chat" element={<ChatPage />} />
+                    <Route path="/paper/assign" element={<AssignPaper />} />
+                    <Route path="/review" element={<ReviewsPage />} />
+                    <Route path="/profile/:id" element={<ProfilePage />} />
+                    <Route path="/reviews" element={<ReviewDetailPage />} />
+                    <Route path="/ex" element={<SubmissionsList />}></Route>
+                    <Route
+                      path="/addSubmission"
+                      element={
+                        <SubmissionProvider>
+                          <AddSubmissionPage />
+                        </SubmissionProvider>
+                      }
+                    />
 
-                  <Route path="/" element={<LoginForm />} />
-                </Routes>
-              </div>
-            </Router>
-          </Box>
+                    <Route path="/" element={<LoginForm />} />
+                  </Routes>
+                </div>
+              </Router>
+            </Box>
+         </ConferenceProvider>            // close ConferenceProvider
         </UserProvider>
       </ThemeProvider>
     </ColorModeContext.Provider>

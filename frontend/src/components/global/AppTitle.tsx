@@ -4,19 +4,23 @@ import { tokens } from "../../theme";
 
 interface AppTitleProps {
   text: string;
+  onClick?: () => void;   // add optional onClick handler
 }
 
-const AppTitle: React.FC<AppTitleProps> = ({ text }) => {
+const AppTitle: React.FC<AppTitleProps> = ({ text, onClick }) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
 
   return (
     <Typography
       variant="h4"
+      onClick={onClick}                            // attach onClick
       sx={{
+        cursor: onClick ? "pointer" : "default",  // show pointer if clickable
         border: `2px solid ${colors.grey[100]}`,
         borderRadius: "20px",
         color: colors.grey[100],
+        backgroundColor: colors.primary[800],
         padding: "10px",
         width: "100%",
         boxSizing: "border-box",
@@ -24,6 +28,7 @@ const AppTitle: React.FC<AppTitleProps> = ({ text }) => {
         fontSize: theme.typography.h4.fontSize,
         fontWeight: "bold",
         textAlign: "center",
+        
       }}
     >
       {text}

@@ -1,17 +1,34 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
+import { useConference } from "../../../context/ConferenceContext";
 import { useNavigate } from "react-router-dom";
 import Topbar from "../../global/TopBar";
 import SideMenu from "../../global/SideMenu";
 import AppTitle, { SectionTitle } from "../../global/AppTitle";
+import { getAllConferences } from "../../../services/conferenceService";
+import { Conference } from "../../../models/conference";
 import { getMenuItemsForPage } from "../../global/sideMenuConfig";
 import { handleMenuItemClick } from "../../../utils/navigation/menuNavigation";
 //import useAuth from "../../hooks/useAuth";
 import "./Homepage.css";
 
 const Homepage: React.FC = () => {
+  const { activeConference, setActiveConference } = useConference();
+  const [conferences, setConferences] = useState<Conference[]>([]);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const menuItems = getMenuItemsForPage("default");
   //useAuth();
+
+  useEffect(() => {
+    getAllConferences()
+      .then(setConferences)
+      .finally(() => setLoading(false));
+  }, []);
+
+  // on click, set globally
+  const handleConferenceClick = (conf: Conference) => {
+    setActiveConference(conf);
+  };
 
   const handleLogout = async () => {
     try {
@@ -73,8 +90,22 @@ const Homepage: React.FC = () => {
           {/* Upcoming Conferences Section */}
           <div className="section">
             <SectionTitle text="Upcoming Conferences" />
-            <AppTitle text="OS FAIR 2024" />
-            <AppTitle text="BILKENT CONFERENCE 2025" />
+            {loading
+              ? <div>Loading…</div>
+              : conferences.length > 0
+                ? (
+                  <div className="conference-list">
+                    {conferences.map(conf => (
+                      <AppTitle
+                        key={conf.id}
+                        text={conf.name}
+                        onClick={() => handleConferenceClick(conf)}
+                      />
+                    ))}
+                  </div>
+                )
+                : <div>No conferences found</div>
+            }
           </div>
 
           {/* Past Conferences Section */}
