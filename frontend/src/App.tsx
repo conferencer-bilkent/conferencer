@@ -80,7 +80,7 @@ const App: React.FC = () => {
                 </div>
               </Router>
             </Box>
-         </ConferenceProvider>            // close ConferenceProvider
+         </ConferenceProvider>           
         </UserProvider>
       </ThemeProvider>
     </ColorModeContext.Provider>

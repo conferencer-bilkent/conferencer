@@ -20,3 +20,24 @@ export const getAllConferences = async (): Promise<Conference[]> => {
     throw error;
   }
 };
+
+export const createConference = async (
+  payload: Record<string, any>
+): Promise<number> => {
+  try {
+    const res = await fetch("http://localhost:5000/conference/create", {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      throw new Error(data.error || res.statusText);
+    }
+    return data.conference_id as number;
+  } catch (err) {
+    console.error("Failed to create conference:", err);
+    throw err;
+  }
+};
