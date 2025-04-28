@@ -24,6 +24,7 @@ def get_profile(user_id=None):
         "surname": user.get("surname"),
         "bio": user.get("bio"),
         "stats": stats_data,
+        "roles": user.get("roles"),
         "preferred_keywords": user.get("preferred_keywords"),
         "not_preferred_keywords": user.get("not_preferred_keywords"),
         "affiliation": user.get("affiliation"),

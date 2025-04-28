@@ -4,6 +4,7 @@ from bson import ObjectId
 from extensions import mongo
 from models.pc_member_invitation import PCMemberInvitation
 from routes.notification_routes import send_notification
+from models.role import Role
 
 def create_conference():
     if "user_id" not in session:
@@ -59,10 +60,35 @@ def create_conference():
 
         mongo.db.conferences.insert_one(conference.to_dict())
 
-        return jsonify({
+        new_role = Role(
+            conference_id=conference.conference_id,
+            position="superchair",
+            is_active=True
+        )
+        
+        role_dict = {
+            '_id': new_role.id,
+            'conference_id': new_role.conference_id,
+            'track_id': None,
+            'position': new_role.position,
+            'is_active': new_role.is_active
+        }
+        
+        mongo.db.roles.insert_one(role_dict)
+        
+        user_id = session["user_id"]
+        result = mongo.db.users.update_one(
+            {'_id': ObjectId(user_id)},
+            {'$addToSet': {'roles': str(new_role.id)}}
+        )
+        if result.modified_count > 0:
+            return jsonify({
             "message": "Conference created successfully",
-            "conference_id": conference.id
-        }), 201
+            "conference_id": str(conference.conference_id),
+            "role_id": str(new_role.id)
+            }), 201
+        else:
+            return jsonify({'error': 'User not found or role not updated'}), 404
 
     except Exception as e:
         print("Conference creation error:", e)
