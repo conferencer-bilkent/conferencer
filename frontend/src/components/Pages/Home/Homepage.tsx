@@ -12,7 +12,7 @@ import { handleMenuItemClick } from "../../../utils/navigation/menuNavigation";
 import "./Homepage.css";
 
 const Homepage: React.FC = () => {
-  const {  setActiveConference } = useConference();
+  const { setActiveConference } = useConference();
   const [conferences, setConferences] = useState<Conference[]>([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
@@ -59,7 +59,7 @@ const Homepage: React.FC = () => {
     navigate("/conference/create");
   };
   const handleAssignPaper = () => {
-    navigate("/paper/assign");
+    navigate("/addSubmission");
   };
 
   console.log("Conferences:", conferences);
