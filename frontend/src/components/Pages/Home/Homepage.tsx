@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useConference } from "../../../context/ConferenceContext";
+//import { useConference } from "../../../context/ConferenceContext";
 import { useNavigate } from "react-router-dom";
 import Topbar from "../../global/TopBar";
 import SideMenu from "../../global/SideMenu";
@@ -12,7 +12,7 @@ import { handleMenuItemClick } from "../../../utils/navigation/menuNavigation";
 import "./Homepage.css";
 
 const Homepage: React.FC = () => {
-  const { activeConference, setActiveConference } = useConference();
+  //const { activeConference, setActiveConference } = useConference();
   const [conferences, setConferences] = useState<Conference[]>([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
@@ -26,9 +26,9 @@ const Homepage: React.FC = () => {
   }, []);
 
   // on click, set globally
-  const handleConferenceClick = (conf: Conference) => {
-    setActiveConference(conf);
-  };
+  // const handleConferenceClick = (conf: Conference) => {
+  //   setActiveConference(conf);
+  // };
 
   const handleLogout = async () => {
     try {
@@ -62,7 +62,7 @@ const Homepage: React.FC = () => {
     navigate("/paper/assign");
   };
 
-  console.log("Conferences:", conferences); 
+  console.log("Conferences:", conferences);
   return (
     <>
       <Topbar></Topbar>
@@ -92,25 +92,26 @@ const Homepage: React.FC = () => {
           {/* Upcoming Conferences Section */}
           <div className="section">
             <SectionTitle text="Upcoming Conferences" />
-            {loading
-              ? <div>Loading…</div>
-              : conferences.length > 0
-                ? (
-                  <div className="conference-list">
-                    {
-                    conferences.map(conf => (
-                      console.log(conf.id),
+            {loading ? (
+              <div>Loading…</div>
+            ) : conferences.length > 0 ? (
+              <div className="conference-list">
+                {conferences.map(
+                  (conf) => (
+                    console.log(conf.id),
+                    (
                       <AppTitle
                         key={conf.id}
                         text={conf.name}
-                        onClick={() => handleConferenceClick(conf)}
+                        //onClick={() => handleConferenceClick(conf)}
                       />
-                      
-                    ))}
-                  </div>
-                )
-                : <div>No conferences found</div>
-            }
+                    )
+                  )
+                )}
+              </div>
+            ) : (
+              <div>No conferences found</div>
+            )}
           </div>
 
           {/* Past Conferences Section */}
