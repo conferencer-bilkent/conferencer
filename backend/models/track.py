@@ -17,7 +17,7 @@ class Track:
         self.track_chairs = track_chairs or []
         self.papers = papers or []
         self.reviews = reviews or []
-        self.assignments = assignments or []  # Each assignment: { "user_id": ..., "paper_id": ... }
+        self.assignments = assignments or []  
         self.created_at = created_at or datetime.utcnow()
 
     def to_dict(self):

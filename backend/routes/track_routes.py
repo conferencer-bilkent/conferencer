@@ -5,6 +5,8 @@ from extensions import mongo
 from models.pc_member_invitation import PCMemberInvitation
 from routes.notification_routes import send_notification
 from models.track import Track
+from models.role import Role
+from models.user import User
 
 
 def get_all_tracks():
@@ -44,7 +46,7 @@ def create_track():
         return jsonify({"message": "Track created successfully", "track_id": str(track.id)}), 201
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-    
+
 def appoint_track_chair():
     if "user_id" not in session:
         return jsonify({"error": "Unauthorized"}), 401
@@ -92,17 +94,17 @@ def appoint_track_chair():
             "conference_id": conference_id,
             "is_active": True
         }
-         
+
         # add the role to the user
         mongo.db.users.update_one(
             {"_id": ObjectId(track_chair)},
             {"$push": {"roles": role}}
         )
-        
+
         return jsonify({"message": "Track chair appointed successfully"}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-    
+
 def get_tracks_by_conference(conference_id):
     if "user_id" not in session:
         return jsonify({"error": "Unauthorized"}), 401
@@ -113,7 +115,7 @@ def get_tracks_by_conference(conference_id):
         return jsonify({"tracks": track_list}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-    
+
 def get_track(track_id):
     if "user_id" not in session:
         return jsonify({"error": "Unauthorized"}), 401
@@ -128,7 +130,7 @@ def get_track(track_id):
         return jsonify({"track": track_obj.to_dict()}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-    
+
 def get_track_by_author(author_id):
     if "user_id" not in session:
         return jsonify({"error": "Unauthorized"}), 401
@@ -139,7 +141,7 @@ def get_track_by_author(author_id):
         return jsonify({"tracks": track_list}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-    
+
 def get_track_by_reviewer(reviewer_id):
     if "user_id" not in session:
         return jsonify({"error": "Unauthorized"}), 401
@@ -150,23 +152,68 @@ def get_track_by_reviewer(reviewer_id):
         return jsonify({"tracks": track_list}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-    
 
-def get_track_by_people(people_id):
+def get_all_relevant_people(track_id):
     if "user_id" not in session:
         return jsonify({"error": "Unauthorized"}), 401
 
     try:
-        tracks = mongo.db.tracks.find({"$or": [
-            {"track_chairs": people_id},
-            {"papers.authors": people_id},
-            {"reviews.reviewer_id": people_id}
-        ]})
-        track_list = [Track(**track).to_dict() for track in tracks]
-        return jsonify({"tracks": track_list}), 200
+        track = mongo.db.tracks.find_one({"_id": ObjectId(track_id)})
+        if not track:
+            return jsonify({"error": "Track not found"}), 404
+
+        # find all the people who have roles with role_id in the roles
+        # people have roles keeping role_ids, roles have track_ids
+
+        # find all people who has role array non null
+        people = mongo.db.users.find({"roles": {"$ne": []}})
+
+   
+        # find all the roles of the track
+
+        # cross references people.roles with roles_of_track
+        # and get the user_id and role name of the people and return it
+        people_position = []
+
+        for person in people:
+            if "roles" in person:
+                for role_data in person["roles"]:
+                    if isinstance(role_data, dict) and "track_id" in role_data:
+                        track_id_str = str(track_id)
+                        if role_data["track_id"] == track_id_str:
+                            people_position.append({
+                                "user_id": str(person["_id"]),
+                                "role": role_data["position"]
+                            })
+                        
+
+        return jsonify({"people": people_position}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-    
+
+
+
+def get_track_by_people(people_id):
+    # use all relevant people function and get_all_tracks function to realize thşis one
+
+    if "user_id" not in session:
+        return jsonify({"error": "Unauthorized"}), 401
+    try:
+        # get all tracks using get_all_tracks function
+        all_tracks_response = get_all_tracks()
+        all_tracks = all_tracks_response.get_json().get("tracks", [])
+        # get all relevant people using get_all_relevant_people function
+        all_relevant_people_response = get_all_relevant_people(people_id)
+        all_relevant_people = all_relevant_people_response.get_json().get("people", [])
+        # find the track of the people
+        track_of_people = []
+        for track in all_tracks:
+            if track["_id"] in all_relevant_people:
+                track_of_people.append(track)
+        return jsonify({"tracks": track_of_people}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 
 
 
