@@ -112,12 +112,9 @@ def get_conferences():
 
         result = []
         for conference in conferences:
-            conf_dict = dict(conference)  # MongoDB document
-            conf_dict['conference_id'] = str(conf_dict.pop('id'))  # Handle ID properly
-            conf_dict['conference_id'] = str(conf_dict.pop('_id'))  # Handle ID properly
-            conf_obj = Conference(**conf_dict)  # Create Conference object
-            result.append(conf_obj.to_dict())  # Now you can safely call .to_dict()
-
+            conf_dict = dict(conference)
+            conf_dict['_id'] = str(conf_dict['_id'])
+            result.append(conf_dict)
 
         return jsonify({"conferences": result}), 200
 
