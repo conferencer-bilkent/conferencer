@@ -12,6 +12,7 @@ class Notification:
         self.to_whom = to_whom
         self.is_accepted = False
         self.invitation_id = invitation_id
+        self.is_read = False
 
     to_dict = lambda self: {
         "id": self.id,
@@ -22,5 +23,7 @@ class Notification:
         "created_at": self.created_at.isoformat(),
         "to_whom": self.to_whom,
         "is_accepted": self.is_accepted,
-        "invitation_id": self.invitation_id
+        "invitation_id": self.invitation_id,
+        "is_read": self.is_read
+
     }

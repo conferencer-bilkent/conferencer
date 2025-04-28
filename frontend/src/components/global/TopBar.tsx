@@ -68,7 +68,7 @@ const Topbar: React.FC = () => {
 
   const handleProfile = () => {
     handleMenuClose();
-    navigate("/profile");
+    navigate(`/profile/${user?.id}`);
   };
 
   const getInitials = () => {

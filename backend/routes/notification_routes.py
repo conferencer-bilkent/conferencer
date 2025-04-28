@@ -8,7 +8,7 @@ def get_notification():
     user_id = session.get('user_id')
     
     notifications = mongo.db.notifications.find({"to_whom": user_id})
-    
+
     result = []
     for notification in notifications:
         result.append({
@@ -18,10 +18,16 @@ def get_notification():
             'is_interactive': notification['is_interactive'],
             'is_answered': notification.get('is_answered', False),
             'created_at': notification.get('created_at', datetime.now().isoformat()),
-            'is_accepted': notification.get('is_accepted', False)
+            'is_accepted': notification.get('is_accepted', False),
+            'is_read': notification.get('is_read', False),
         })
     
     result = sorted(result, key=lambda x: x['created_at'], reverse=True)
+
+    mongo.db.notifications.update_many(
+        {"to_whom": user_id},
+        {"$set": {"is_read": True}}
+    )
     
     return jsonify({'notifications': result})
 

@@ -14,9 +14,17 @@ body {
   padding: 2rem;
   margin: 1rem;
 }
-
-/* Progress steps */
+.content-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  background-color: #f9fafb00;
+}
 .progress-container {
+  display: flex;
+  justify-content: center;   
   padding: 1rem 0;
   margin-bottom: 2rem;
 }
@@ -25,8 +33,9 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  width: 100%;
+  max-width: 600px;           
 }
-
 .step-container {
   display: flex;
   align-items: center;
