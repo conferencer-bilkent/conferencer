@@ -15,6 +15,7 @@ interface Notification {
   is_answered: boolean;
   created_at: string;
   is_accepted: boolean;
+  is_read: boolean;
 }
 
 const colors = tokens("dark");

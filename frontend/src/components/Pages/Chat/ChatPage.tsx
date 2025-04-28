@@ -60,7 +60,6 @@ const ChatPage: React.FC = () => {
   const [composeTo, setComposeTo] = useState("");
   const [composeSubject, setComposeSubject] = useState("");
   const [composeContent, setComposeContent] = useState("");
-  const [replyToMessage, setReplyToMessage] = useState<Message | null>(null);
 
   const fetchMessages = async () => {
     try {
@@ -235,7 +234,6 @@ const ChatPage: React.FC = () => {
               }}
               onClick={() => {
                 setComposeOpen(true);
-                setReplyToMessage(null);
               }}
             >
               New Message

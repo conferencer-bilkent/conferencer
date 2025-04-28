@@ -13,8 +13,10 @@ import SelectPeoplePopup from "../../global/SelectPeoplePopUp";
 import "./ConferencePage.css";
 import Topbar from "../../global/TopBar";
 import { handleMenuItemClick } from "../../../utils/navigation/menuNavigation";
+import { useConference } from "../../../context/ConferenceContext";
 
 const ConferencePage: React.FC = () => {
+  const { activeConference } = useConference();
   const menuItems = getMenuItemsForPage("default");
   const navigate = useNavigate();
 
@@ -42,7 +44,7 @@ const ConferencePage: React.FC = () => {
             <SideMenu items={menuItems} onItemClick={handleItemClick} />
           </div>
           <div className="content-container">
-            <AppTitle text="CS FAIR 2025" />
+            <AppTitle text={activeConference?.name || "No Conference Selected"} />
 
             <div className="buttons-row">
               {/* The first and third buttons open the popup with their respective text */}
