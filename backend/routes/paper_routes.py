@@ -57,18 +57,26 @@ def submit_paper():
 
     data = request.get_json()
 
+    track = data.get("track_id")
+
     try:
         paper = Paper(
             paper_id=ObjectId(),
             title=data.get("title"),
             abstract=data.get("abstract"),
             keywords=data.get("keywords", []),
-            paper_path=data.get("paper"),  # Assuming this is a URL or path to the PDF
+            paper_path=data.get("paper"),  
             authors=data.get("authors", []),
             created_at=None
         )
 
         mongo.db.papers.insert_one(paper.to_dict())
+
+        # Update the track with the new paper
+        mongo.db.tracks.update_one(
+            {"_id": ObjectId(track)},
+            {"$push": {"papers": str(paper.id)}}
+        )
 
         return jsonify({
             "message": "Paper created successfully!",
