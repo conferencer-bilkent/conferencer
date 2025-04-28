@@ -43,14 +43,14 @@ const AssignPaper: React.FC = () => {
     }));
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    // if (e.target.files && e.target.files[0]) {
-    //     setPaper((prev) => ({
-    //         ...prev,
-    //         paperFile: e.target.files[0],
-    //     }));
-    // }
-  };
+  // const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   // if (e.target.files && e.target.files[0]) {
+  //   //     setPaper((prev) => ({
+  //   //         ...prev,
+  //   //         paperFile: e.target.files[0],
+  //   //     }));
+  //   // }
+  // };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -125,7 +125,7 @@ const AssignPaper: React.FC = () => {
           <input
             type="file"
             accept="application/pdf"
-            onChange={handleFileChange}
+            // onChange={handleFileChange}
             required
           />
         </div>

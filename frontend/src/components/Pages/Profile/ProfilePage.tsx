@@ -8,8 +8,6 @@ import {
   DialogTitle,
   TextField,
   CircularProgress,
-  Checkbox,
-  ListItemText,
   Autocomplete,
   Table,
   TableHead,
