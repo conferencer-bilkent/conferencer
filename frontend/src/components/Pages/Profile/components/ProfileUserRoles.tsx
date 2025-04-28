@@ -20,6 +20,7 @@ const UserRoles: React.FC<UserRolesProps> = ({ activeRoles, pastRoles }) => {
     borderRadius: "12px",
     padding: "15px",
     color: "white",
+    height: "100%",
     width: "100%",
   };
   
