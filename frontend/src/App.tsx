@@ -23,6 +23,7 @@ import { ConferenceProvider } from "./context/ConferenceContext";  // add this
 import ChatPage from "./components/Pages/Chat/ChatPage";
 import NotificationsPage from "./components/Pages/Notifications/Notifications";
 import AssignPaper from "./components/Pages/Conference/Paper/AssignPaper";
+import CreateTrack from "./components/Pages/Conference/CreateTrack/CreateTrack";
 
 const App: React.FC = () => {
   const [theme, colorMode] = useMode();
@@ -54,6 +55,10 @@ const App: React.FC = () => {
                     <Route
                       path="/conference/create"
                       element={<CreateConference />}
+                    />
+                    <Route
+                      path="/conference/createTrack"
+                      element={<CreateTrack />}
                     />
                     <Route path="/mytasks" element={<MyTasks />} />
                     <Route

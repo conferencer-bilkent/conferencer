@@ -6,7 +6,7 @@ export interface ReviewFlag {
   }
   
   export interface Conference {
-    id: string;                      // flatten ObjectId.$oid
+    id: string;                      // conferece_id in backend
     name: string;
     acronym: string;
     shortAcronym: string;

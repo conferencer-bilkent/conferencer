@@ -27,6 +27,7 @@ const Homepage: React.FC = () => {
 
   const handleConferenceClick = (conf: Conference) => {
     setActiveConference(conf);
+    navigate("/conference");
   };
 
   const handleLogout = async () => {
