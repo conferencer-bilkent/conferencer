@@ -225,133 +225,126 @@ const CreateConference: React.FC = () => {
         <SideMenu items={menuItems} onItemClick={handleItemClick} />
         <div className="content-container">
           <div className="main-container">
-            <div className="card-container">
-              <div className="form-card">
-                <div className="progress-container">
-                  <div className="progress-steps-container">
-                    {steps.map((_, index) => (
-                      <div key={index} className="step-container">
-                        <div
-                          className={`step-circle ${
-                            index <= currentStep ? "active" : ""
-                          }`}
-                        >
-                          {index + 1}
-                        </div>
-                        {index < steps.length - 1 && (
-                          <div
-                            className={`step-line ${
-                              index < currentStep ? "active" : ""
-                            }`}
-                          />
-                        )}
+            <div className="form-card">
+              <div className="progress-container">
+                <div className="progress-steps-container">
+                  {steps.map((_, index) => (
+                    <div key={index} className="step-container">
+                      <div
+                        className={`step-circle ${
+                          index <= currentStep ? "active" : ""
+                        }`}
+                      >
+                        {index + 1}
                       </div>
-                    ))}
-                  </div>
+                      {index < steps.length - 1 && (
+                        <div
+                          className={`step-line ${
+                            index < currentStep ? "active" : ""
+                          }`}
+                        />
+                      )}
+                    </div>
+                  ))}
                 </div>
+              </div>
 
-                <div className="form-content">
-                  <h2 className="form-title">{step.title}</h2>
-                  <form onSubmit={handleFormSubmit}>
-                    <div className="space-y-4">
-                      {step.fields.map((field) => {
-                        const rawValue = form[field as keyof ConferenceForm];
-                        const isObjectField =
-                          rawValue &&
-                          typeof rawValue === "object" &&
-                          "value" in rawValue;
-                        const value = isObjectField
-                          ? (rawValue as any).value
-                          : rawValue;
-                        const scope = isObjectField
-                          ? (rawValue as any).scope
-                          : null;
-                        const isInvalid = invalidFields.has(field);
+              <div className="form-content">
+                <h2 className="form-title">{step.title}</h2>
+                <form onSubmit={handleFormSubmit}>
+                  <div className="space-y-4">
+                    {step.fields.map((field) => {
+                      const rawValue = form[field as keyof ConferenceForm];
+                      const isObjectField =
+                        rawValue &&
+                        typeof rawValue === "object" &&
+                        "value" in rawValue;
+                      const value = isObjectField
+                        ? (rawValue as any).value
+                        : rawValue;
+                      const scope = isObjectField
+                        ? (rawValue as any).scope
+                        : null;
+                      const isInvalid = invalidFields.has(field);
 
-                        return (
-                          <div
-                            key={field}
-                            className={`form-field ${
-                              isInvalid ? "invalid" : ""
-                            }`}
-                          >
-                            <label className="form-label">
-                              {formatLabel(field)}
-                              {scope && (
-                                <span className="scope-badge">{scope}</span>
-                              )}
-                            </label>
-
-                            {typeof value === "boolean" ? (
-                              <input
-                                type="checkbox"
-                                checked={value}
-                                onChange={(e) =>
-                                  handleChange(
-                                    field as keyof ConferenceForm,
-                                    isObjectField
-                                      ? { value: e.target.checked, scope }
-                                      : e.target.checked
-                                  )
-                                }
-                                className="form-checkbox"
-                              />
-                            ) : typeof value === "number" ? (
-                              <input
-                                type="number"
-                                value={value}
-                                onChange={(e) =>
-                                  handleChange(
-                                    field as keyof ConferenceForm,
-                                    isObjectField
-                                      ? { value: Number(e.target.value), scope }
-                                      : Number(e.target.value)
-                                  )
-                                }
-                                className="form-input"
-                              />
-                            ) : (
-                              <input
-                                type="text"
-                                value={value as string}
-                                onChange={(e) =>
-                                  handleChange(
-                                    field as keyof ConferenceForm,
-                                    isObjectField
-                                      ? { value: e.target.value, scope }
-                                      : e.target.value
-                                  )
-                                }
-                                className="form-input"
-                              />
+                      return (
+                        <div
+                          key={field}
+                          className={`form-field ${isInvalid ? "invalid" : ""}`}
+                        >
+                          <label className="form-label">
+                            {formatLabel(field)}
+                            {scope && (
+                              <span className="scope-badge">{scope}</span>
                             )}
-                          </div>
-                        );
-                      })}
-                    </div>
+                          </label>
 
-                    <div className="button-container">
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setCurrentStep((prev) => Math.max(prev - 1, 0))
-                        }
-                        disabled={currentStep === 0}
-                        className="nav-button button-back"
-                      >
-                        Back
-                      </button>
-                      <button
-                        type="submit"
-                        className="nav-button button-primary"
-                      >
-                        {currentStep === steps.length - 1
-                          ? "Create Conference"
-                          : "Next"}
-                      </button>
-                    </div>
-                  </form>
-                </div>
+                          {typeof value === "boolean" ? (
+                            <input
+                              type="checkbox"
+                              checked={value}
+                              onChange={(e) =>
+                                handleChange(
+                                  field as keyof ConferenceForm,
+                                  isObjectField
+                                    ? { value: e.target.checked, scope }
+                                    : e.target.checked
+                                )
+                              }
+                              className="form-checkbox"
+                            />
+                          ) : typeof value === "number" ? (
+                            <input
+                              type="number"
+                              value={value}
+                              onChange={(e) =>
+                                handleChange(
+                                  field as keyof ConferenceForm,
+                                  isObjectField
+                                    ? { value: Number(e.target.value), scope }
+                                    : Number(e.target.value)
+                                )
+                              }
+                              className="form-input"
+                            />
+                          ) : (
+                            <input
+                              type="text"
+                              value={value as string}
+                              onChange={(e) =>
+                                handleChange(
+                                  field as keyof ConferenceForm,
+                                  isObjectField
+                                    ? { value: e.target.value, scope }
+                                    : e.target.value
+                                )
+                              }
+                              className="form-input"
+                            />
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  <div className="button-container">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setCurrentStep((prev) => Math.max(prev - 1, 0))
+                      }
+                      disabled={currentStep === 0}
+                      className="nav-button button-back"
+                    >
+                      Back
+                    </button>
+                    <button type="submit" className="nav-button button-primary">
+                      {currentStep === steps.length - 1
+                        ? "Create Conference"
+                        : "Next"}
+                    </button>
+                  </div>
+                </form>
               </div>
             </div>
           </div>
