@@ -14,7 +14,6 @@ def create_conference():
 
     try:
         conference = Conference(
-            conference_id=ObjectId(),
             name=data.get("name"),
             acronym=data.get("acronym"),
             short_acronym=data.get("short_acronym"),
