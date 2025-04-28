@@ -53,10 +53,8 @@ const ProfilePage: React.FC = () => {
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-       
-          const userData = await getUserById(id!);
-          setProfileUser(userData);
-        
+        const userData = await getUserById(id!);
+        setProfileUser(userData);
       } catch (err) {
         console.error("Error fetching user profile:", err);
         setError("Failed to load user profile");
@@ -108,13 +106,18 @@ const ProfilePage: React.FC = () => {
 
   const handleEditSave = async () => {
     try {
+      console.log("data edited", editData);
       const response = await fetch("http://127.0.0.1:5000/profile/update", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
         body: JSON.stringify({
           name: editData.name,
           surname: editData.surname,
           bio: editData.bio,
+          email: editData.email,
           preferred_keywords: preferredKeywords,
           unwanted_keywords: unwantedKeywords,
         }),
@@ -225,7 +228,7 @@ const ProfilePage: React.FC = () => {
 
   const statsCellStyle: React.CSSProperties = {
     padding: "8px",
-    color: colors.grey[100], 
+    color: colors.grey[100],
     width: "50%",
     borderBottom: `1px solid ${colors.grey[100]}`,
     borderRight: `1px solid ${colors.grey[100]}`,
@@ -316,19 +319,27 @@ const ProfilePage: React.FC = () => {
                   <tbody>
                     <tr>
                       <td style={statsCellStyle}>Average Rating Given:</td>
-                      <td style={lastCellStyle}>{userStats.avg_rating_given}</td>
+                      <td style={lastCellStyle}>
+                        {userStats.avg_rating_given}
+                      </td>
                     </tr>
                     <tr>
                       <td style={statsCellStyle}>Avg Time Before Deadline:</td>
-                      <td style={lastCellStyle}>{userStats.avg_submit_time_before_deadline}</td>
+                      <td style={lastCellStyle}>
+                        {userStats.avg_submit_time_before_deadline}
+                      </td>
                     </tr>
                     <tr>
                       <td style={statsCellStyle}>Avg Time to Review:</td>
-                      <td style={lastCellStyle}>{userStats.avg_time_to_review}</td>
+                      <td style={lastCellStyle}>
+                        {userStats.avg_time_to_review}
+                      </td>
                     </tr>
                     <tr>
                       <td style={statsCellStyle}>Deadline Compliance Rate:</td>
-                      <td style={lastCellStyle}>{userStats.deadline_compliance_rate}</td>
+                      <td style={lastCellStyle}>
+                        {userStats.deadline_compliance_rate}
+                      </td>
                     </tr>
                     <tr>
                       <td style={statsCellStyle}>Review Rating:</td>
@@ -345,10 +356,22 @@ const ProfilePage: React.FC = () => {
             <Table size="small" style={{ color: colors.grey[100] }}>
               <TableHead>
                 <TableRow>
-                  <TableCell style={{ backgroundColor: colors.grey[400], color: colors.grey[100], borderBottom: `1px solid ${colors.grey[100]}` }}>
+                  <TableCell
+                    style={{
+                      backgroundColor: colors.grey[400],
+                      color: colors.grey[100],
+                      borderBottom: `1px solid ${colors.grey[100]}`,
+                    }}
+                  >
                     <strong>Preferred Keywords</strong>
                   </TableCell>
-                  <TableCell style={{ backgroundColor: colors.grey[400], color: colors.grey[100], borderBottom: `1px solid ${colors.grey[100]}` }}>
+                  <TableCell
+                    style={{
+                      backgroundColor: colors.grey[400],
+                      color: colors.grey[100],
+                      borderBottom: `1px solid ${colors.grey[100]}`,
+                    }}
+                  >
                     <strong>Unwanted Keywords</strong>
                   </TableCell>
                 </TableRow>
@@ -361,10 +384,21 @@ const ProfilePage: React.FC = () => {
                   ),
                 }).map((_, index) => (
                   <TableRow key={index}>
-                    <TableCell style={{ backgroundColor: colors.grey[400] ,color: colors.grey[400], borderBottom: `1px solid ${colors.grey[100]}` }}>
+                    <TableCell
+                      style={{
+                        backgroundColor: colors.grey[400],
+                        color: colors.grey[400],
+                        borderBottom: `1px solid ${colors.grey[100]}`,
+                      }}
+                    >
                       {preferredKeywords[index] || "-"}
                     </TableCell>
-                    <TableCell style={{ color: colors.grey[400], borderBottom: `1px solid ${colors.grey[100]}` }}>
+                    <TableCell
+                      style={{
+                        color: colors.grey[400],
+                        borderBottom: `1px solid ${colors.grey[100]}`,
+                      }}
+                    >
                       {unwantedKeywords[index] || "-"}
                     </TableCell>
                   </TableRow>
