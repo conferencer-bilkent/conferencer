@@ -63,6 +63,8 @@ const ProfilePage: React.FC = () => {
     fetchUserData();
   }, [id, currentUser, contextLoading, navigate]);
 
+  const isOwnProfile = currentUser?.id === id;
+
   useEffect(() => {
     const fetchKeywords = async () => {
       try {
@@ -279,13 +281,16 @@ const ProfilePage: React.FC = () => {
       <div style={{ flexGrow: 1, display: "flex", flexDirection: "column" }}>
         <TopBar />
         <div style={{ padding: "20px", overflowY: "auto" }}>
-          <Button
-            variant="contained"
-            onClick={handleEditOpen}
-            style={{ alignSelf: "flex-end", marginBottom: "10px" }}
-          >
-            Edit Profile
-          </Button>
+          {isOwnProfile && (
+            <Button
+              variant="contained"
+              onClick={handleEditOpen}
+              style={{ alignSelf: "flex-end", marginBottom: "10px" }}
+            >
+              Edit Profile
+            </Button>
+          )}
+
           <AppTitle text={`${profileUser.name} ${profileUser.surname}`} />
 
           <div style={{ marginTop: "20px" }}>
