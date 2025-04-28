@@ -53,16 +53,10 @@ const ProfilePage: React.FC = () => {
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        if (id == currentUser?.id || !id) {
-          if (currentUser) {
-            setProfileUser(currentUser);
-          } else if (!contextLoading) {
-            navigate("/login");
-          }
-        } else {
+       
           const userData = await getUserById(id!);
           setProfileUser(userData);
-        }
+        
       } catch (err) {
         console.error("Error fetching user profile:", err);
         setError("Failed to load user profile");
