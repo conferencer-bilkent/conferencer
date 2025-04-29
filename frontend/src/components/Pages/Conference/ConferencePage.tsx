@@ -24,15 +24,31 @@ const ConferencePage: React.FC = () => {
   const navigate = useNavigate();
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
-  const [activeTrack, setActiveTrack] = useState<any>(null);
+  
+  // Initialize active track state with safe default
+  const [activeTrack, setActiveTrack] = useState<any>(
+    activeConference?.tracks?.[0] || null
+  );
+
+  // Track which popup button (if any) is clicked
   const [popupAction, setPopupAction] = useState<string | null>(null);
 
   useEffect(() => {
+    // First, try to get the activeConference if not already set
     if (!activeConference) {
       const stored = localStorage.getItem("activeConference");
       if (stored) {
-        setActiveConference(JSON.parse(stored));
-        // Exit early and let the dependency trigger this effect again when activeConference is set
+        try {
+          const parsedConference = JSON.parse(stored);
+          setActiveConference(parsedConference);
+          
+          // Also set active track immediately
+          if (parsedConference?.tracks?.length > 0) {
+            setActiveTrack(parsedConference.tracks[0]);
+          }
+        } catch (error) {
+          console.error("Error parsing stored conference:", error);
+        }
         return;
       } else {
         console.log("No active conference found in localStorage");
@@ -55,7 +71,7 @@ const ConferencePage: React.FC = () => {
       setActiveTrack(null); // Reset if no tracks available
       console.log("No tracks available for this conference");
     }
-  }, [activeConference]); // Add activeConference to dependency array
+  }, [activeConference, setActiveConference]); // Include setActiveConference in dependency array
 
   const openPopup = (actionName: string) => {
     setPopupAction(actionName);
