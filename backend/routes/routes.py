@@ -8,7 +8,7 @@ from routes.chad_routes import send_chad, get_received_chad, get_sent_chad
 from routes.paper_routes import  get_paper, submit_paper
 from routes.review_routes import get_review, submit_review
 from routes.upload_routes import upload_file
-from routes.notification_routes import get_notification, mark_notification_as_answered
+from routes.notification_routes import get_notification, mark_notification_as_answered, mark_all_read
 from routes.keywords_routes import get_keywords, add_keyword, set_keywords
 from routes.track_routes import create_track, get_tracks_by_conference, appoint_track_chair, get_track_by_people, get_track_by_author, get_track_by_reviewer, get_track, get_all_tracks, get_all_relevant_people
 from routes.assignment_routes import create_assignment_for_track, get_assignments_for_reviewer, get_assigned_papers
@@ -64,6 +64,7 @@ upload_bp.route("/<conference_id>/<track_name>", methods=["POST"])(upload_file)
 
 notification_bp.route("/", methods=["GET"])(get_notification)
 notification_bp.route("/mark_answered/<notification_id>/<is_accepted>", methods=["POST"])(mark_notification_as_answered)
+notification_bp.route("/mark_read", methods=["POST"])(mark_all_read)
 
 keywords_bp.route("/", methods=["GET"])(get_keywords)
 keywords_bp.route("/<keyword>", methods=["POST"])(add_keyword)

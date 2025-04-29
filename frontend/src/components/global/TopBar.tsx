@@ -102,12 +102,14 @@ const Topbar: React.FC = () => {
       console.error("Error fetching notifications:", err);
     }
   };
+
   useEffect(() => {
     fetchNotifications();
   }, []);
 
   // 3. Compute unread count
   const unreadCount = notifications.filter((n) => !n.is_read).length;
+  console.log("Notifications:", notifications);
   console.log("Unread notifications count:", unreadCount);
   const handleSearchFocus = async () => {
     if (users.length === 0) {
@@ -126,7 +128,16 @@ const Topbar: React.FC = () => {
 
   const handleNotificationsClick = async () => {
     if (!showNotifications) {
-      await fetchNotifications();
+      // 1️⃣ load notifications when bell is clicked
+
+      // 2️⃣ mark all as read on the server
+      await fetch("http://127.0.0.1:5000/notification/mark_read", {
+        method: "POST",
+        credentials: "include",
+      });
+
+      // 3️⃣ update local state so badge clears
+      setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })));
     }
     setShowNotifications(!showNotifications);
     setShowUsers(false);
