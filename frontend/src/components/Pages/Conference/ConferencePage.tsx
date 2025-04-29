@@ -21,7 +21,6 @@ import { UserData } from "../../../models/user";
 
 const ConferencePage: React.FC = () => {
   const { activeConference, setActiveConference } = useConference();
-  const menuItems = getMenuItemsForPage("default");
   const navigate = useNavigate();
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
@@ -57,10 +56,6 @@ const ConferencePage: React.FC = () => {
       console.log("No tracks available for this conference");
     }
   }, [activeConference]); // Add activeConference to dependency array
-
-  const handleItemClick = (item: string) => {
-    handleMenuItemClick(item, navigate);
-  };
 
   const openPopup = (actionName: string) => {
     setPopupAction(actionName);
@@ -157,11 +152,9 @@ const ConferencePage: React.FC = () => {
   };
 
   const [allUsers, setAllUsers] = useState<UserData[]>([]);
-  const [loadingAllUsers, setLoadingAllUsers] = useState<boolean>(false);
 
   useEffect(() => {
     const fetchAllUsers = async () => {
-      setLoadingAllUsers(true);
       try {
         const users = await getAllUsers();
         setAllUsers(users);
@@ -169,7 +162,7 @@ const ConferencePage: React.FC = () => {
       } catch (error) {
         console.error("Error fetching all users:", error);
       } finally {
-        setLoadingAllUsers(false);
+        console.log("Finished fetching all users");
       }
     };
 

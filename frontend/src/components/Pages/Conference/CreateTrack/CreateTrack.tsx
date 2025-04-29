@@ -2,12 +2,10 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./CreateTrack.css";
-import { getMenuItemsForPage } from "../../../global/sideMenuConfig";
-import { handleMenuItemClick } from "../../../../utils/navigation/menuNavigation";
-import {
-  createTrack,
-  mapApiResponseToTrack,
-} from "../../../../services/trackService";
+// import {
+//   createTrack,
+//   mapApiResponseToTrack,
+// } from "../../../../services/trackService";
 import { useConference } from "../../../../context/ConferenceContext";
 
 const steps = [
@@ -66,7 +64,6 @@ type TrackForm = typeof defaultForm;
 
 const CreateTrack: React.FC = () => {
   const navigate = useNavigate();
-  const menuItems = getMenuItemsForPage("default");
   const [currentStep, setCurrentStep] = useState(0);
   const [form, setForm] = useState<TrackForm>(defaultForm);
   const [invalidFields, setInvalidFields] = useState<Set<string>>(new Set());
@@ -75,23 +72,6 @@ const CreateTrack: React.FC = () => {
   useEffect(() => {
     setInvalidFields(new Set());
   }, [currentStep]);
-
-  const handleLogout = async () => {
-    try {
-      const response = await fetch("/auth/logout", {
-        method: "POST",
-        credentials: "include",
-      });
-      if (response.ok) navigate("/login");
-    } catch (e) {
-      console.error("Logout failed", e);
-    }
-  };
-
-  const handleItemClick = (item: string) => {
-    if (item === "LOG OUT") handleLogout();
-    else handleMenuItemClick(item, navigate);
-  };
 
   const validateCurrentStep = (): string[] => {
     const invalid: string[] = [];
@@ -138,12 +118,12 @@ const CreateTrack: React.FC = () => {
         // Add conference_id to payload
         payload.conference_id = activeConference.id;
 
-        const trackId = await createTrack(payload);
-        const newTrack = mapApiResponseToTrack({
-          track_id: trackId,
-          ...payload,
-          created_at: new Date().toISOString(),
-        });
+        // const trackId = await createTrack(payload);
+        // const newTrack = mapApiResponseToTrack({
+        //   track_id: trackId,
+        //   ...payload,
+        //   created_at: new Date().toISOString(),
+        // });
 
         // If you have an addTrack function in your context
         // addTrack(newTrack);

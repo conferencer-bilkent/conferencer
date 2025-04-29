@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import "./RegisterForm.css";
 import { FaUser, FaLock, FaRegUser } from "react-icons/fa";
 import { Box, Button, TextField, Typography, useTheme } from "@mui/material";
-import Topbar from "../../global/TopBar"; // Import Topbar for theme toggle
 import { useNavigate } from "react-router-dom";
 
 const RegisterForm: React.FC = () => {
