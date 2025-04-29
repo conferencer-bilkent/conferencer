@@ -205,8 +205,6 @@ const ProfilePage: React.FC = () => {
     border: `1px solid ${colors.grey[100]}`,
     borderRadius: "12px",
     padding: "15px",
-    color: "white",
-    backgroundColor: colors.primary[500],
     height: "fit-content", // Adapt to content size
     minHeight: "190px", // Set minimum height
   };
@@ -225,7 +223,6 @@ const ProfilePage: React.FC = () => {
     borderRight: `1px solid ${colors.grey[100]}`,
     borderTop: `1px solid ${colors.grey[100]}`,
     borderLeft: `1px solid ${colors.grey[100]}`,
-    backgroundColor: colors.primary[500], // Slightly lighter than container
   };
 
   // Add a style for the last column cells without right border
@@ -237,7 +234,6 @@ const ProfilePage: React.FC = () => {
     borderRight: `1px solid ${colors.grey[100]}`,
     borderTop: `1px solid ${colors.grey[100]}`,
     borderLeft: `1px solid ${colors.grey[100]}`,
-    backgroundColor: colors.primary[500], // Match the first column
   };
 
   const statsTitleStyle: React.CSSProperties = {
@@ -253,8 +249,6 @@ const ProfilePage: React.FC = () => {
     border: `1px solid ${colors.grey[100]}`,
     borderRadius: "12px",
     padding: "15px",
-    color: "white",
-    backgroundColor: colors.primary[500],
   };
 
   const keywordsTitleStyle: React.CSSProperties = {
@@ -345,7 +339,6 @@ const ProfilePage: React.FC = () => {
               <TableRow>
                 <TableCell
                   style={{
-                    backgroundColor: colors.grey[400],
                     color: colors.grey[100],
                     borderBottom: `1px solid ${colors.grey[100]}`,
                   }}
@@ -354,7 +347,6 @@ const ProfilePage: React.FC = () => {
                 </TableCell>
                 <TableCell
                   style={{
-                    backgroundColor: colors.grey[400],
                     color: colors.grey[100],
                     borderBottom: `1px solid ${colors.grey[100]}`,
                   }}
@@ -373,7 +365,6 @@ const ProfilePage: React.FC = () => {
                 <TableRow key={index}>
                   <TableCell
                     style={{
-                      backgroundColor: colors.grey[400],
                       color: colors.grey[400],
                       borderBottom: `1px solid ${colors.grey[100]}`,
                     }}
