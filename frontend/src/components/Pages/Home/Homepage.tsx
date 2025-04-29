@@ -23,30 +23,8 @@ const Homepage: React.FC = () => {
     navigate("/conference");
   };
 
-  const handleCreateConference = () => {
-    navigate("/conference/create");
-  };
-  const handleAssignPaper = () => {
-    navigate("/addSubmission");
-  };
-
   return (
     <div className="content-container">
-      <div className="button-group">
-        <button
-          className="create-conference-button"
-          onClick={handleCreateConference}
-        >
-          Create New Conference
-        </button>
-        <button
-          className="create-conference-button"
-          onClick={handleAssignPaper}
-        >
-          Assign paper
-        </button>
-      </div>
-
       <div className="sections-container">
         <div className="section">
           <SectionTitle text="Upcoming Conferences" />

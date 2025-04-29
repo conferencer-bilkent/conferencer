@@ -61,7 +61,8 @@ const SideMenu: React.FC<SideMenuProps> = ({ items }) => {
         flexDirection: "column",
         height: "100vh",
         padding: { xs: "10px", sm: "0" }, // Add padding for small screens
-        marginTop: "10vh", // Start at 1/3 of the page height
+        marginTop: "calc(100vh/5)", // Start at 1/3 of the page height
+        paddingLeft: "3rem", // Ensure left padding is 3rem
       }}
     >
       <ul style={{ listStyle: "none", padding: 0, width: "100%" }}>
