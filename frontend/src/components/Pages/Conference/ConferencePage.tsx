@@ -136,22 +136,7 @@ const ConferencePage: React.FC = () => {
     // For different actions, we may want different filtering rules
     switch(popupAction) {
       case "Invite People":
-        // Filter out users who are already PC members
-        console.log("Filtering users for Invite People");
-        console.log("Active Conference PC Members:", activeConference.pcMembers);
-        console.log("All Users:", allUsers);
-        // Alternative approach with more flexible ID matching
-        return allUsers.filter(user => {
-          // Get all possible ID forms
-          const userId = user._id || user.id;
-          
-          // Check if this ID is in the PC members array
-          const isAlreadyPcMember = activeConference.pcMembers?.some(
-            memberId => memberId === userId
-          );
-          
-          return !allUsers;
-        });
+        return allUsers;
         
       case "Assign Superchair(s)":
         // Filter out users who are already superchairs
