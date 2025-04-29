@@ -70,7 +70,7 @@ export const tokens = (mode: "light" | "dark"): Tokens => ({
           800: "#2a2d64",
           900: "#151632",
         },
-        transparent: "rgba(0, 0, 0, 0)", // Added transparent color
+        transparent: "rgba(0, 0, 0, 0)", // Ensure transparent color for dark theme
       }
     : {
         grey: {
@@ -128,7 +128,7 @@ export const tokens = (mode: "light" | "dark"): Tokens => ({
           800: "#c3c6fd",
           900: "#e1e2fe",
         },
-        transparent: "rgba(255, 255, 255, 0)", // Added transparent color
+        transparent: "rgba(255, 255, 255, 0)", // Ensure transparent color for light theme
       }),
 });
 

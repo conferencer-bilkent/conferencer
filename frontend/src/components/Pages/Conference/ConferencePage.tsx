@@ -28,7 +28,7 @@ const ConferencePage: React.FC = () => {
 
   // Track which popup button (if any) is clicked
   const [popupAction, setPopupAction] = useState<string | null>(null);
-  
+
   // Initialize active track when activeConference changes
   useEffect(() => {
     if (activeConference!.tracks!.length > 0) {
@@ -40,7 +40,7 @@ const ConferencePage: React.FC = () => {
       setActiveTrack(null); // Reset if no tracks available
     }
   }, []);
-  
+
   const handleItemClick = (item: string) => {
     handleMenuItemClick(item, navigate);
   };
@@ -114,7 +114,7 @@ const ConferencePage: React.FC = () => {
       case "Assign Trackchair(s)":
         // Handle track-related assignments
         // These would need track ID as well
-        
+
         break;
 
       default:
@@ -167,10 +167,10 @@ const ConferencePage: React.FC = () => {
           (pcMemberId) =>
             !activeConference.superchairs.includes(pcMemberId?.toString() ?? "")
         );
-        
+
         // Then map these IDs to the corresponding UserData objects
-        const nonSupers = allUsers.filter(
-          (user) => nonSuperIds.includes(user._id?.toString() ?? "")
+        const nonSupers = allUsers.filter((user) =>
+          nonSuperIds.includes(user._id?.toString() ?? "")
         );
         return nonSupers;
 
@@ -180,18 +180,18 @@ const ConferencePage: React.FC = () => {
         console.log(
           `Assigning users to track ${JSON.stringify(activeTrack)} }`
         );
-        
+
         // First get IDs of PC members who aren't already track chairs
         const nonTrackChairIds = activeConference.pcMembers.filter(
           (pcMemberId) =>
             !activeTrack.track_chairs.includes(pcMemberId?.toString() ?? "")
         );
-        
+
         // Then map these IDs to the corresponding UserData objects
-        const nonTracks = allUsers.filter(
-          (user) => nonTrackChairIds.includes(user._id?.toString() ?? "")
+        const nonTracks = allUsers.filter((user) =>
+          nonTrackChairIds.includes(user._id?.toString() ?? "")
         );
-        
+
         return nonTracks;
       default:
         // Default case - no filtering
@@ -200,155 +200,153 @@ const ConferencePage: React.FC = () => {
   };
 
   return (
-    <>
-      <Topbar></Topbar>
-      <div className="conference-page">
-        <div className="conference-container">
-          <div className="side-menu-container">
-            <SideMenu items={menuItems} onItemClick={handleItemClick} />
-          </div>
-          <div className="content-container">
-            <AppTitle
-              text={activeConference?.name || "No Conference Selected"}
+    <div className="conference-page">
+      <div className="conference-container">
+        <div className="content-container">
+          <AppTitle text={activeConference?.name || "No Conference Selected"} />
+
+          <div className="buttons-row">
+            {/* The first and third buttons open the popup with their respective text */}
+            <AppButton
+              icon={<FaPlusCircle />}
+              text="Invite People"
+              onClick={() => openPopup("Invite People")}
             />
-
-            <div className="buttons-row">
-              {/* The first and third buttons open the popup with their respective text */}
-              <AppButton
-                icon={<FaPlusCircle />}
-                text="Invite People"
-                onClick={() => openPopup("Invite People")}
-              />
-              <AppButton
-                icon={<DashboardIcon sx={{ width: "26px", height: "26px" }} />}
-                text="Conference Overview"
-                // no popup for this one
-              />
-              <AppButton
-                icon={<FaPlusCircle />}
-                text="Assign Superchair(s)"
-                onClick={() => openPopup("Assign Superchair(s)")}
-              />
-              <AppButton
-                icon={<FaPlusCircle />}
-                text="Add Track"
-                onClick={() => navigate("/conference/createTrack")}
-                // no popup for this one
-              />
-            </div>
-
-            {/* Use ConferenceDetail directly instead of ConferenceDetailExample */}
-            {activeConference && (
-              <ConferenceDetail
-                description={
-                  activeConference.venue
-                    ? `Venue: ${activeConference.venue}, ${
-                        activeConference.city || ""
-                      }, ${activeConference.country || ""}`
-                    : "No venue information available"
-                }
-                texts={[
-                  {
-                    title: "Track Dates",
-                    content: `${new Date(
-                      activeConference.createdAt || Date.now()
-                    ).toLocaleDateString()} - ${new Date(
-                      activeConference.licenseExpiry || Date.now()
-                    ).toLocaleDateString()}`,
-                  },
-                  {
-                    content: "See Full Calendar",
-                    link: "#",
-                  },
-                  {
-                    content: `Total Submissions: 0`,
-                  },
-                  {
-                    content: `Assigned Reviews: 0`,
-                  },
-                  {
-                    content: `Pending Reviews: 0`,
-                  },
-                ]}
-                buttons={[
-                  {
-                    icon: <FaBookOpen size={24} />,
-                    text: "View Submissions and Paper Assignments",
-                  },
-                  {
-                    icon: <AssignmentIcon sx={{ fontSize: 26 }} />,
-                    text: "Assign Papers",
-                    onClick: () => openPopup("Select Paper(s)"),
-                  },
-                  {
-                    icon: <FaPlusCircle size={24} />,
-                    text: "Add People to Track",
-                    onClick: () => openPopup("Add People to Track"),
-                  },
-                  {
-                    icon: <FaPlusCircle size={24} />,
-                    text: "Assign Trackchair(s)",
-                    onClick: () => openPopup("Assign Trackchair(s)"),
-                  },
-                ]}
-              />
-            )}
-
-            {/* Display Superchairs */}
-            {activeConference && activeConference.superchairs && (
-              <div style={{ marginTop: "20px" }}>
-                <h3 style={{ color: "white", marginBottom: "10px" }}>
-                  Superchair(s)
-                </h3>
-                <div style={{ display: "flex", flexWrap: "wrap", gap: "10px" }}>
-                  {activeConference.superchairs.map((chairId, index) => (
-                    <div
-                      key={index}
-                      onClick={() => navigate(`/profile/${chairId}`)}
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        border: "1px solid white",
-                        borderRadius: "16px",
-                        padding: "8px 12px",
-                        cursor: "pointer",
-                        minWidth: "160px",
-                        backgroundColor: "#2c3e50",
-                        color: "white",
-                        width: "fit-content",
-                      }}
-                    >
-                      <FaUser style={{ marginRight: "8px" }} />
-                      {loadingUsers[chairId] ? (
-                        <span>Loading...</span>
-                      ) : superchairUsers[chairId] ? (
-                        <span>{`${superchairUsers[chairId].name} ${
-                          superchairUsers[chairId].surname || ""
-                        }`}</span>
-                      ) : (
-                        <span>{chairId}</span>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Conditionally render the popup if popupAction is set */}
-            {popupAction && (
-              <SelectPeoplePopup
-                buttonText={popupAction}
-                people={getFilteredUsersForPopup()}
-                onClose={closePopup}
-                onSelect={(selectedUserIds) =>
-                  handleSelectedUsers(selectedUserIds, popupAction)
-                }
-              />
-            )}
+            <AppButton
+              icon={<DashboardIcon sx={{ width: "26px", height: "26px" }} />}
+              text="Conference Overview"
+              // no popup for this one
+            />
+            <AppButton
+              icon={<FaPlusCircle />}
+              text="Assign Superchair(s)"
+              onClick={() => openPopup("Assign Superchair(s)")}
+            />
+            <AppButton
+              icon={<FaPlusCircle />}
+              text="Add Track"
+              onClick={() => navigate("/conference/createTrack")}
+              // no popup for this one
+            />
+            {/* Added "Assign paper" button */}
+            <AppButton
+              icon={<AssignmentIcon sx={{ fontSize: 26 }} />}
+              text="Add Submission"
+              onClick={() => navigate("/addSubmission")}
+            />
           </div>
+
+          {/* Use ConferenceDetail directly instead of ConferenceDetailExample */}
+          {activeConference && (
+            <ConferenceDetail
+              description={
+                activeConference.venue
+                  ? `Venue: ${activeConference.venue}, ${
+                      activeConference.city || ""
+                    }, ${activeConference.country || ""}`
+                  : "No venue information available"
+              }
+              texts={[
+                {
+                  title: "Track Dates",
+                  content: `${new Date(
+                    activeConference.createdAt || Date.now()
+                  ).toLocaleDateString()} - ${new Date(
+                    activeConference.licenseExpiry || Date.now()
+                  ).toLocaleDateString()}`,
+                },
+                {
+                  content: "See Full Calendar",
+                  link: "#",
+                },
+                {
+                  content: `Total Submissions: 0`,
+                },
+                {
+                  content: `Assigned Reviews: 0`,
+                },
+                {
+                  content: `Pending Reviews: 0`,
+                },
+              ]}
+              buttons={[
+                {
+                  icon: <FaBookOpen size={24} />,
+                  text: "View Submissions and Paper Assignments",
+                },
+                {
+                  icon: <AssignmentIcon sx={{ fontSize: 26 }} />,
+                  text: "Assign Papers",
+                  onClick: () => openPopup("Select Paper(s)"),
+                },
+                {
+                  icon: <FaPlusCircle size={24} />,
+                  text: "Add People to Track",
+                  onClick: () => openPopup("Add People to Track"),
+                },
+                {
+                  icon: <FaPlusCircle size={24} />,
+                  text: "Assign Trackchair(s)",
+                  onClick: () => openPopup("Assign Trackchair(s)"),
+                },
+              ]}
+            />
+          )}
+
+          {/* Display Superchairs */}
+          {activeConference && activeConference.superchairs && (
+            <div style={{ marginTop: "20px" }}>
+              <h3 style={{ color: "white", marginBottom: "10px" }}>
+                Superchair(s)
+              </h3>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "10px" }}>
+                {activeConference.superchairs.map((chairId, index) => (
+                  <div
+                    key={index}
+                    onClick={() => navigate(`/profile/${chairId}`)}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      border: "1px solid white",
+                      borderRadius: "16px",
+                      padding: "8px 12px",
+                      cursor: "pointer",
+                      minWidth: "160px",
+                      backgroundColor: "#2c3e50",
+                      color: "white",
+                      width: "fit-content",
+                    }}
+                  >
+                    <FaUser style={{ marginRight: "8px" }} />
+                    {loadingUsers[chairId] ? (
+                      <span>Loading...</span>
+                    ) : superchairUsers[chairId] ? (
+                      <span>{`${superchairUsers[chairId].name} ${
+                        superchairUsers[chairId].surname || ""
+                      }`}</span>
+                    ) : (
+                      <span>{chairId}</span>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Conditionally render the popup if popupAction is set */}
+          {popupAction && (
+            <SelectPeoplePopup
+              buttonText={popupAction}
+              people={getFilteredUsersForPopup()}
+              onClose={closePopup}
+              onSelect={(selectedUserIds) =>
+                handleSelectedUsers(selectedUserIds, popupAction)
+              }
+            />
+          )}
         </div>
       </div>
-    </>
+    </div>
   );
 };
 

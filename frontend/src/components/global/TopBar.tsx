@@ -191,13 +191,22 @@ const Topbar: React.FC = () => {
   );
 
   return (
-    <Box display="flex" justifyContent="space-between" p={2}>
+    <Box
+      display="flex"
+      alignItems="center"
+      justifyContent="space-between"
+      p={2}
+    >
       {/* Logo */}
       <Box
         display="flex"
         alignItems="center"
-        mr={3}
-        sx={{ cursor: "pointer" }}
+        sx={{
+          cursor: "pointer",
+          position: "absolute",
+          left: 0,
+          paddingLeft: "3rem",
+        }}
         onClick={() => navigate("/home")}
       >
         <Typography
@@ -213,7 +222,7 @@ const Topbar: React.FC = () => {
 
       {/* Search */}
       <ClickAwayListener onClickAway={() => setShowUsers(false)}>
-        <Box position="relative" flexGrow={1} maxWidth="600px" mr={2}>
+        <Box position="relative" flexGrow={1} mx={10}>
           <Box
             display="flex"
             sx={{
@@ -300,7 +309,25 @@ const Topbar: React.FC = () => {
       </ClickAwayListener>
 
       {/* Right Icons */}
-      <Box display="flex" alignItems="center">
+      <Box display="flex" alignItems="center" ml="auto">
+        {/* Create Conference Button */}
+        <Button
+          variant="outlined"
+          sx={{
+            mr: 2,
+            borderColor: colors.greenAccent[500],
+            color: colors.greenAccent[500],
+            "&:hover": {
+              backgroundColor: colors.transparent,
+              borderColor: colors.greenAccent[400],
+              color: colors.greenAccent[400],
+            },
+          }}
+          onClick={() => navigate("/conference/create")}
+        >
+          Create Conference
+        </Button>
+
         {/* Theme toggle */}
         <IconButton onClick={colorMode.toggleColorMode}>
           {theme.palette.mode === "dark" ? (
