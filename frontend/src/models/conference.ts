@@ -4,6 +4,17 @@ export interface ReviewFlag {
     value: boolean | number | string;
     scope: 'conference' | 'track';
   }
+
+  export interface Track {
+    _id: string;
+    track_name: string;
+    conference_id: string;
+    track_chairs: string[];
+    papers: string[];
+    reviews: string[];
+    assignments: string[];
+    created_at: string;
+  }
   
   export interface Conference {
     id: string;                      // conferece_id in backend
@@ -52,5 +63,7 @@ export interface ReviewFlag {
     subreviewersAllowed: ReviewFlag;
     subreviewerAnonymous: ReviewFlag;
     trackChairNotifications: ReviewFlag;
+    tracks: Track[];
+
   }
   

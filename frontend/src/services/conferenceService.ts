@@ -48,6 +48,7 @@ export const mapApiResponseToConference = (apiConference: any): Conference => {
     subreviewersAllowed: apiConference.subreviewers_allowed || { value: false, scope: "track" },
     subreviewerAnonymous: apiConference.subreviewer_anonymous || { value: false, scope: "track" },
     trackChairNotifications: apiConference.track_chair_notifications || { value: false, scope: "track" },
+    tracks: apiConference.tracks || [],
   };
 };
 

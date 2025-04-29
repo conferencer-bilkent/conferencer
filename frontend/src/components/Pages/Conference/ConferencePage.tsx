@@ -23,13 +23,27 @@ const ConferencePage: React.FC = () => {
   const { activeConference } = useConference();
   const menuItems = getMenuItemsForPage("default");
   const navigate = useNavigate();
-
-  const handleItemClick = (item: string) => {
-    handleMenuItemClick(item, navigate);
-  };
+  // Add active track state
+  const [activeTrack, setActiveTrack] = useState<any>(null);
 
   // Track which popup button (if any) is clicked
   const [popupAction, setPopupAction] = useState<string | null>(null);
+  
+  // Initialize active track when activeConference changes
+  useEffect(() => {
+    if (activeConference!.tracks!.length > 0) {
+      console.log(
+        `Setting active track for conference: ${activeConference?.name} (ID: ${activeConference?.id})`
+      );
+      setActiveTrack(activeConference!.tracks[0]);
+    } else {
+      setActiveTrack(null); // Reset if no tracks available
+    }
+  }, []);
+  
+  const handleItemClick = (item: string) => {
+    handleMenuItemClick(item, navigate);
+  };
 
   const openPopup = (actionName: string) => {
     setPopupAction(actionName);
@@ -100,7 +114,7 @@ const ConferencePage: React.FC = () => {
       case "Assign Trackchair(s)":
         // Handle track-related assignments
         // These would need track ID as well
-        console.log(`${action} - Implementation needed`);
+        
         break;
 
       default:
@@ -149,17 +163,36 @@ const ConferencePage: React.FC = () => {
 
       case "Assign Superchair(s)":
         // Filter out users who are already superchairs
-        return allUsers.filter(
-          (user) => !activeConference.superchairs?.includes(user.id)
+        const nonSuperIds = activeConference.pcMembers.filter(
+          (pcMemberId) =>
+            !activeConference.superchairs.includes(pcMemberId?.toString() ?? "")
         );
+        
+        // Then map these IDs to the corresponding UserData objects
+        const nonSupers = allUsers.filter(
+          (user) => nonSuperIds.includes(user._id?.toString() ?? "")
+        );
+        return nonSupers;
 
       case "Add People to Track":
       case "Assign Trackchair(s)":
-        // For track-related actions, you might want to filter out existing track chairs
-        return allUsers.filter(
-          (user) => !activeConference.trackChairs?.includes(user.id)
+        // For track-related actions, filter out existing track chairs
+        console.log(
+          `Assigning users to track ${JSON.stringify(activeTrack)} }`
         );
-
+        
+        // First get IDs of PC members who aren't already track chairs
+        const nonTrackChairIds = activeConference.pcMembers.filter(
+          (pcMemberId) =>
+            !activeTrack.track_chairs.includes(pcMemberId?.toString() ?? "")
+        );
+        
+        // Then map these IDs to the corresponding UserData objects
+        const nonTracks = allUsers.filter(
+          (user) => nonTrackChairIds.includes(user._id?.toString() ?? "")
+        );
+        
+        return nonTracks;
       default:
         // Default case - no filtering
         return allUsers;
