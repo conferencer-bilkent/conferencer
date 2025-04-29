@@ -60,6 +60,21 @@ const App: React.FC = () => {
                   }
                 />
                 <Route
+                  path="/"
+                  element={
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "center",
+                        alignItems: "center",
+                        height: "100vh",
+                      }}
+                    >
+                      <LoginForm />
+                    </div>
+                  }
+                />
+                <Route
                   path="/register"
                   element={
                     <div
