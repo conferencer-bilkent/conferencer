@@ -72,7 +72,7 @@ export interface UserData {
   created_at?: string;
   updated_at?: string;
   preferred_keywords?: string[];
-  unwanted_keywords?: string[];
+  not_preferred_keywords?: string[];
 }
 
 // Add a utility function to get the first stats object

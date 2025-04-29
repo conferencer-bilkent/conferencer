@@ -86,7 +86,7 @@ const ProfilePage: React.FC = () => {
         email: profileUser.email || "",
       });
       setPreferredKeywords(profileUser.preferred_keywords || []);
-      setUnwantedKeywords(profileUser.unwanted_keywords || []);
+      setUnwantedKeywords(profileUser.not_preferred_keywords || []);
     }
     console.log("Profile User:", profileUser);
     console.log("Preferred Keywords:", preferredKeywords);
@@ -114,7 +114,7 @@ const ProfilePage: React.FC = () => {
           bio: editData.bio,
           email: editData.email,
           preferred_keywords: preferredKeywords,
-          unwanted_keywords: unwantedKeywords,
+          not_preferred_keywords: unwantedKeywords,
         }),
       });
       if (!response.ok) throw new Error("Failed to update profile");
@@ -126,7 +126,7 @@ const ProfilePage: React.FC = () => {
               surname: editData.surname,
               bio: editData.bio,
               preferred_keywords: preferredKeywords,
-              unwanted_keywords: unwantedKeywords,
+              not_preferred_keywords: unwantedKeywords,
             }
           : null
       );
