@@ -2,8 +2,10 @@ import React from "react";
 import { FaUser, FaRegSquare, FaCheckSquare } from "react-icons/fa";
 
 export interface Person {
-  _id: number;
+  id: number;        // Changed from _id to id to match what's created in SelectPeoplePopUp
   name: string;
+  email?: string;    // Added email field
+  userId?: string;   // Added userId field to store the actual user ID
 }
 
 interface SelectPeopleItemProps {
@@ -48,16 +50,15 @@ const SelectPeopleItem: React.FC<SelectPeopleItemProps> = ({
 }) => (
   <div style={styles.container}>
     {people.map((person) => {
-      console.log("person", person);
-      const isSelected = selectedIds.includes(person._id);
+      const isSelected = selectedIds.includes(person.id); // Changed from _id to id
       return (
         <div
-          key={person._id}
+          key={person.id} // Changed from _id to id
           style={{
             ...styles.item,
             ...(isSelected ? styles.selected : {}),
           }}
-          onClick={() => onToggle(person._id)}
+          onClick={() => onToggle(person.id)} // Changed from _id to id
         >
           <div style={styles.left}>
             <FaUser style={styles.icon} />
