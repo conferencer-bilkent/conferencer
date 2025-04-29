@@ -220,7 +220,7 @@ export const ColorModeContext = createContext<ColorModeContextType>({
 
 export const useMode = (): [Theme, { toggleColorMode: () => void }] => {
   const storedTheme = localStorage.getItem("theme") as "light" | "dark" | null;
-  const [mode, setMode] = useState<"light" | "dark">(storedTheme || "dark");
+  const [mode, setMode] = useState<"light" | "dark">(storedTheme || "light");
 
   useEffect(() => {
     localStorage.setItem("theme", mode); // Save the theme to localStorage whenever it changes
