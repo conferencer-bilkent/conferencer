@@ -11,6 +11,7 @@ from routes.upload_routes import upload_file
 from routes.notification_routes import get_notification, mark_notification_as_answered
 from routes.keywords_routes import get_keywords, add_keyword, set_keywords
 from routes.track_routes import create_track, get_tracks_by_conference, appoint_track_chair, get_track_by_people, get_track_by_author, get_track_by_reviewer, get_track, get_all_tracks, get_all_relevant_people
+from routes.assignment_routes import create_assignment_for_track, get_assignments_for_reviewer, get_assigned_papers
 
 # Define blueprints
 auth_bp = Blueprint("auth", __name__)
@@ -25,6 +26,7 @@ upload_bp = Blueprint("upload", __name__)
 notification_bp = Blueprint("notification", __name__)
 keywords_bp = Blueprint("keywords", __name__)
 track_bp = Blueprint("track", __name__)
+assignment_bp = Blueprint("assignment", __name__)
 
 # Route bindings (logic attached here)
 auth_bp.route("/login", methods=["POST"])(login)
@@ -76,6 +78,10 @@ track_bp.route("/<track_id>/author", methods=["GET"])(get_track_by_author)
 track_bp.route("/<track_id>/reviewer", methods=["GET"])(get_track_by_reviewer)
 track_bp.route("/<track_id>", methods=["GET"])(get_track)
 track_bp.route("/<track_id>/relevant", methods=["GET"])(get_all_relevant_people)
+track_bp.route("/<track_id>/assign", methods=["POST"])(create_assignment_for_track)
+
+assignment_bp.route("/reviewer/<reviewer_id>", methods=["GET"])(get_assignments_for_reviewer)
+assignment_bp.route("/reviewer/<reviewer_id>/papers", methods=["GET"])(get_assigned_papers)
 
 # Register list
 all_routes = [
@@ -91,4 +97,5 @@ all_routes = [
     (notification_bp, "/notification"),
     (keywords_bp, "/keywords"),
     (track_bp, "/track"),
+    (assignment_bp, "/assignment"),
 ]
