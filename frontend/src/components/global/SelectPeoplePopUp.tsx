@@ -1,3 +1,5 @@
+// src/global/SelectPeoplePopUp.tsx
+
 import React, { useState, useEffect } from "react";
 import { FaSearch } from "react-icons/fa";
 import SelectPeopleItem, { Person } from "./SelectPeopleItem";
@@ -7,7 +9,7 @@ interface Props {
   buttonText: string;
   people?: UserData[];
   onClose: () => void;
-  onSelect?: (selectedUserIds: string[]) => void; // New callback prop
+  onSelect?: (selectedUserIds: string[]) => void;
 }
 
 const styles = {
@@ -72,62 +74,46 @@ const SelectPeoplePopup: React.FC<Props> = ({
   const [selected, setSelected] = useState<number[]>([]);
   const [filteredPeople, setFilteredPeople] = useState<Person[]>([]);
 
-  // Map users to a person structure that works with our component
+  // Map UserData -> Person for rendering and selection
   const mapUserToPerson = (user: UserData, index: number): Person => ({
     id: index,
     name: `${user.name || ""} ${user.surname || ""}`.trim(),
     email: user.email || "",
-    userId: user.id || "", // Use _id as the actual user identifier
+    userId: user._id?.toString() ?? "",
   });
 
-  // Convert UserData[] to Person[] for the component - initial setup
+  // Initialize filtered list whenever the people prop changes
   useEffect(() => {
-    const mappedPeople = people.map(mapUserToPerson);
-    setFilteredPeople(mappedPeople);
+    setFilteredPeople(people.map(mapUserToPerson));
   }, [people]);
 
-  // Filter people based on search input
+  // Filter by name or email on search input
   useEffect(() => {
     if (!search.trim()) {
-      // If search is empty, show all people
-      const mappedPeople = people.map(mapUserToPerson);
-      setFilteredPeople(mappedPeople);
+      setFilteredPeople(people.map(mapUserToPerson));
       return;
     }
-
-    // Filter based on search
-    const searchLower = search.toLowerCase();
+    const lower = search.toLowerCase();
     const filtered = people
       .filter(
-        (user) =>
-          `${user.name || ""} ${user.surname || ""}`
-            .toLowerCase()
-            .includes(searchLower) ||
-          (user.email && user.email.toLowerCase().includes(searchLower))
+        (u) =>
+          `${u.name || ""} ${u.surname || ""}`.toLowerCase().includes(lower) ||
+          (u.email?.toLowerCase().includes(lower) ?? false)
       )
       .map(mapUserToPerson);
-
     setFilteredPeople(filtered);
   }, [search, people]);
 
   const toggle = (id: number) =>
-    setSelected((s) =>
-      s.includes(id) ? s.filter((x) => x !== id) : [...s, id]
+    setSelected((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
     );
 
-  // Handle the final selection when the button is clicked
   const handleSelection = () => {
-    console.log("Selected IDs:", selected); // Debugging line
-    // Map selected indices back to actual user IDs
-    const selectedUserIds = selected
-      .map((index) => {
-        const person = filteredPeople.find((p) => p.id === index);
-        return person?.userId || "";
-      })
-      .filter((id) => id); // Filter out any empty strings
-    console.log("Selected User IDs:", selectedUserIds); // Debugging line
-    // Pass selected user IDs to parent component
-    onSelect(selectedUserIds);
+    const selectedIds = selected
+      .map((idx) => filteredPeople.find((p) => p.id === idx)?.userId)
+      .filter((id): id is string => Boolean(id));
+    onSelect(selectedIds);
     onClose();
   };
 
@@ -137,6 +123,7 @@ const SelectPeoplePopup: React.FC<Props> = ({
         <button style={styles.close} onClick={onClose}>
           ✕
         </button>
+
         <div style={styles.search}>
           <FaSearch style={{ marginRight: 8 }} />
           <input
