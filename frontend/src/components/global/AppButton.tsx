@@ -24,9 +24,9 @@ const AppButton: React.FC<AppButtonProps> = ({ icon, text, onClick }) => {
         alignItems: "center",
         backgroundColor: isHovered
           ? theme.palette.mode === "dark"
-            ? colors.grey[700]
-            : colors.grey[200]
-          : "transparent",
+            ? colors.grey[600]
+            : colors.grey[600]
+          : colors.primary[1000],
         width: "240px",
         height: "56px",
         border: `2px solid ${colors.grey[100]}`,
@@ -48,12 +48,12 @@ const AppButton: React.FC<AppButtonProps> = ({ icon, text, onClick }) => {
           marginRight: "12px",
         }}
       >
-        {React.cloneElement(icon as React.ReactElement, { 
-          style: { 
-            width: "24px", 
+        {React.cloneElement(icon as React.ReactElement, {
+          style: {
+            width: "24px",
             height: "24px",
-            ...((icon as React.ReactElement)?.props?.style || {})
-          } 
+            ...((icon as React.ReactElement)?.props?.style || {}),
+          },
         })}
       </div>
       <span

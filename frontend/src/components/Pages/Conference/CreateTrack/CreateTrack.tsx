@@ -4,8 +4,6 @@ import { useNavigate } from "react-router-dom";
 import "./CreateTrack.css";
 import { getMenuItemsForPage } from "../../../global/sideMenuConfig";
 import { handleMenuItemClick } from "../../../../utils/navigation/menuNavigation";
-import SideMenu from "../../../global/SideMenu";
-import Topbar from "../../../global/TopBar";
 import {
   createTrack,
   mapApiResponseToTrack,
@@ -80,7 +78,10 @@ const CreateTrack: React.FC = () => {
 
   const handleLogout = async () => {
     try {
-      const response = await fetch("/auth/logout", { method: "POST", credentials: "include" });
+      const response = await fetch("/auth/logout", {
+        method: "POST",
+        credentials: "include",
+      });
       if (response.ok) navigate("/login");
     } catch (e) {
       console.error("Logout failed", e);
@@ -96,9 +97,10 @@ const CreateTrack: React.FC = () => {
     const invalid: string[] = [];
     steps[currentStep].fields.forEach((field) => {
       const formValue = form[field as keyof TrackForm];
-      let value: any = formValue && typeof formValue === "object" && "value" in formValue
-        ? (formValue as any).value
-        : formValue;
+      let value: any =
+        formValue && typeof formValue === "object" && "value" in formValue
+          ? (formValue as any).value
+          : formValue;
       if (typeof value === "string" && value.trim() === "") invalid.push(field);
       if (typeof value === "number" && isNaN(value)) invalid.push(field);
     });
@@ -106,8 +108,12 @@ const CreateTrack: React.FC = () => {
   };
 
   const handleChange = (field: keyof TrackForm, value: any) => {
-    setForm(prev => ({ ...prev, [field]: value }));
-    setInvalidFields(prev => { const s = new Set(prev); s.delete(field as string); return s; });
+    setForm((prev) => ({ ...prev, [field]: value }));
+    setInvalidFields((prev) => {
+      const s = new Set(prev);
+      s.delete(field as string);
+      return s;
+    });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -120,109 +126,148 @@ const CreateTrack: React.FC = () => {
     // unwrap values
     const payload: Record<string, any> = {};
     Object.entries(form).forEach(([k, v]) => {
-      payload[k] = v && typeof v === "object" && "value" in v ? (v as any).value : v;
+      payload[k] =
+        v && typeof v === "object" && "value" in v ? (v as any).value : v;
     });
     if (currentStep === steps.length - 1) {
       try {
         if (!activeConference) {
           throw new Error("No active conference selected");
         }
-        
+
         // Add conference_id to payload
         payload.conference_id = activeConference.id;
-        
+
         const trackId = await createTrack(payload);
-        const newTrack = mapApiResponseToTrack({ 
-          track_id: trackId, 
-          ...payload, 
-          created_at: new Date().toISOString() 
+        const newTrack = mapApiResponseToTrack({
+          track_id: trackId,
+          ...payload,
+          created_at: new Date().toISOString(),
         });
-        
+
         // If you have an addTrack function in your context
         // addTrack(newTrack);
-        
+
         alert("Track created successfully!");
         navigate(`/conference/`);
       } catch (err: any) {
         alert(`Error: ${err.message}`);
       }
     } else {
-      setCurrentStep(prev => Math.min(prev + 1, steps.length - 1));
+      setCurrentStep((prev) => Math.min(prev + 1, steps.length - 1));
     }
   };
 
   const formatLabel = (str: string) =>
-    str.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+    str.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 
   const step = steps[currentStep];
 
   return (
-    <>
-      <Topbar />
-      <div className="homepage-container">
-        <SideMenu items={menuItems} onItemClick={handleItemClick} />
-        <div className="content-container">
-          <div className="form-card">
-            {/* Progress */}
-            <div className="progress-container">
-              <div className="progress-steps-container">
-                {steps.map((_, i) => (
-                  <div key={i} className="step-container">
-                    <div className={`step-circle ${i <= currentStep ? 'active' : ''}`}>{i + 1}</div>
-                    {i < steps.length - 1 && <div className={`step-line ${i < currentStep ? 'active' : ''}`} />}
-                  </div>
-                ))}
+    <div className="content-container">
+      <div className="form-card">
+        {/* Progress */}
+        <div className="progress-container">
+          <div className="progress-steps-container">
+            {steps.map((_, i) => (
+              <div key={i} className="step-container">
+                <div
+                  className={`step-circle ${i <= currentStep ? "active" : ""}`}
+                >
+                  {i + 1}
+                </div>
+                {i < steps.length - 1 && (
+                  <div
+                    className={`step-line ${i < currentStep ? "active" : ""}`}
+                  />
+                )}
               </div>
-            </div>
-            {/* Form */}
-            <h2 className="form-title">{step.title}</h2>
-            <form onSubmit={handleSubmit}>
-              <div className="space-y-4">
-                {step.fields.map(field => {
-                  const raw = form[field as keyof TrackForm];
-                  const isObj = raw && typeof raw === 'object' && 'value' in raw;
-                  const value = isObj ? (raw as any).value : raw;
-                  const scope = isObj ? (raw as any).scope : null;
-                  const invalid = invalidFields.has(field);
-                  return (
-                    <div key={field} className={`form-field ${invalid ? 'invalid' : ''}`}>
-                      <label className="form-label">
-                        {formatLabel(field)}{scope && <span className="scope-badge">{scope}</span>}
-                      </label>
-                      {typeof value === 'boolean' ? (
-                        <input type="checkbox" checked={value}
-                          onChange={e => handleChange(field as any, isObj ? { value: e.target.checked, scope } : e.target.checked)}
-                          className="form-checkbox" />
-                      ) : typeof value === 'number' ? (
-                        <input type="number" value={value}
-                          onChange={e => handleChange(field as any, isObj ? { value: Number(e.target.value), scope } : Number(e.target.value))}
-                          className="form-input" />
-                      ) : (
-                        <input type="text" value={value as string}
-                          onChange={e => handleChange(field as any, isObj ? { value: e.target.value, scope } : e.target.value)}
-                          className="form-input" />
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-              <div className="button-container">
-                <button type="button" onClick={() => setCurrentStep(prev => Math.max(prev - 1, 0))}
-                  disabled={currentStep === 0} className="nav-button button-back">
-                  Back
-                </button>
-                <button type="submit" className="nav-button button-primary">
-                  {currentStep === steps.length - 1 ? "Create Track" : "Next"}
-                </button>
-              </div>
-            </form>
+            ))}
           </div>
         </div>
+        {/* Form */}
+        <h2 className="form-title">{step.title}</h2>
+        <form onSubmit={handleSubmit}>
+          <div className="space-y-4">
+            {step.fields.map((field) => {
+              const raw = form[field as keyof TrackForm];
+              const isObj = raw && typeof raw === "object" && "value" in raw;
+              const value = isObj ? (raw as any).value : raw;
+              const scope = isObj ? (raw as any).scope : null;
+              const invalid = invalidFields.has(field);
+              return (
+                <div
+                  key={field}
+                  className={`form-field ${invalid ? "invalid" : ""}`}
+                >
+                  <label className="form-label">
+                    {formatLabel(field)}
+                    {scope && <span className="scope-badge">{scope}</span>}
+                  </label>
+                  {typeof value === "boolean" ? (
+                    <input
+                      type="checkbox"
+                      checked={value}
+                      onChange={(e) =>
+                        handleChange(
+                          field as any,
+                          isObj
+                            ? { value: e.target.checked, scope }
+                            : e.target.checked
+                        )
+                      }
+                      className="form-checkbox"
+                    />
+                  ) : typeof value === "number" ? (
+                    <input
+                      type="number"
+                      value={value}
+                      onChange={(e) =>
+                        handleChange(
+                          field as any,
+                          isObj
+                            ? { value: Number(e.target.value), scope }
+                            : Number(e.target.value)
+                        )
+                      }
+                      className="form-input"
+                    />
+                  ) : (
+                    <input
+                      type="text"
+                      value={value as string}
+                      onChange={(e) =>
+                        handleChange(
+                          field as any,
+                          isObj
+                            ? { value: e.target.value, scope }
+                            : e.target.value
+                        )
+                      }
+                      className="form-input"
+                    />
+                  )}
+                </div>
+              );
+            })}
+          </div>
+          <div className="button-container">
+            <button
+              type="button"
+              onClick={() => setCurrentStep((prev) => Math.max(prev - 1, 0))}
+              disabled={currentStep === 0}
+              className="nav-button button-back"
+            >
+              Back
+            </button>
+            <button type="submit" className="nav-button button-primary">
+              {currentStep === steps.length - 1 ? "Create Track" : "Next"}
+            </button>
+          </div>
+        </form>
       </div>
-    </>
+    </div>
   );
 };
 
 export default CreateTrack;
-
-

@@ -1,63 +1,19 @@
-.homepage-container {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  margin: 0; /* Add this */
-  padding: 0; /* Add this */
-}
 
-.topbar-wrapper {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 1000;
-  height: 60px; /* Explicitly set Topbar height */
-  margin: 0; /* Ensure no margin */
-  padding: 0; /* Ensure no padding */
-}
-.main-content-container {
-  display: flex;
-  flex: 1;
-  margin-top: 60px; /* Must match Topbar height */
-  height: calc(100% - 60px); /* Must match Topbar height */
-  overflow: hidden; /* Prevent any overflow */
-}
 
 .content-container {
   flex: 1;
   padding: 20px;
+  display: flex;
+  flex-direction: column;
   overflow-y: auto;
-  background-color: #f5f5f500;
   margin: 0; /* Ensure no margin */
 }
 
-.button-group {
-  display: flex;
-  gap: 15px;
-  margin-bottom: 30px;
-}
-
-.create-conference-button {
-  padding: 12px 24px;
-  background-color: #2196f3;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 16px;
-  transition: background-color 0.3s;
-}
-
-.create-conference-button:hover {
-  background-color: #1976d2;
-}
 
 .sections-container {
   display: flex;
   flex-direction: column;
-  gap: 40px;
-  max-width: 1200px;
+  gap: 40px;  
   margin: 0 auto;
 }
 

@@ -16,13 +16,9 @@ import {
   TableCell,
 } from "@mui/material";
 import AppTitle from "../../global/AppTitle";
-import SideMenu from "../../global/SideMenu";
-import TopBar from "../../global/TopBar";
-import { getMenuItemsForPage } from "../../global/sideMenuConfig";
 import ProfileUserRoles from "./components/ProfileUserRoles";
 import { tokens } from "../../../theme";
 import { useNavigate, useParams } from "react-router-dom";
-import { handleMenuItemClick } from "../../../utils/navigation/menuNavigation";
 import { useUser } from "../../../context/UserContext";
 import { emptyRole, getUserStats, UserData } from "../../../models/user";
 import { getUserById } from "../../../services/userService";
@@ -30,7 +26,6 @@ import { getUserById } from "../../../services/userService";
 const ProfilePage: React.FC = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
-  const menuItems = getMenuItemsForPage("default");
   const navigate = useNavigate();
   const { user: currentUser, loading: contextLoading } = useUser();
   const { id } = useParams<{ id: string }>();
@@ -139,10 +134,6 @@ const ProfilePage: React.FC = () => {
     } catch (error) {
       console.error("Error updating profile:", error);
     }
-  };
-
-  const handleItemClick = (item: string) => {
-    handleMenuItemClick(item, navigate);
   };
 
   if (loading) {

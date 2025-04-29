@@ -44,8 +44,36 @@ const App: React.FC = () => {
           <ConferenceProvider>
             <Router>
               <Routes>
-                <Route path="/login" element={<LoginForm />} />
-                <Route path="/register" element={<RegisterForm />} />
+                <Route
+                  path="/login"
+                  element={
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "center",
+                        alignItems: "center",
+                        height: "100vh",
+                      }}
+                    >
+                      <LoginForm />
+                    </div>
+                  }
+                />
+                <Route
+                  path="/register"
+                  element={
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "center",
+                        alignItems: "center",
+                        height: "100vh",
+                      }}
+                    >
+                      <RegisterForm />
+                    </div>
+                  }
+                />
                 <Route
                   path="*"
                   element={
