@@ -1,6 +1,6 @@
 from flask import Blueprint
 from routes.auth_routes import login, signup, logout, check_session, login_google, google_callback
-from routes.conference_routes import create_conference, get_conferences, get_conference, invite_pc_member
+from routes.conference_routes import create_conference, get_conferences, get_conference, invite_pc_member, appoint_superchair
 from routes.ping_routes import ping
 from routes.profile_routes import get_profile, update_profile, get_all_users
 from routes.role_routes import assign_role, get_roles
@@ -40,6 +40,7 @@ conference_bp.route("/<conference_id>/invite_pc_member", methods=["POST"])(invit
 conference_bp.route("/create", methods=["POST"])(create_conference)
 conference_bp.route("/", methods=["GET"])(get_conferences)
 conference_bp.route("/<conference_id>", methods=["GET"])(get_conference)
+conference_bp.route("/<conference_id>/superchair", methods=["POST"])(appoint_superchair)
 
 ping_bp.route("/", methods=["GET"])(ping)
 

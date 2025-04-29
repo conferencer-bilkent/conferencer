@@ -115,7 +115,24 @@ def get_conferences():
         result = []
         for conference in conferences:
             conf_dict = dict(conference)
-            conf_dict['_id'] = str(conf_dict['_id'])
+            roles = mongo.db.roles.find({"conference_id": conf_dict["conference_id"]})
+            role_list = []
+            for role in roles:
+                role_dict = dict(role)
+                role_dict['_id'] = str(role_dict['_id'])
+                role_list.append(role_dict)
+            conf_dict['roles'] = role_list
+            # Get users models having the array roles which have these role ids in them
+            role_ids = [str(role['_id']) for role in role_list]
+            users = mongo.db.users.find({"roles": {"$in": role_ids}})
+            user_list = []
+            for user in users:
+                user_dict = dict(user)
+                user_dict['_id'] = str(user_dict['_id'])
+                user_dict['positions_in_this_conference'] = [role['position'] for role in role_list if str(role['_id']) in user_dict['roles']]
+                user_list.append(user_dict)
+            conf_dict['users'] = user_list
+
             tracks = mongo.db.tracks.find({"conference_id": conf_dict["conference_id"]})
             track_list = []
             for track in tracks:
@@ -130,6 +147,70 @@ def get_conferences():
     except Exception as e:
         return jsonify({"error": f"Failed to retrieve conferences: {str(e)}"}), 500
 
+
+def appoint_superchair(conference_id):
+    if "user_id" not in session:
+        return jsonify({"error": "Unauthorized"}), 401
+
+    try:
+        data = request.get_json()
+        user_id = data.get("user_id")
+
+        if not user_id:
+            return jsonify({"error": "Missing user_id"}), 400
+
+        # Check if the user is already a superchair
+        existing_role = mongo.db.roles.find_one({
+            "conference_id": conference_id,
+            "position": "superchair",
+            "user_id": user_id
+        })
+
+        if existing_role:
+            return jsonify({"error": "User is already a superchair"}), 400
+
+        new_role = Role(
+            conference_id=conference_id,
+            position="superchair",
+            is_active=True
+        )
+
+        role_dict = {
+            '_id': new_role.id,
+            'conference_id': new_role.conference_id,
+            'track_id': None,
+            'position': new_role.position,
+            'is_active': new_role.is_active
+        }
+
+        # Update the conference's superchair array
+        conference_update = mongo.db.conferences.update_one(
+            {"conference_id": conference_id},
+            {"$addToSet": {"superchairs": user_id}}
+        )
+
+        if conference_update.modified_count == 0:
+            return jsonify({"error": "Conference not found"}), 404
+
+        mongo.db.roles.insert_one(role_dict)
+
+        result = mongo.db.users.update_one(
+            {'_id': ObjectId(user_id)},
+            {'$addToSet': {'roles': str(new_role.id)}}
+        )
+
+        if result.modified_count > 0:
+            return jsonify({
+                "message": "Superchair appointed successfully",
+                "role_id": str(new_role.id)
+            }), 201
+        else:
+            return jsonify({'error': 'User not found or role not updated'}), 404
+
+    except Exception as e:
+        return jsonify({"error": f"Failed to appoint superchair: {str(e)}"}), 500
+    
+
 def get_conference(conference_id):
     try:
         conference = mongo.db.conferences.find_one({"conference_id": conference_id})
@@ -141,6 +222,25 @@ def get_conference(conference_id):
 
         conf_dict = dict(conference)
         conf_dict['_id'] = str(conf_dict['_id'])
+
+        # Get roles in the conference 
+        roles = mongo.db.roles.find({"conference_id": conference_id})
+        role_list = []
+        for role in roles:
+            role_dict = dict(role)
+            role_dict['_id'] = str(role_dict['_id'])
+            role_list.append(role_dict)
+        conf_dict['roles'] = role_list
+        # Get users models having the array roles which have these role ids in them
+        role_ids = [str(role['_id']) for role in role_list]
+        users = mongo.db.users.find({"roles": {"$in": role_ids}})
+        user_list = []
+        for user in users:
+            user_dict = dict(user)
+            user_dict['_id'] = str(user_dict['_id'])
+            user_dict['positions_in_this_conference'] = [role['position'] for role in role_list if str(role['_id']) in user_dict['roles']]
+            user_list.append(user_dict)
+        conf_dict['users'] = user_list
 
         # Get tracks for the conference
         tracks = mongo.db.tracks.find({"conference_id": conference_id})
