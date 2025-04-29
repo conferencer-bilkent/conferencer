@@ -55,12 +55,16 @@ const SideMenu: React.FC<SideMenuProps> = ({ items }) => {
   return (
     <Box
       sx={{
-        padding: "20px",
+        width: { xs: "auto", sm: "250px" }, // Allow shrinking on small screens
         borderRadius: "10px",
-        width: "250px",
+        display: "flex",
+        flexDirection: "column",
+        height: "100vh",
+        padding: { xs: "10px", sm: "0" }, // Add padding for small screens
+        marginTop: "10vh", // Start at 1/3 of the page height
       }}
     >
-      <ul style={{ listStyle: "none", padding: 0 }}>
+      <ul style={{ listStyle: "none", padding: 0, width: "100%" }}>
         {items.map((item, index) => (
           <li
             key={index}
@@ -75,6 +79,7 @@ const SideMenu: React.FC<SideMenuProps> = ({ items }) => {
               borderBottom: `1px solid ${colors.grey[300]}`,
               borderRadius: "5px",
               transition: "background-color 0.3s, color 0.3s",
+              textAlign: "center", // Center text for small screens
             }}
             onMouseEnter={(e) => {
               e.currentTarget.style.color = colors.grey[900];

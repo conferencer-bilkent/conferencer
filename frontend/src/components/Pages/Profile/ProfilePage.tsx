@@ -16,13 +16,9 @@ import {
   TableCell,
 } from "@mui/material";
 import AppTitle from "../../global/AppTitle";
-import SideMenu from "../../global/SideMenu";
-import TopBar from "../../global/TopBar";
-import { getMenuItemsForPage } from "../../global/sideMenuConfig";
 import ProfileUserRoles from "./components/ProfileUserRoles";
 import { tokens } from "../../../theme";
 import { useNavigate, useParams } from "react-router-dom";
-import { handleMenuItemClick } from "../../../utils/navigation/menuNavigation";
 import { useUser } from "../../../context/UserContext";
 import { emptyRole, getUserStats, UserData } from "../../../models/user";
 import { getUserById } from "../../../services/userService";
@@ -30,7 +26,6 @@ import { getUserById } from "../../../services/userService";
 const ProfilePage: React.FC = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
-  const menuItems = getMenuItemsForPage("default");
   const navigate = useNavigate();
   const { user: currentUser, loading: contextLoading } = useUser();
   const { id } = useParams<{ id: string }>();
@@ -139,10 +134,6 @@ const ProfilePage: React.FC = () => {
     } catch (error) {
       console.error("Error updating profile:", error);
     }
-  };
-
-  const handleItemClick = (item: string) => {
-    handleMenuItemClick(item, navigate);
   };
 
   if (loading) {
@@ -274,142 +265,130 @@ const ProfilePage: React.FC = () => {
   };
 
   return (
-    <div style={{ display: "flex", height: "100vh", width: "100vw" }}>
-      <div style={{ width: "220px" }}>
-        <SideMenu items={menuItems} onItemClick={handleItemClick} />
+    <div style={{ padding: "20px", overflowY: "auto" }}>
+      {isOwnProfile && (
+        <Button
+          variant="contained"
+          onClick={handleEditOpen}
+          style={{ alignSelf: "flex-end", marginBottom: "10px" }}
+        >
+          Edit Profile
+        </Button>
+      )}
+
+      <AppTitle text={`${profileUser.name} ${profileUser.surname}`} />
+
+      <div style={{ marginTop: "20px" }}>
+        <p>Name: {profileUser.name}</p>
+        <p>Surname: {profileUser.surname}</p>
+        <p>Bio: {profileUser.bio || "No bio provided"}</p>
+        <p>Email: {profileUser.email}</p>
       </div>
-      <div style={{ flexGrow: 1, display: "flex", flexDirection: "column" }}>
-        <TopBar />
-        <div style={{ padding: "20px", overflowY: "auto" }}>
-          {isOwnProfile && (
-            <Button
-              variant="contained"
-              onClick={handleEditOpen}
-              style={{ alignSelf: "flex-end", marginBottom: "10px" }}
-            >
-              Edit Profile
-            </Button>
-          )}
 
-          <AppTitle text={`${profileUser.name} ${profileUser.surname}`} />
+      {/* New flex container for roles and stats */}
+      <div style={flexContainerStyle}>
+        {/* Roles section with scrollability */}
+        <div style={rolesContainerStyle}>
+          <ProfileUserRoles
+            activeRoles={activeRoles.map((role) => ({
+              name: role?.name || "Unknown",
+            }))}
+            pastRoles={pastRoles.map((role) => ({
+              name: role?.name || "Unknown",
+            }))}
+          />
+        </div>
 
-          <div style={{ marginTop: "20px" }}>
-            <p>Name: {profileUser.name}</p>
-            <p>Surname: {profileUser.surname}</p>
-            <p>Bio: {profileUser.bio || "No bio provided"}</p>
-            <p>Email: {profileUser.email}</p>
-          </div>
-
-          {/* New flex container for roles and stats */}
-          <div style={flexContainerStyle}>
-            {/* Roles section with scrollability */}
-            <div style={rolesContainerStyle}>
-              <ProfileUserRoles
-                activeRoles={activeRoles.map((role) => ({
-                  name: role?.name || "Unknown",
-                }))}
-                pastRoles={pastRoles.map((role) => ({
-                  name: role?.name || "Unknown",
-                }))}
-              />
-            </div>
-
-            {/* Stats section */}
-            <div style={statsContainerStyle}>
-              <h3 style={statsTitleStyle}>Stats</h3>
-              <div>
-                <table style={statsTableStyle}>
-                  <tbody>
-                    <tr>
-                      <td style={statsCellStyle}>Average Rating Given:</td>
-                      <td style={lastCellStyle}>
-                        {userStats.avg_rating_given}
-                      </td>
-                    </tr>
-                    <tr>
-                      <td style={statsCellStyle}>Avg Time Before Deadline:</td>
-                      <td style={lastCellStyle}>
-                        {userStats.avg_submit_time_before_deadline}
-                      </td>
-                    </tr>
-                    <tr>
-                      <td style={statsCellStyle}>Avg Time to Review:</td>
-                      <td style={lastCellStyle}>
-                        {userStats.avg_time_to_review}
-                      </td>
-                    </tr>
-                    <tr>
-                      <td style={statsCellStyle}>Deadline Compliance Rate:</td>
-                      <td style={lastCellStyle}>
-                        {userStats.deadline_compliance_rate}
-                      </td>
-                    </tr>
-                    <tr>
-                      <td style={statsCellStyle}>Review Rating:</td>
-                      <td style={lastCellStyle}>{userStats.review_rating}</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-
-          <div style={keywordsContainerStyle}>
-            <h3 style={keywordsTitleStyle}>Keywords</h3>
-            <Table size="small" style={{ color: colors.grey[100] }}>
-              <TableHead>
-                <TableRow>
-                  <TableCell
-                    style={{
-                      backgroundColor: colors.grey[400],
-                      color: colors.grey[100],
-                      borderBottom: `1px solid ${colors.grey[100]}`,
-                    }}
-                  >
-                    <strong>Preferred Keywords</strong>
-                  </TableCell>
-                  <TableCell
-                    style={{
-                      backgroundColor: colors.grey[400],
-                      color: colors.grey[100],
-                      borderBottom: `1px solid ${colors.grey[100]}`,
-                    }}
-                  >
-                    <strong>Unwanted Keywords</strong>
-                  </TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {Array.from({
-                  length: Math.max(
-                    preferredKeywords.length,
-                    unwantedKeywords.length
-                  ),
-                }).map((_, index) => (
-                  <TableRow key={index}>
-                    <TableCell
-                      style={{
-                        backgroundColor: colors.grey[400],
-                        color: colors.grey[400],
-                        borderBottom: `1px solid ${colors.grey[100]}`,
-                      }}
-                    >
-                      {preferredKeywords[index] || "-"}
-                    </TableCell>
-                    <TableCell
-                      style={{
-                        color: colors.grey[400],
-                        borderBottom: `1px solid ${colors.grey[100]}`,
-                      }}
-                    >
-                      {unwantedKeywords[index] || "-"}
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+        {/* Stats section */}
+        <div style={statsContainerStyle}>
+          <h3 style={statsTitleStyle}>Stats</h3>
+          <div>
+            <table style={statsTableStyle}>
+              <tbody>
+                <tr>
+                  <td style={statsCellStyle}>Average Rating Given:</td>
+                  <td style={lastCellStyle}>{userStats.avg_rating_given}</td>
+                </tr>
+                <tr>
+                  <td style={statsCellStyle}>Avg Time Before Deadline:</td>
+                  <td style={lastCellStyle}>
+                    {userStats.avg_submit_time_before_deadline}
+                  </td>
+                </tr>
+                <tr>
+                  <td style={statsCellStyle}>Avg Time to Review:</td>
+                  <td style={lastCellStyle}>{userStats.avg_time_to_review}</td>
+                </tr>
+                <tr>
+                  <td style={statsCellStyle}>Deadline Compliance Rate:</td>
+                  <td style={lastCellStyle}>
+                    {userStats.deadline_compliance_rate}
+                  </td>
+                </tr>
+                <tr>
+                  <td style={statsCellStyle}>Review Rating:</td>
+                  <td style={lastCellStyle}>{userStats.review_rating}</td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
+      </div>
+
+      <div style={keywordsContainerStyle}>
+        <h3 style={keywordsTitleStyle}>Keywords</h3>
+        <Table size="small" style={{ color: colors.grey[100] }}>
+          <TableHead>
+            <TableRow>
+              <TableCell
+                style={{
+                  backgroundColor: colors.grey[400],
+                  color: colors.grey[100],
+                  borderBottom: `1px solid ${colors.grey[100]}`,
+                }}
+              >
+                <strong>Preferred Keywords</strong>
+              </TableCell>
+              <TableCell
+                style={{
+                  backgroundColor: colors.grey[400],
+                  color: colors.grey[100],
+                  borderBottom: `1px solid ${colors.grey[100]}`,
+                }}
+              >
+                <strong>Unwanted Keywords</strong>
+              </TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {Array.from({
+              length: Math.max(
+                preferredKeywords.length,
+                unwantedKeywords.length
+              ),
+            }).map((_, index) => (
+              <TableRow key={index}>
+                <TableCell
+                  style={{
+                    backgroundColor: colors.grey[400],
+                    color: colors.grey[400],
+                    borderBottom: `1px solid ${colors.grey[100]}`,
+                  }}
+                >
+                  {preferredKeywords[index] || "-"}
+                </TableCell>
+                <TableCell
+                  style={{
+                    color: colors.grey[400],
+                    borderBottom: `1px solid ${colors.grey[100]}`,
+                  }}
+                >
+                  {unwantedKeywords[index] || "-"}
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
       </div>
 
       <Dialog
