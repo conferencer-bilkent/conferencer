@@ -159,6 +159,35 @@ export const checkSession = async (): Promise<{ logged_in: boolean; user: UserDa
   }
 };
 
+/**
+ * Fetches all users from the system
+ * 
+ * @returns Promise with array of user data
+ */
+export const getAllUsers = async (): Promise<UserData[]> => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/profile/users`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include',
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || 'Failed to fetch users');
+    }
+    
+    const data = await response.json();
+    // The response is an array directly, not wrapped in a users property
+    return Array.isArray(data) ? data : [];
+  } catch (error) {
+    console.error('Error fetching all users:', error);
+    throw error;
+  }
+};
+
 const userService = {
   getUserById,
  loginUser,

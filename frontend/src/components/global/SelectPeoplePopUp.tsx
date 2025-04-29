@@ -1,27 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { FaSearch } from "react-icons/fa";
 import SelectPeopleItem, { Person } from "./SelectPeopleItem";
-import SelectPaperItem, { Paper } from "./SelectPaperItem";
+import { UserData } from "../../models/user";
 
-interface SelectPeoplePopupProps {
-  buttonText: string; // e.g., "Invite People", "Assign Superchair(s)", etc.
-  onClose: () => void; // callback to close the popup
+interface Props {
+  buttonText: string;
+  people?: UserData[];
+  onClose: () => void;
+  onSelect?: (selectedUserIds: string[]) => void; // New callback prop
 }
-
-// Example papers (demo)
-const EXAMPLE_PAPERS: Paper[] = [
-  {
-    id: 1,
-    title:
-      "Impact of Virtual Reality on Cognitive Learning in Higher Education",
-    authors: "Jane Doe, Memduh Tutus, Bilal Kar, et al.",
-  },
-  {
-    id: 2,
-    title: "AI-Powered Learning Tools: A Future Perspective",
-    authors: "Alice Johnson, Bob Smith",
-  },
-];
 
 const styles = {
   overlay: {
@@ -30,31 +17,30 @@ const styles = {
     left: 0,
     width: "100%",
     height: "100%",
-    background: "rgba(0, 0, 0, 0.5)",
+    background: "rgba(0,0,0,0.5)",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
     zIndex: 9999,
   },
-  popupContent: {
+  popup: {
     background: "#2b3c47",
     padding: "1rem 1.5rem",
     borderRadius: "8px",
     width: "300px",
-    textAlign: "center" as const,
     position: "relative" as const,
   },
-  closeButton: {
+  close: {
     position: "absolute" as const,
-    top: "8px",
-    right: "10px",
+    top: 8,
+    right: 10,
     background: "transparent",
     border: "none",
     color: "#fff",
     fontSize: "1.2rem",
     cursor: "pointer",
   },
-  searchContainer: {
+  search: {
     display: "flex",
     alignItems: "center",
     border: "2px solid #00aaff",
@@ -62,121 +48,113 @@ const styles = {
     background: "#1f2a32",
     padding: "0.5rem 1rem",
     color: "#fff",
+    marginBottom: "1rem",
   } as React.CSSProperties,
-  searchIcon: {
-    marginRight: "0.5rem",
-    cursor: "pointer",
-  },
-  searchInput: {
-    flex: 1,
-    background: "transparent",
-    border: "none",
-    outline: "none",
-    color: "#fff",
-    fontSize: "1rem",
-  } as React.CSSProperties,
-  divider: {
-    border: "none",
-    borderBottom: "2px solid #fff",
-    margin: "1rem 0",
-  } as React.CSSProperties,
-  popupButton: {
+  action: {
+    marginTop: "1rem",
     padding: "0.75rem 1rem",
     border: "none",
     borderRadius: "4px",
     background: "#2cbbf7",
     color: "#fff",
+    width: "100%",
     cursor: "pointer",
   } as React.CSSProperties,
 };
 
-const SelectPeoplePopup: React.FC<SelectPeoplePopupProps> = ({
-  buttonText,
+const SelectPeoplePopup: React.FC<Props> = ({ 
+  buttonText, 
+  people = [], 
   onClose,
+  onSelect = () => {} // Default empty function 
 }) => {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedItems, setSelectedItems] = useState<number[]>([]);
-  const [people, setPeople] = useState<Person[]>([]);
-  const [loading, setLoading] = useState(false);
-
-  const isPaperMode = buttonText === "Select Paper(s)";
-
-  const handleToggle = (id: number) => {
-    setSelectedItems((prev) =>
-      prev.includes(id) ? prev.filter((p) => p !== id) : [...prev, id]
-    );
-  };
-
-  // Fetch people when popup opens (non-paper mode)
-  const fetchPeople = async () => {
-    setLoading(true);
-    try {
-      const res = await fetch("http://127.0.0.1:5000/profile/users", {
-        credentials: "include",
-      });
-      if (!res.ok) throw new Error("Fetch failed");
-      const data: Person[] = await res.json();
-      setPeople(data);
-    } catch (err) {
-      console.error("Error fetching people:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
+  const [search, setSearch] = useState("");
+  const [selected, setSelected] = useState<number[]>([]);
+  const [filteredPeople, setFilteredPeople] = useState<Person[]>([]);
+  
+  // Map users to a person structure that works with our component
+  const mapUserToPerson = (user: UserData, index: number): Person => ({
+    id: index,
+    name: `${user.name || ''} ${user.surname || ''}`.trim(),
+    email: user.email || '',
+    userId: user.id || '', // Use _id as the actual user identifier
+  });
+  
+  // Convert UserData[] to Person[] for the component - initial setup
   useEffect(() => {
-    if (!isPaperMode) {
-      fetchPeople();
+    const mappedPeople = people.map(mapUserToPerson);
+    setFilteredPeople(mappedPeople);
+  }, [people]);
+  
+  // Filter people based on search input
+  useEffect(() => {
+    if (!search.trim()) {
+      // If search is empty, show all people
+      const mappedPeople = people.map(mapUserToPerson);
+      setFilteredPeople(mappedPeople);
+      return;
     }
-  }, [isPaperMode]);
+    
+    // Filter based on search
+    const searchLower = search.toLowerCase();
+    const filtered = people
+      .filter(user => 
+        `${user.name || ''} ${user.surname || ''}`.toLowerCase().includes(searchLower) ||
+        (user.email && user.email.toLowerCase().includes(searchLower))
+      )
+      .map(mapUserToPerson);
+    
+    setFilteredPeople(filtered);
+  }, [search, people]);
 
-  // Choose correct data list
-  const dataList = isPaperMode ? EXAMPLE_PAPERS : people;
+  const toggle = (id: number) =>
+    setSelected((s) =>
+      s.includes(id) ? s.filter((x) => x !== id) : [...s, id]
+    );
 
-  // Filter based on search term
-  const filteredItems = dataList.filter((item) =>
-    (isPaperMode ? (item as Paper).title : (item as Person).name)
-      .toLowerCase()
-      .includes(searchTerm.toLowerCase())
-  );
+  // Handle the final selection when the button is clicked
+  const handleSelection = () => {
+    // Map selected indices back to actual user IDs
+    const selectedUserIds = selected.map(index => {
+      const person = filteredPeople.find(p => p.id === index);
+      return person?.userId || '';
+    }).filter(id => id); // Filter out any empty strings
+    
+    // Pass selected user IDs to parent component
+    onSelect(selectedUserIds);
+    onClose();
+  };
 
   return (
     <div style={styles.overlay} onClick={onClose}>
-      <div style={styles.popupContent} onClick={(e) => e.stopPropagation()}>
-        <button style={styles.closeButton} onClick={onClose}>
+      <div style={styles.popup} onClick={(e) => e.stopPropagation()}>
+        <button style={styles.close} onClick={onClose}>
           ✕
         </button>
-
-        <div style={styles.searchContainer}>
-          <FaSearch style={styles.searchIcon} />
+        <div style={styles.search}>
+          <FaSearch style={{ marginRight: 8 }} />
           <input
             type="text"
-            placeholder={isPaperMode ? "Search papers..." : "Search people..."}
-            value={searchTerm}
-            style={styles.searchInput}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder="Search people..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            style={{
+              flex: 1,
+              background: "transparent",
+              border: "none",
+              outline: "none",
+              color: "#fff",
+            }}
           />
         </div>
 
-        <hr style={styles.divider} />
+        <SelectPeopleItem
+          people={filteredPeople}
+          selectedIds={selected}
+          onToggle={toggle}
+        />
 
-        {isPaperMode ? (
-          <SelectPaperItem
-            papers={filteredItems as Paper[]}
-            selectedIds={selectedItems}
-            onToggle={handleToggle}
-          />
-        ) : loading ? (
-          <p style={{ color: "#fff" }}>Loading...</p>
-        ) : (
-          <SelectPeopleItem
-            people={filteredItems as Person[]}
-            selectedIds={selectedItems}
-            onToggle={handleToggle}
-          />
-        )}
-
-        <button style={styles.popupButton} onClick={onClose}>
+        <button style={styles.action} onClick={handleSelection}>
           {buttonText}
         </button>
       </div>
