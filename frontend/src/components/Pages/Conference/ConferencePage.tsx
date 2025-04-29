@@ -14,6 +14,8 @@ import "./ConferencePage.css";
 import Topbar from "../../global/TopBar";
 import { handleMenuItemClick } from "../../../utils/navigation/menuNavigation";
 import { useConference } from "../../../context/ConferenceContext";
+import { invitePeopleToConference } from "../../../services/conferenceService";
+
 
 // Import the user service and types
 import { getUserById, getAllUsers } from "../../../services/userService"; // Add getAllUsers import
@@ -96,6 +98,17 @@ const ConferencePage: React.FC = () => {
         // Handle inviting people to the conference
         if (activeConference) {
           // Call your API to invite these users to the conference
+          
+          invitePeopleToConference(selectedUserIds, activeConference.id, activeConference.name)
+            .then(response => {
+              console.log("Successfully invited users:", response);
+              // You could add a success notification here
+            })
+            .catch(error => {
+              console.error("Error inviting users:", error);
+              // You could add an error notification here
+            });
+          
           console.log(`Inviting users to conference ${activeConference.id}`);
         }
         break;
@@ -167,11 +180,14 @@ const ConferencePage: React.FC = () => {
           (pcMemberId) =>
             !activeConference.superchairs.includes(pcMemberId?.toString() ?? "")
         );
+        console.log(activeConference.pcMembers);
 
         // Then map these IDs to the corresponding UserData objects
         const nonSupers = allUsers.filter((user) =>
           nonSuperIds.includes(user._id?.toString() ?? "")
         );
+
+
         return nonSupers;
 
       case "Add People to Track":
