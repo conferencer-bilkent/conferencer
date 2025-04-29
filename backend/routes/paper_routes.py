@@ -3,52 +3,22 @@ from models.paper import Paper
 from models.review import Review
 from extensions import mongo
 from bson import ObjectId
+from datetime import datetime
 
 def get_paper(paper_id):
     try:
         paper = mongo.db.papers.find_one({"_id": ObjectId(paper_id)})
-
         if not paper:
             return jsonify({"error": "Paper not found"}), 404
 
-        # 🎯 Fetch ALL reviews separately
-        reviews_cursor = mongo.db.reviews.find({"paper_id": str(paper["_id"])})
-        review_objs = []
+        # Convert ObjectId fields to string for JSON compatibility
+        paper["_id"] = str(paper["_id"])
+        paper["created_at"] = paper.get("created_at").isoformat() if paper.get("created_at") else None
 
-        for review_doc in reviews_cursor:
-            review_obj = Review(
-                id=review_doc["_id"],
-                paper_id=review_doc["paper_id"],
-                reviewer_id=review_doc["reviewer_id"],
-                reviewer_name=review_doc["reviewer_name"],
-                sub_firstname=review_doc["subreviewer"]["first_name"],
-                sub_lastname=review_doc["subreviewer"]["last_name"],
-                sub_email=review_doc["subreviewer"]["email"],
-                evaluation=review_doc["evaluation"],
-                confidence=review_doc["confidence"],
-                created_at=review_doc["created_at"]
-            )
-            review_objs.append(review_obj)
-
-        paper_obj = Paper(
-            paper_id=paper["_id"],
-            title=paper["title"],
-            abstract=paper["abstract"],
-            keywords=paper.get("keywords", []),
-            paper_path=paper["paper"],
-            authors=paper.get("authors", []),
-            decision=paper.get("decision"),
-            track=paper.get("track"),
-            bidding=paper.get("bidding"),
-            assignee=paper.get("assignee"),
-            reviews=review_objs,  # 🎯 real Review objects now
-            created_at=paper.get("created_at")
-        )
-
-        return jsonify({"paper": paper_obj.to_dict()}), 200
+        return jsonify(paper), 200
 
     except Exception as e:
-        return jsonify({"error": f"Failed to retrieve paper: {str(e)}"}), 500   
+        return jsonify({"error": f"Failed to fetch paper: {str(e)}"}), 500   
 
 
 def submit_paper():
@@ -56,7 +26,6 @@ def submit_paper():
         return jsonify({"error": "Unauthorized"}), 401
 
     data = request.get_json()
-
     track = data.get("track_id")
 
     try:
@@ -65,22 +34,35 @@ def submit_paper():
             title=data.get("title"),
             abstract=data.get("abstract"),
             keywords=data.get("keywords", []),
-            paper_path=data.get("paper"),  
-            authors=data.get("authors", []),
-            created_at=None
+            paper_path=data.get("paper"),
+            authors=data.get("authors", []),  # Expecting full author objects
+            created_by=session["user_id"],
+            track=track
         )
 
-        mongo.db.papers.insert_one(paper.to_dict())
+        # Insert the paper and capture MongoDB _id
+        result = mongo.db.papers.insert_one({
+            "id": paper.id,
+            "title": paper.title,
+            "abstract": paper.abstract,
+            "keywords": paper.keywords,
+            "paper": paper.paper,
+            "authors": paper.authors,
+            "track": paper.track,
+            "created_by": paper.created_by,
+            "created_at": paper.created_at
+        })
 
-        # Update the track with the new paper
+        # Use MongoDB's _id for track linkage
+        inserted_id = result.inserted_id
         mongo.db.tracks.update_one(
             {"_id": ObjectId(track)},
-            {"$push": {"papers": str(paper.id)}}
+            {"$push": {"papers": inserted_id}}
         )
 
         return jsonify({
             "message": "Paper created successfully!",
-            "paper_id": paper.id
+            "paper_id": str(inserted_id)
         }), 201
 
     except Exception as e:
