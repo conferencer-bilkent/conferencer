@@ -147,3 +147,43 @@ export const invitePeopleToConference = async (
     throw error;
   }
 };
+
+/**
+ * Assigns a user as a superchair for a conference
+ * 
+ * @param userId - ID of the user to assign as superchair
+ * @param conferenceId - ID of the conference
+ * @returns Promise with the response data
+ */
+export const assignSuperchair = async (
+  userId: string,
+  conferenceId: string
+): Promise<any> => {
+  try {
+    const payload = {
+      user_id: userId
+    };
+    
+    const response = await fetch(`http://127.0.0.1:5000/conference/${conferenceId}/superchair`, {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    
+    if (!response.ok) {
+      const data = await response.json();
+      throw new Error(data.error || `Failed to assign user ${userId} as superchair`);
+    }
+    
+    const result = await response.json();
+    return {
+      success: true,
+      message: `Successfully assigned user ${userId} as superchair for conference ID: ${conferenceId}`,
+      result
+    };
+  } catch (error) {
+    console.error("Failed to assign superchair:", error);
+    throw error;
+  }
+};

@@ -14,7 +14,7 @@ import "./ConferencePage.css";
 import Topbar from "../../global/TopBar";
 import { handleMenuItemClick } from "../../../utils/navigation/menuNavigation";
 import { useConference } from "../../../context/ConferenceContext";
-import { invitePeopleToConference } from "../../../services/conferenceService";
+import { assignSuperchair, invitePeopleToConference } from "../../../services/conferenceService";
 
 
 // Import the user service and types
@@ -22,7 +22,7 @@ import { getUserById, getAllUsers } from "../../../services/userService"; // Add
 import { UserData } from "../../../models/user";
 
 const ConferencePage: React.FC = () => {
-  const { activeConference } = useConference();
+  const { activeConference , setActiveConference} = useConference();
   const menuItems = getMenuItemsForPage("default");
   const navigate = useNavigate();
   // Add active track state
@@ -33,15 +33,32 @@ const ConferencePage: React.FC = () => {
 
   // Initialize active track when activeConference changes
   useEffect(() => {
-    if (activeConference!.tracks!.length > 0) {
+    if (!activeConference) {
+      const stored = localStorage.getItem("activeConference");
+      if (stored) {
+        setActiveConference(JSON.parse(stored));
+        // Exit early and let the dependency trigger this effect again when activeConference is set
+        return;
+      } else {
+        console.log("No active conference found in localStorage");
+        return;
+      }
+    }
+    
+    // Now we know activeConference exists
+    console.log(`Active conference set: ${activeConference.name} (ID: ${activeConference.id})`);
+    
+    // Safe access to tracks with optional chaining and nullish check
+    if (activeConference.tracks?.length > 0) {
       console.log(
-        `Setting active track for conference: ${activeConference?.name} (ID: ${activeConference?.id})`
+        `Setting active track for conference: ${activeConference.name} (ID: ${activeConference.id})`
       );
-      setActiveTrack(activeConference!.tracks[0]);
+      setActiveTrack(activeConference.tracks[0]);
     } else {
       setActiveTrack(null); // Reset if no tracks available
+      console.log("No tracks available for this conference");
     }
-  }, []);
+  }, [activeConference]); // Add activeConference to dependency array
 
   const handleItemClick = (item: string) => {
     handleMenuItemClick(item, navigate);
@@ -116,10 +133,23 @@ const ConferencePage: React.FC = () => {
       case "Assign Superchair(s)":
         // Handle assigning superchairs
         if (activeConference) {
-          // Call your API to assign these users as superchairs
-          console.log(
-            `Assigning users as superchairs to conference ${activeConference.id}`
+          // Process each selected user to assign as superchair
+          const assignPromises = selectedUserIds.map(userId => 
+            assignSuperchair(userId, activeConference.id)
           );
+          
+          Promise.all(assignPromises)
+            .then(results => {
+              console.log("Successfully assigned superchairs:", results);
+              // Refresh the page or update the UI to show new superchairs
+              window.location.reload(); // Simple refresh, or you could update state
+            })
+            .catch(error => {
+              console.error("Error assigning superchair(s):", error);
+              // You could add an error notification here
+            });
+          
+          console.log(`Assigning users as superchairs to conference ${activeConference.id}`);
         }
         break;
 
