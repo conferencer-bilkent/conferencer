@@ -5,6 +5,7 @@ from extensions import mongo
 from models.pc_member_invitation import PCMemberInvitation
 from routes.notification_routes import send_notification
 from models.track import Track
+from models.paper import Paper
 from models.role import Role
 from models.user import User
 
@@ -222,9 +223,38 @@ def get_track_by_people(people_id):
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+def get_all_papers_in_track(track_id):
+    try:
+        # Fetch the track document by track_id
+        track = mongo.db.tracks.find_one({"_id": ObjectId(track_id)})
 
+        if not track:
+            return jsonify({"error": "Track not found"}), 404
 
+        # Get all paper IDs associated with the track
+        paper_ids = track.get("papers", [])
+        print(f"Paper IDs associated with track: {paper_ids}")  # Debugging
 
+        if not paper_ids:
+            return jsonify({"error": "No papers associated with this track"}), 404
 
+        # Convert paper IDs to ObjectId for querying papers
+        paper_ids_object = [ObjectId(paper_id) for paper_id in paper_ids]
+        print(f"Converted Paper IDs to ObjectId: {paper_ids_object}")  # Debugging
 
+        # Fetch the papers using the ObjectId list
+        papers_cursor = mongo.db.papers.find({"_id": {"$in": paper_ids_object}})
+        papers = list(papers_cursor)  # Convert cursor to list to inspect the documents
 
+        print(f"Papers fetched from DB: {papers}")  # Debugging
+
+        # Convert papers to a list and return the results
+        paper_list = []
+        for paper in papers:
+            paper["_id"] = str(paper["_id"])  # Convert ObjectId to string for the response
+            paper_list.append(paper)
+
+        return jsonify({"papers": paper_list}), 200
+
+    except Exception as e:
+        return jsonify({"error": f"Failed to retrieve papers: {str(e)}"}), 500

@@ -10,7 +10,7 @@ from routes.review_routes import get_review, submit_review
 from routes.upload_routes import upload_file
 from routes.notification_routes import get_notification, mark_notification_as_answered, mark_all_read
 from routes.keywords_routes import get_keywords, add_keyword, set_keywords
-from routes.track_routes import create_track, get_tracks_by_conference, appoint_track_chair, get_track_by_people, get_track_by_author, get_track_by_reviewer, get_track, get_all_tracks, get_all_relevant_people
+from routes.track_routes import create_track, get_tracks_by_conference, appoint_track_chair, get_track_by_people, get_track_by_author, get_track_by_reviewer, get_track, get_all_tracks, get_all_relevant_people, get_all_papers_in_track
 from routes.assignment_routes import create_assignment_for_track, get_assignments_for_reviewer, get_assigned_papers
 
 # Define blueprints
@@ -80,6 +80,7 @@ track_bp.route("/<track_id>/reviewer", methods=["GET"])(get_track_by_reviewer)
 track_bp.route("/<track_id>", methods=["GET"])(get_track)
 track_bp.route("/<track_id>/relevant", methods=["GET"])(get_all_relevant_people)
 track_bp.route("/<track_id>/assign", methods=["POST"])(create_assignment_for_track)
+track_bp.route("/<track_id>/papers", methods=["GET"])(get_all_papers_in_track)
 
 assignment_bp.route("/reviewer/<reviewer_id>", methods=["GET"])(get_assignments_for_reviewer)
 assignment_bp.route("/reviewer/<reviewer_id>/papers", methods=["GET"])(get_assigned_papers)
