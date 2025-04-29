@@ -152,7 +152,7 @@ const ProfilePage: React.FC = () => {
           display: "flex",
           justifyContent: "center",
           alignItems: "center",
-          height: "100vh",
+          height: "100%",
         }}
       >
         <CircularProgress />
@@ -274,141 +274,133 @@ const ProfilePage: React.FC = () => {
   };
 
   return (
-    <div style={{ display: "flex", height: "100vh", width: "100vw" }}>
-      <div style={{ width: "220px" }}>
-        <SideMenu items={menuItems} onItemClick={handleItemClick} />
-      </div>
-      <div style={{ flexGrow: 1, display: "flex", flexDirection: "column" }}>
-        <TopBar />
-        <div style={{ padding: "20px", overflowY: "auto" }}>
-          {isOwnProfile && (
-            <Button
-              variant="contained"
-              onClick={handleEditOpen}
-              style={{ alignSelf: "flex-end", marginBottom: "10px" }}
-            >
-              Edit Profile
-            </Button>
-          )}
+    <div style={{ flexGrow: 1, display: "flex", flexDirection: "column" }}>
+      <div style={{ padding: "20px", overflowY: "auto" }}>
+        {isOwnProfile && (
+          <Button
+            variant="contained"
+            onClick={handleEditOpen}
+            style={{ alignSelf: "flex-end", marginBottom: "10px" }}
+          >
+            Edit Profile
+          </Button>
+        )}
 
-          <AppTitle text={`${profileUser.name} ${profileUser.surname}`} />
+        <AppTitle text={`${profileUser.name} ${profileUser.surname}`} />
 
-          <div style={{ marginTop: "20px" }}>
-            <p>Name: {profileUser.name}</p>
-            <p>Surname: {profileUser.surname}</p>
-            <p>Bio: {profileUser.bio || "No bio provided"}</p>
-            <p>Email: {profileUser.email}</p>
+        <div style={{ marginTop: "20px" }}>
+          <p>Name: {profileUser.name}</p>
+          <p>Surname: {profileUser.surname}</p>
+          <p>Bio: {profileUser.bio || "No bio provided"}</p>
+          <p>Email: {profileUser.email}</p>
+        </div>
+
+        {/* New flex container for roles and stats */}
+        <div style={flexContainerStyle}>
+          {/* Roles section with scrollability */}
+          <div style={rolesContainerStyle}>
+            <ProfileUserRoles
+              activeRoles={activeRoles.map((role) => ({
+                name: role?.name || "Unknown",
+              }))}
+              pastRoles={pastRoles.map((role) => ({
+                name: role?.name || "Unknown",
+              }))}
+            />
           </div>
 
-          {/* New flex container for roles and stats */}
-          <div style={flexContainerStyle}>
-            {/* Roles section with scrollability */}
-            <div style={rolesContainerStyle}>
-              <ProfileUserRoles
-                activeRoles={activeRoles.map((role) => ({
-                  name: role?.name || "Unknown",
-                }))}
-                pastRoles={pastRoles.map((role) => ({
-                  name: role?.name || "Unknown",
-                }))}
-              />
-            </div>
-
-            {/* Stats section */}
-            <div style={statsContainerStyle}>
-              <h3 style={statsTitleStyle}>Stats</h3>
-              <div>
-                <table style={statsTableStyle}>
-                  <tbody>
-                    <tr>
-                      <td style={statsCellStyle}>Average Rating Given:</td>
-                      <td style={lastCellStyle}>
-                        {userStats.avg_rating_given}
-                      </td>
-                    </tr>
-                    <tr>
-                      <td style={statsCellStyle}>Avg Time Before Deadline:</td>
-                      <td style={lastCellStyle}>
-                        {userStats.avg_submit_time_before_deadline}
-                      </td>
-                    </tr>
-                    <tr>
-                      <td style={statsCellStyle}>Avg Time to Review:</td>
-                      <td style={lastCellStyle}>
-                        {userStats.avg_time_to_review}
-                      </td>
-                    </tr>
-                    <tr>
-                      <td style={statsCellStyle}>Deadline Compliance Rate:</td>
-                      <td style={lastCellStyle}>
-                        {userStats.deadline_compliance_rate}
-                      </td>
-                    </tr>
-                    <tr>
-                      <td style={statsCellStyle}>Review Rating:</td>
-                      <td style={lastCellStyle}>{userStats.review_rating}</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
+          {/* Stats section */}
+          <div style={statsContainerStyle}>
+            <h3 style={statsTitleStyle}>Stats</h3>
+            <div>
+              <table style={statsTableStyle}>
+                <tbody>
+                  <tr>
+                    <td style={statsCellStyle}>Average Rating Given:</td>
+                    <td style={lastCellStyle}>{userStats.avg_rating_given}</td>
+                  </tr>
+                  <tr>
+                    <td style={statsCellStyle}>Avg Time Before Deadline:</td>
+                    <td style={lastCellStyle}>
+                      {userStats.avg_submit_time_before_deadline}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style={statsCellStyle}>Avg Time to Review:</td>
+                    <td style={lastCellStyle}>
+                      {userStats.avg_time_to_review}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style={statsCellStyle}>Deadline Compliance Rate:</td>
+                    <td style={lastCellStyle}>
+                      {userStats.deadline_compliance_rate}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style={statsCellStyle}>Review Rating:</td>
+                    <td style={lastCellStyle}>{userStats.review_rating}</td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
           </div>
+        </div>
 
-          <div style={keywordsContainerStyle}>
-            <h3 style={keywordsTitleStyle}>Keywords</h3>
-            <Table size="small" style={{ color: colors.grey[100] }}>
-              <TableHead>
-                <TableRow>
+        <div style={keywordsContainerStyle}>
+          <h3 style={keywordsTitleStyle}>Keywords</h3>
+          <Table size="small" style={{ color: colors.grey[100] }}>
+            <TableHead>
+              <TableRow>
+                <TableCell
+                  style={{
+                    backgroundColor: colors.grey[400],
+                    color: colors.grey[100],
+                    borderBottom: `1px solid ${colors.grey[100]}`,
+                  }}
+                >
+                  <strong>Preferred Keywords</strong>
+                </TableCell>
+                <TableCell
+                  style={{
+                    backgroundColor: colors.grey[400],
+                    color: colors.grey[100],
+                    borderBottom: `1px solid ${colors.grey[100]}`,
+                  }}
+                >
+                  <strong>Unwanted Keywords</strong>
+                </TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {Array.from({
+                length: Math.max(
+                  preferredKeywords.length,
+                  unwantedKeywords.length
+                ),
+              }).map((_, index) => (
+                <TableRow key={index}>
                   <TableCell
                     style={{
                       backgroundColor: colors.grey[400],
-                      color: colors.grey[100],
+                      color: colors.grey[400],
                       borderBottom: `1px solid ${colors.grey[100]}`,
                     }}
                   >
-                    <strong>Preferred Keywords</strong>
+                    {preferredKeywords[index] || "-"}
                   </TableCell>
                   <TableCell
                     style={{
-                      backgroundColor: colors.grey[400],
-                      color: colors.grey[100],
+                      color: colors.grey[400],
                       borderBottom: `1px solid ${colors.grey[100]}`,
                     }}
                   >
-                    <strong>Unwanted Keywords</strong>
+                    {unwantedKeywords[index] || "-"}
                   </TableCell>
                 </TableRow>
-              </TableHead>
-              <TableBody>
-                {Array.from({
-                  length: Math.max(
-                    preferredKeywords.length,
-                    unwantedKeywords.length
-                  ),
-                }).map((_, index) => (
-                  <TableRow key={index}>
-                    <TableCell
-                      style={{
-                        backgroundColor: colors.grey[400],
-                        color: colors.grey[400],
-                        borderBottom: `1px solid ${colors.grey[100]}`,
-                      }}
-                    >
-                      {preferredKeywords[index] || "-"}
-                    </TableCell>
-                    <TableCell
-                      style={{
-                        color: colors.grey[400],
-                        borderBottom: `1px solid ${colors.grey[100]}`,
-                      }}
-                    >
-                      {unwantedKeywords[index] || "-"}
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
+              ))}
+            </TableBody>
+          </Table>
         </div>
       </div>
 

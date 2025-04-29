@@ -76,7 +76,7 @@ const MyTasks: React.FC = () => {
   return (
     <>
       <Topbar />
-      <div style={{ display: "flex", minHeight: "100vh" }}>
+      <div style={{ display: "flex", minHeight: "100%" }}>
         <SideMenu items={menuItems} onItemClick={handleItemClick} />
         <Box
           sx={{

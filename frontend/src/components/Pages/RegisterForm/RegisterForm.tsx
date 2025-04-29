@@ -44,7 +44,7 @@ const RegisterForm: React.FC = () => {
   return (
     <Box
       sx={{
-        minHeight: "100vh",
+        minHeight: "100%",
         display: "flex",
         justifyContent: "center",
         alignItems: "center",

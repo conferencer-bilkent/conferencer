@@ -1,12 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useTheme } from "@mui/material/styles";
 import AppTitle from "../../global/AppTitle";
-import SideMenu from "../../global/SideMenu";
-import TopBar from "../../global/TopBar";
-import { getMenuItemsForPage } from "../../global/sideMenuConfig";
 import { tokens } from "../../../theme";
-import { useNavigate } from "react-router-dom";
-import { handleMenuItemClick } from "../../../utils/navigation/menuNavigation";
 import {
   Box,
   TextField,
@@ -44,8 +39,6 @@ interface Message {
 const ChatPage: React.FC = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
-  const menuItems = getMenuItemsForPage("default");
-  const navigate = useNavigate();
   const { user } = useUser();
 
   const [activeView, setActiveView] = useState<"inbox" | "sent" | "chats">(
@@ -123,7 +116,7 @@ const ChatPage: React.FC = () => {
         display="flex"
         justifyContent="center"
         alignItems="center"
-        height="100vh"
+        height="100%"
       >
         <CircularProgress />
       </Box>
@@ -136,7 +129,7 @@ const ChatPage: React.FC = () => {
         display="flex"
         justifyContent="center"
         alignItems="center"
-        height="100vh"
+        height="100%"
       >
         <Typography color="error">{error}</Typography>
       </Box>
@@ -195,322 +188,314 @@ const ChatPage: React.FC = () => {
       style={{
         display: "flex",
         flexDirection: "column",
-        height: "100vh",
-        width: "100vw",
+        height: "100%",
+
         backgroundColor: theme.palette.background.default,
       }}
     >
-      <TopBar />
-      <div style={{ display: "flex", flex: 1, overflow: "hidden" }}>
-        <SideMenu
-          items={menuItems}
-          onItemClick={(item) => handleMenuItemClick(item, navigate)}
-        />
-        <div
-          style={{ flex: 1, display: "flex", overflow: "hidden", padding: 16 }}
+      <div
+        style={{ flex: 1, display: "flex", overflow: "hidden", padding: 16 }}
+      >
+        <Paper
+          style={{
+            width: 300,
+            borderRight: `1px solid ${colors.grey[700]}`,
+            display: "flex",
+            flexDirection: "column",
+            backgroundColor: "transparent",
+            flexShrink: 0,
+          }}
+          elevation={0}
         >
-          <Paper
+          <Button
+            variant="contained"
+            color="primary"
+            startIcon={<EditIcon />}
             style={{
-              width: 300,
-              borderRight: `1px solid ${colors.grey[700]}`,
-              display: "flex",
-              flexDirection: "column",
-              backgroundColor: "transparent",
-              flexShrink: 0,
+              margin: 16,
+              padding: 12,
+              textTransform: "none",
+              borderRadius: 24,
+              boxShadow: "none",
+              backgroundColor: colors.blueAccent[700],
             }}
-            elevation={0}
+            onClick={() => {
+              setComposeOpen(true);
+            }}
           >
+            New Message
+          </Button>
+          <Box>
             <Button
-              variant="contained"
-              color="primary"
-              startIcon={<EditIcon />}
-              style={{
-                margin: 16,
-                padding: 12,
-                textTransform: "none",
-                borderRadius: 24,
-                boxShadow: "none",
-                backgroundColor: colors.blueAccent[700],
-              }}
-              onClick={() => {
-                setComposeOpen(true);
-              }}
+              fullWidth
+              startIcon={<InboxIcon />}
+              style={navButtonStyle(activeView === "inbox")}
+              onClick={() => setActiveView("inbox")}
             >
-              New Message
+              Inbox
             </Button>
-            <Box>
-              <Button
-                fullWidth
-                startIcon={<InboxIcon />}
-                style={navButtonStyle(activeView === "inbox")}
-                onClick={() => setActiveView("inbox")}
-              >
-                Inbox
-              </Button>
-              <Button
-                fullWidth
-                startIcon={<SentIcon />}
-                style={navButtonStyle(activeView === "sent")}
-                onClick={() => setActiveView("sent")}
-              >
-                Sent
-              </Button>
-              <Button
-                fullWidth
-                startIcon={<ForumIcon />}
-                style={navButtonStyle(activeView === "chats")}
-                onClick={() => setActiveView("chats")}
-              >
-                Chats
-              </Button>
-            </Box>
-            <Box sx={{ p: 2 }}>
-              <TextField
-                fullWidth
-                placeholder="Search messages..."
-                size="small"
-                InputProps={{
-                  startAdornment: <SearchIcon color="action" sx={{ mr: 1 }} />,
-                }}
-              />
-            </Box>
-            <Box sx={{ flexGrow: 1, overflowY: "auto" }}>
-              <Typography variant="subtitle1" sx={{ p: 2, fontWeight: "bold" }}>
-                Recent
-              </Typography>
-              <List>
-                {displayedContacts.map((item: any) => (
-                  <ListItem
-                    key={typeof item === "string" ? item : item.id}
-                    style={contactItemStyle(
-                      selectedContact === (item.id || item)
-                    )}
-                    onClick={() => setSelectedContact(item.id || item)}
-                  >
-                    <Avatar sx={{ bgcolor: colors.greenAccent[500], mr: 2 }}>
-                      {(item.name || item).substring(0, 2).toUpperCase()}
-                    </Avatar>
-                    <ListItemText
-                      primary={item.name || item}
-                      secondary={item.subject || ""}
-                      primaryTypographyProps={{ fontWeight: "bold" }}
-                      secondaryTypographyProps={{
-                        whiteSpace: "nowrap",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                      }}
-                    />
-                  </ListItem>
-                ))}
-              </List>
-            </Box>
-          </Paper>
+            <Button
+              fullWidth
+              startIcon={<SentIcon />}
+              style={navButtonStyle(activeView === "sent")}
+              onClick={() => setActiveView("sent")}
+            >
+              Sent
+            </Button>
+            <Button
+              fullWidth
+              startIcon={<ForumIcon />}
+              style={navButtonStyle(activeView === "chats")}
+              onClick={() => setActiveView("chats")}
+            >
+              Chats
+            </Button>
+          </Box>
+          <Box sx={{ p: 2 }}>
+            <TextField
+              fullWidth
+              placeholder="Search messages..."
+              size="small"
+              InputProps={{
+                startAdornment: <SearchIcon color="action" sx={{ mr: 1 }} />,
+              }}
+            />
+          </Box>
+          <Box sx={{ flexGrow: 1, overflowY: "auto" }}>
+            <Typography variant="subtitle1" sx={{ p: 2, fontWeight: "bold" }}>
+              Recent
+            </Typography>
+            <List>
+              {displayedContacts.map((item: any) => (
+                <ListItem
+                  key={typeof item === "string" ? item : item.id}
+                  style={contactItemStyle(
+                    selectedContact === (item.id || item)
+                  )}
+                  onClick={() => setSelectedContact(item.id || item)}
+                >
+                  <Avatar sx={{ bgcolor: colors.greenAccent[500], mr: 2 }}>
+                    {(item.name || item).substring(0, 2).toUpperCase()}
+                  </Avatar>
+                  <ListItemText
+                    primary={item.name || item}
+                    secondary={item.subject || ""}
+                    primaryTypographyProps={{ fontWeight: "bold" }}
+                    secondaryTypographyProps={{
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                    }}
+                  />
+                </ListItem>
+              ))}
+            </List>
+          </Box>
+        </Paper>
 
+        <div
+          style={{
+            flex: 1,
+            display: "flex",
+            flexDirection: "column",
+            padding: 20,
+            overflow: "hidden",
+          }}
+        >
           <div
             style={{
-              flex: 1,
               display: "flex",
-              flexDirection: "column",
-              padding: 20,
-              overflow: "hidden",
+              alignItems: "center",
+              marginBottom: 16,
             }}
           >
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                marginBottom: 16,
-              }}
-            >
-              <AppTitle text={selectedContact || "Select a conversation"} />
-            </div>
+            <AppTitle text={selectedContact || "Select a conversation"} />
+          </div>
 
-            {selectedContact && displayedMessages.length > 0 ? (
-              activeView === "chats" ? (
-                // ⭐️ Keep CHAT view as BUBBLE MESSAGES
-                <Box
-                  sx={{
-                    flexGrow: 1,
-                    overflowY: "auto",
-                    backgroundColor: "transparent",
-                    borderRadius: 2,
-                    padding: 2,
-                    mb: 2,
-                  }}
-                >
-                  <List>
-                    {displayedMessages.map((message) => (
-                      <React.Fragment key={message.id}>
-                        <ListItem
-                          style={{
-                            display: "flex",
-                            justifyContent:
-                              message.from === user?.id
-                                ? "flex-end"
-                                : "flex-start",
-                            marginBottom: 10,
-                            width: "100%",
-                          }}
-                        >
-                          <Box
-                            sx={{
-                              minWidth: "120px",
-                              maxWidth: "70%",
-                              bgcolor:
-                                message.from === user?.id
-                                  ? colors.blueAccent[500]
-                                  : colors.greenAccent[500],
-                              color: theme.palette.getContrastText(
-                                message.from === user?.id
-                                  ? colors.blueAccent[500]
-                                  : colors.greenAccent[500]
-                              ),
-                              borderRadius:
-                                message.from === user?.id
-                                  ? "18px 18px 0 18px"
-                                  : "18px 18px 18px 0",
-                              p: 2,
-                              display: "flex",
-                              flexDirection: "column",
-                              whiteSpace: "pre-wrap",
-                              wordBreak: "break-word",
-                            }}
-                          >
-                            <Typography
-                              variant="subtitle2"
-                              sx={{
-                                fontWeight: "bold",
-                                mb: 0.5,
-                                fontSize: "1.2rem",
-                              }}
-                            >
-                              {message.subject}
-                            </Typography>
-                            <Typography variant="body2" sx={{ mb: 1 }}>
-                              {message.content}
-                            </Typography>
-                            <Typography
-                              variant="caption"
-                              sx={{ alignSelf: "flex-end", opacity: 0.7 }}
-                            >
-                              {new Date(message.timestamp).toLocaleTimeString(
-                                [],
-                                {
-                                  hour: "2-digit",
-                                  minute: "2-digit",
-                                }
-                              )}
-                            </Typography>
-                          </Box>
-                        </ListItem>
-                        <Divider component="li" />
-                      </React.Fragment>
-                    ))}
-                  </List>
-                </Box>
-              ) : (
-                // ⭐️ New MAIL view for Inbox/Sent
-                <Box
-                  sx={{
-                    flexGrow: 1,
-                    overflowY: "auto",
-                    backgroundColor: "background.paper",
-                    borderRadius: 2,
-                    padding: 2,
-                    mb: 2,
-                  }}
-                >
-                  <List>
-                    {displayedMessages.map((message) => (
-                      <Paper
-                        key={message.id}
-                        elevation={2}
-                        sx={{
-                          mb: 2,
-                          p: 2,
-                          borderRadius: 2,
-                          backgroundColor: theme.palette.background.default,
+          {selectedContact && displayedMessages.length > 0 ? (
+            activeView === "chats" ? (
+              // ⭐️ Keep CHAT view as BUBBLE MESSAGES
+              <Box
+                sx={{
+                  flexGrow: 1,
+                  overflowY: "auto",
+                  backgroundColor: "transparent",
+                  borderRadius: 2,
+                  padding: 2,
+                  mb: 2,
+                }}
+              >
+                <List>
+                  {displayedMessages.map((message) => (
+                    <React.Fragment key={message.id}>
+                      <ListItem
+                        style={{
+                          display: "flex",
+                          justifyContent:
+                            message.from === user?.id
+                              ? "flex-end"
+                              : "flex-start",
+                          marginBottom: 10,
+                          width: "100%",
                         }}
                       >
                         <Box
-                          display="flex"
-                          justifyContent="space-between"
-                          alignItems="center"
-                          mb={1}
+                          sx={{
+                            minWidth: "120px",
+                            maxWidth: "70%",
+                            bgcolor:
+                              message.from === user?.id
+                                ? colors.blueAccent[500]
+                                : colors.greenAccent[500],
+                            color: theme.palette.getContrastText(
+                              message.from === user?.id
+                                ? colors.blueAccent[500]
+                                : colors.greenAccent[500]
+                            ),
+                            borderRadius:
+                              message.from === user?.id
+                                ? "18px 18px 0 18px"
+                                : "18px 18px 18px 0",
+                            p: 2,
+                            display: "flex",
+                            flexDirection: "column",
+                            whiteSpace: "pre-wrap",
+                            wordBreak: "break-word",
+                          }}
                         >
                           <Typography
-                            variant="subtitle1"
+                            variant="subtitle2"
                             sx={{
-                              overflow: "hidden",
-                              textOverflow: "ellipsis",
-                              whiteSpace: "normal", // ⭐ allow wrapping
+                              fontWeight: "bold",
+                              mb: 0.5,
+                              fontSize: "1.2rem",
                             }}
                           >
-                            <Box component="span" fontWeight="bold">
-                              From user:
-                            </Box>{" "}
-                            <Box component="span" fontWeight="normal">
-                              {activeView === "inbox"
-                                ? message.from
-                                : message.to}
-                            </Box>
+                            {message.subject}
                           </Typography>
-
-                          <Typography variant="caption" color="text.secondary">
-                            {new Date(message.timestamp).toLocaleString([], {
-                              hour: "2-digit",
-                              minute: "2-digit",
-                              day: "2-digit",
-                              month: "short",
-                              year: "numeric",
-                            })}
+                          <Typography variant="body2" sx={{ mb: 1 }}>
+                            {message.content}
+                          </Typography>
+                          <Typography
+                            variant="caption"
+                            sx={{ alignSelf: "flex-end", opacity: 0.7 }}
+                          >
+                            {new Date(message.timestamp).toLocaleTimeString(
+                              [],
+                              {
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              }
+                            )}
                           </Typography>
                         </Box>
+                      </ListItem>
+                      <Divider component="li" />
+                    </React.Fragment>
+                  ))}
+                </List>
+              </Box>
+            ) : (
+              // ⭐️ New MAIL view for Inbox/Sent
+              <Box
+                sx={{
+                  flexGrow: 1,
+                  overflowY: "auto",
+                  backgroundColor: "background.paper",
+                  borderRadius: 2,
+                  padding: 2,
+                  mb: 2,
+                }}
+              >
+                <List>
+                  {displayedMessages.map((message) => (
+                    <Paper
+                      key={message.id}
+                      elevation={2}
+                      sx={{
+                        mb: 2,
+                        p: 2,
+                        borderRadius: 2,
+                        backgroundColor: theme.palette.background.default,
+                      }}
+                    >
+                      <Box
+                        display="flex"
+                        justifyContent="space-between"
+                        alignItems="center"
+                        mb={1}
+                      >
                         <Typography
-                          variant="h6"
-                          sx={{ mb: 1, whiteSpace: "normal" }}
+                          variant="subtitle1"
+                          sx={{
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            whiteSpace: "normal", // ⭐ allow wrapping
+                          }}
                         >
                           <Box component="span" fontWeight="bold">
-                            Subject:
+                            From user:
                           </Box>{" "}
                           <Box component="span" fontWeight="normal">
-                            {message.subject || "No Subject"}
+                            {activeView === "inbox" ? message.from : message.to}
                           </Box>
                         </Typography>
 
-                        <Typography
-                          variant="body2"
-                          sx={{
-                            color: theme.palette.text.secondary,
-                            wordBreak: "break-word", // ⭐ allows long words like URLs to break
-                            whiteSpace: "pre-wrap", // ⭐ respects new lines and wraps properly
-                          }}
-                        >
-                          {message.content}
+                        <Typography variant="caption" color="text.secondary">
+                          {new Date(message.timestamp).toLocaleString([], {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                            day: "2-digit",
+                            month: "short",
+                            year: "numeric",
+                          })}
                         </Typography>
-                      </Paper>
-                    ))}
-                  </List>
-                </Box>
-              )
-            ) : (
-              <Box
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  height: "100%",
-                  color: colors.grey[300],
-                }}
-              >
-                <Typography variant="h6">
-                  Select a conversation to view messages
-                </Typography>
+                      </Box>
+                      <Typography
+                        variant="h6"
+                        sx={{ mb: 1, whiteSpace: "normal" }}
+                      >
+                        <Box component="span" fontWeight="bold">
+                          Subject:
+                        </Box>{" "}
+                        <Box component="span" fontWeight="normal">
+                          {message.subject || "No Subject"}
+                        </Box>
+                      </Typography>
+
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          color: theme.palette.text.secondary,
+                          wordBreak: "break-word", // ⭐ allows long words like URLs to break
+                          whiteSpace: "pre-wrap", // ⭐ respects new lines and wraps properly
+                        }}
+                      >
+                        {message.content}
+                      </Typography>
+                    </Paper>
+                  ))}
+                </List>
               </Box>
-            )}
-          </div>
+            )
+          ) : (
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                height: "100%",
+                color: colors.grey[300],
+              }}
+            >
+              <Typography variant="h6">
+                Select a conversation to view messages
+              </Typography>
+            </Box>
+          )}
         </div>
       </div>
+
       <Modal open={composeOpen} onClose={() => setComposeOpen(false)}>
         <Box
           sx={{
