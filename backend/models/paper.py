@@ -2,7 +2,7 @@ from bson import ObjectId
 from datetime import datetime
 
 class Paper:
-    def __init__(self, paper_id, title, abstract, keywords, paper_path, authors,
+    def __init__(self, paper_id, title, abstract, keywords, paper_path, authors,created_by,
                  decision=None, track=None, bidding=None, assignee=None,
                  reviews=None, created_at=None):
         self.id = str(paper_id) if isinstance(paper_id, ObjectId) else paper_id
@@ -16,6 +16,7 @@ class Paper:
         self.bidding = bidding
         self.assignee = assignee
         self.reviews = reviews or []
+        self.created_by = created_by
         self.created_at = created_at or datetime.utcnow()
         self.avg_acceptance = self.calculate_avg_acceptance()
 
@@ -38,7 +39,8 @@ class Paper:
             "track": self.track,
             "bidding": self.bidding,
             "assignee": self.assignee,
-            "reviews": [r.to_dict() for r in self.reviews],
+            "reviews": self.reviews,
+            "created_by": self.created_by,
             "created_at": self.created_at,
             "avg_acceptance": self.avg_acceptance
         }
