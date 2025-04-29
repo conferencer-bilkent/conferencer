@@ -1,9 +1,14 @@
 import React from "react";
 import "./ConferenceDetail.css";
 import { FaBookOpen, FaPlusCircle } from "react-icons/fa";
-import AssignmentIcon from '@mui/icons-material/Assignment';
-import { ConferenceData, conference1, conference2 } from "../../../../utils/dummyData/dummyConferenceData";
-
+import AssignmentIcon from "@mui/icons-material/Assignment";
+import { useTheme } from "@mui/material";
+import { tokens } from "../../../../theme";
+import {
+  ConferenceData,
+  conference1,
+  conference2,
+} from "../../../../utils/dummyData/dummyConferenceData";
 
 interface TextInfo {
   title?: string;
@@ -26,17 +31,37 @@ interface ConferenceDetailProps {
 const ConferenceDetail: React.FC<ConferenceDetailProps> = ({
   texts,
   buttons,
-  description
+  description,
 }) => {
+  const theme = useTheme();
+  const colors = tokens(theme.palette.mode);
+
   return (
-    <div className="conference-detail">
-      <div className="description-container">
+    <div
+      className="conference-detail"
+      style={{
+        border: `2px solid ${colors.grey[100]}`,
+        backgroundColor: colors.primary[1000],
+        color: colors.grey[100],
+      }}
+    >
+      <div
+        className="description-container"
+        style={{
+          borderRight: `2px solid ${colors.grey[100]}`,
+        }}
+      >
         <div className="description">
-          {description || "Description: orem ipsum dolor sit amet, consectetur adipiscing elit. Sed egestas vulputate elit non consectetur. Pellentesque vel enim diam. Maecenas dictum turpis vitae elit pellentesque, sit amet pharetra dolor viverra. Pellentesque vel nisi sit amet dui pharetra auctor. Cras condimentum nisl a posuere sagittis. Suspendisse volutpat auctor fermentum. Morbi ultrices felis quis felis facilisis, nec maximus nibh lacinia. Phasellus porta lorem ante, a fermentum risus blandit vitae. Suspendisse tempus ultrices risus sit amet consequat. Morbi lacus lacus, accumsan non blandit suscipit, aliquet sed lorem."}
+          {description ||
+            "Description: orem ipsum dolor sit amet, consectetur adipiscing elit. Sed egestas vulputate elit non consectetur. Pellentesque vel enim diam. Maecenas dictum turpis vitae elit pellentesque, sit amet pharetra dolor viverra. Pellentesque vel nisi sit amet dui pharetra auctor. Cras condimentum nisl a posuere sagittis. Suspendisse volutpat auctor fermentum. Morbi ultrices felis quis felis facilisis, nec maximus nibh lacinia. Phasellus porta lorem ante, a fermentum risus blandit vitae. Suspendisse tempus ultrices risus sit amet consequat. Morbi lacus lacus, accumsan non blandit suscipit, aliquet sed lorem."}
         </div>
         <div className="text-info">
           {texts.map((item, index) => (
-            <div className="small-details" key={index}>
+            <div
+              className="small-details"
+              key={index}
+              style={{ color: colors.grey[100] }}
+            >
               {item.title && <strong>{item.title}: </strong>}
               {item.content}
             </div>
@@ -45,14 +70,23 @@ const ConferenceDetail: React.FC<ConferenceDetailProps> = ({
       </div>
       <div className="buttons-container">
         {buttons.map((button, index) => (
-          <div 
-            key={index} 
-            className="button" 
+          <div
+            key={index}
+            className="button"
             onClick={button.onClick}
-            style={button.onClick ? { cursor: 'pointer' } : {}}
+            style={{
+              cursor: button.onClick ? "pointer" : "default",
+              borderRight:
+                index !== buttons.length - 1
+                  ? `1px solid ${colors.grey[100]}`
+                  : "none",
+              backgroundColor: colors.primary[1000],
+
+              color: colors.grey[100],
+            }}
           >
             {button.icon}
-            <p>{button.text}</p>
+            <p style={{ color: colors.grey[100] }}>{button.text}</p>
           </div>
         ))}
       </div>
@@ -61,7 +95,9 @@ const ConferenceDetail: React.FC<ConferenceDetailProps> = ({
 };
 
 // Helper function to create text info from conference data
-const createTextInfoFromConference = (conference: ConferenceData): TextInfo[] => {
+const createTextInfoFromConference = (
+  conference: ConferenceData
+): TextInfo[] => {
   return [
     {
       title: "Track Dates",
@@ -103,29 +139,31 @@ interface ConferenceDetailExampleProps {
   conference?: ConferenceData;
 }
 
-export const ConferenceDetailExample: React.FC<ConferenceDetailExampleProps> = ({ 
-  openPopup, 
-  conference = conference1 // Default to first conference if none provided
+export const ConferenceDetailExample: React.FC<
+  ConferenceDetailExampleProps
+> = ({
+  openPopup,
+  conference = conference1, // Default to first conference if none provided
 }) => {
   // Create buttons with onClick handlers where needed
-  const buttonsWithHandlers = defaultButtons.map(button => {
+  const buttonsWithHandlers = defaultButtons.map((button) => {
     // Handle multiple buttons that should open popups
     if (openPopup) {
       switch (button.text) {
         case "Assign Papers":
           return {
             ...button,
-            onClick: () => openPopup("Select Paper(s)")
+            onClick: () => openPopup("Select Paper(s)"),
           };
         case "Add People to Track":
           return {
             ...button,
-            onClick: () => openPopup("Add People to Track")
+            onClick: () => openPopup("Add People to Track"),
           };
         case "Assign Trackchair(s)":
           return {
             ...button,
-            onClick: () => openPopup("Assign Trackchair(s)")
+            onClick: () => openPopup("Assign Trackchair(s)"),
           };
         default:
           return button;
@@ -133,14 +171,14 @@ export const ConferenceDetailExample: React.FC<ConferenceDetailExampleProps> = (
     }
     return button;
   });
-  
+
   // Generate text info from conference data
   const textsFromConference = createTextInfoFromConference(conference);
-  
+
   return (
-    <ConferenceDetail 
-      texts={textsFromConference} 
-      buttons={buttonsWithHandlers} 
+    <ConferenceDetail
+      texts={textsFromConference}
+      buttons={buttonsWithHandlers}
       description={conference.description}
     />
   );
@@ -150,10 +188,14 @@ export const ConferenceDetailExample: React.FC<ConferenceDetailExampleProps> = (
 export const ConferenceDetailDemoWithBothConferences: React.FC = () => {
   return (
     <div>
-      <h2>{conference1.name} ({conference1.acronym})</h2>
+      <h2>
+        {conference1.name} ({conference1.acronym})
+      </h2>
       <ConferenceDetailExample conference={conference1} />
-      
-      <h2 style={{ marginTop: '30px' }}>{conference2.name} ({conference2.acronym})</h2>
+
+      <h2 style={{ marginTop: "30px" }}>
+        {conference2.name} ({conference2.acronym})
+      </h2>
       <ConferenceDetailExample conference={conference2} />
     </div>
   );

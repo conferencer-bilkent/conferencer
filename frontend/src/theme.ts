@@ -36,6 +36,7 @@ export const tokens = (mode: "light" | "dark"): Tokens => ({
           700: "#0c101b",
           800: "#080b12",
           900: "#040509",
+          1000: "#080b12",
         },
         greenAccent: {
           100: "#dbf5ee",
@@ -94,6 +95,7 @@ export const tokens = (mode: "light" | "dark"): Tokens => ({
           700: "#727681",
           800: "#a1a4ab",
           900: "#d0d1d5",
+          1000: "#bababa",
         },
         greenAccent: {
           100: "#0f2922",

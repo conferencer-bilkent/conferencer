@@ -4,50 +4,63 @@ import { FaPlusCircle, FaBookOpen, FaUser } from "react-icons/fa";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import AssignmentIcon from "@mui/icons-material/Assignment";
 import { useNavigate } from "react-router-dom";
-
+import { useTheme } from "@mui/material";
+import { tokens } from "../../../theme";
 import ConferenceDetail from "./components/ConferenceDetail";
 import AppTitle from "../../global/AppTitle";
-import SideMenu from "../../global/SideMenu";
-import { getMenuItemsForPage } from "../../global/sideMenuConfig";
 import SelectPeoplePopup from "../../global/SelectPeoplePopUp";
 import "./ConferencePage.css";
-import Topbar from "../../global/TopBar";
-import { handleMenuItemClick } from "../../../utils/navigation/menuNavigation";
 import { useConference } from "../../../context/ConferenceContext";
-import { assignSuperchair, invitePeopleToConference } from "../../../services/conferenceService";
+import {
+  assignSuperchair,
+  invitePeopleToConference,
+} from "../../../services/conferenceService";
 
-
-// Import the user service and types
-import { getUserById, getAllUsers } from "../../../services/userService"; // Add getAllUsers import
+import { getUserById, getAllUsers } from "../../../services/userService";
 import { UserData } from "../../../models/user";
 
 const ConferencePage: React.FC = () => {
-  const { activeConference , setActiveConference} = useConference();
-  const menuItems = getMenuItemsForPage("default");
+  const { activeConference, setActiveConference } = useConference();
   const navigate = useNavigate();
-  // Add active track state
-  const [activeTrack, setActiveTrack] = useState<any>(null);
+  const theme = useTheme();
+  const colors = tokens(theme.palette.mode);
+  
+  // Initialize active track state with safe default
+  const [activeTrack, setActiveTrack] = useState<any>(
+    activeConference?.tracks?.[0] || null
+  );
 
   // Track which popup button (if any) is clicked
   const [popupAction, setPopupAction] = useState<string | null>(null);
 
-  // Initialize active track when activeConference changes
   useEffect(() => {
+    // First, try to get the activeConference if not already set
     if (!activeConference) {
       const stored = localStorage.getItem("activeConference");
       if (stored) {
-        setActiveConference(JSON.parse(stored));
-        // Exit early and let the dependency trigger this effect again when activeConference is set
+        try {
+          const parsedConference = JSON.parse(stored);
+          setActiveConference(parsedConference);
+          
+          // Also set active track immediately
+          if (parsedConference?.tracks?.length > 0) {
+            setActiveTrack(parsedConference.tracks[0]);
+          }
+        } catch (error) {
+          console.error("Error parsing stored conference:", error);
+        }
         return;
       } else {
         console.log("No active conference found in localStorage");
         return;
       }
     }
-    
+
     // Now we know activeConference exists
-    console.log(`Active conference set: ${activeConference.name} (ID: ${activeConference.id})`);
-    
+    console.log(
+      `Active conference set: ${activeConference.name} (ID: ${activeConference.id})`
+    );
+
     // Safe access to tracks with optional chaining and nullish check
     if (activeConference.tracks?.length > 0) {
       console.log(
@@ -58,11 +71,7 @@ const ConferencePage: React.FC = () => {
       setActiveTrack(null); // Reset if no tracks available
       console.log("No tracks available for this conference");
     }
-  }, [activeConference]); // Add activeConference to dependency array
-
-  const handleItemClick = (item: string) => {
-    handleMenuItemClick(item, navigate);
-  };
+  }, [activeConference, setActiveConference]); // Include setActiveConference in dependency array
 
   const openPopup = (actionName: string) => {
     setPopupAction(actionName);
@@ -72,19 +81,15 @@ const ConferencePage: React.FC = () => {
     setPopupAction(null);
   };
 
-  // State to store superchair user data
   const [superchairUsers, setSuperchairUsers] = useState<
     Record<string, UserData>
   >({});
   const [loadingUsers, setLoadingUsers] = useState<Record<string, boolean>>({});
 
-  // Fetch superchair data when activeConference changes
   useEffect(() => {
     if (activeConference?.superchairs?.length) {
-      // Reset state for new conference
       setSuperchairUsers({});
 
-      // Fetch each superchair's details
       activeConference.superchairs.forEach((chairId) => {
         setLoadingUsers((prev) => ({ ...prev, [chairId]: true }));
 
@@ -105,77 +110,67 @@ const ConferencePage: React.FC = () => {
     }
   }, [activeConference?.superchairs]);
 
-  // Function to handle selected users
   const handleSelectedUsers = (selectedUserIds: string[], action: string) => {
     console.log(`Selected users for ${action}:`, selectedUserIds);
 
-    // Different actions for different popup types
     switch (action) {
       case "Invite People":
-        // Handle inviting people to the conference
         if (activeConference) {
-          // Call your API to invite these users to the conference
-          
-          invitePeopleToConference(selectedUserIds, activeConference.id, activeConference.name)
-            .then(response => {
+          invitePeopleToConference(
+            selectedUserIds,
+            activeConference.id,
+            activeConference.name
+          )
+            .then((response) => {
               console.log("Successfully invited users:", response);
-              // You could add a success notification here
             })
-            .catch(error => {
+            .catch((error) => {
               console.error("Error inviting users:", error);
-              // You could add an error notification here
             });
-          
+
           console.log(`Inviting users to conference ${activeConference.id}`);
         }
         break;
 
       case "Assign Superchair(s)":
-        // Handle assigning superchairs
         if (activeConference) {
           // Process each selected user to assign as superchair
-          const assignPromises = selectedUserIds.map(userId => 
+          const assignPromises = selectedUserIds.map((userId) =>
             assignSuperchair(userId, activeConference.id)
           );
-          
+
           Promise.all(assignPromises)
-            .then(results => {
+            .then((results) => {
               console.log("Successfully assigned superchairs:", results);
               // Refresh the page or update the UI to show new superchairs
               window.location.reload(); // Simple refresh, or you could update state
             })
-            .catch(error => {
+            .catch((error) => {
               console.error("Error assigning superchair(s):", error);
               // You could add an error notification here
             });
-          
-          console.log(`Assigning users as superchairs to conference ${activeConference.id}`);
+
+          console.log(
+            `Assigning users as superchairs to conference ${activeConference.id}`
+          );
         }
         break;
 
       case "Add People to Track":
       case "Assign Trackchair(s)":
-        // Handle track-related assignments
-        // These would need track ID as well
-
         break;
 
       default:
         console.log(`No handler for action: ${action}`);
     }
 
-    // Close popup after action is taken
     closePopup();
   };
 
-  // Add state for all users
   const [allUsers, setAllUsers] = useState<UserData[]>([]);
-  const [loadingAllUsers, setLoadingAllUsers] = useState<boolean>(false);
 
-  // Add effect to fetch all users when component mounts
   useEffect(() => {
     const fetchAllUsers = async () => {
-      setLoadingAllUsers(true);
       try {
         const users = await getAllUsers();
         setAllUsers(users);
@@ -183,18 +178,16 @@ const ConferencePage: React.FC = () => {
       } catch (error) {
         console.error("Error fetching all users:", error);
       } finally {
-        setLoadingAllUsers(false);
+        console.log("Finished fetching all users");
       }
     };
 
     fetchAllUsers();
-  }, []); // Empty dependency array ensures it only runs once on mount
+  }, []);
 
-  // Function to get filtered users based on the popup action
   const getFilteredUsersForPopup = (): UserData[] => {
     if (!activeConference) return allUsers;
 
-    // For different actions, we may want different filtering rules
     switch (popupAction) {
       case "Invite People":
         const nonMembers = allUsers.filter(
@@ -205,54 +198,52 @@ const ConferencePage: React.FC = () => {
         return nonMembers;
 
       case "Assign Superchair(s)":
-        // Filter out users who are already superchairs
         const nonSuperIds = activeConference.pcMembers.filter(
           (pcMemberId) =>
             !activeConference.superchairs.includes(pcMemberId?.toString() ?? "")
         );
         console.log(activeConference.pcMembers);
 
-        // Then map these IDs to the corresponding UserData objects
         const nonSupers = allUsers.filter((user) =>
           nonSuperIds.includes(user._id?.toString() ?? "")
         );
-
 
         return nonSupers;
 
       case "Add People to Track":
       case "Assign Trackchair(s)":
-        // For track-related actions, filter out existing track chairs
         console.log(
           `Assigning users to track ${JSON.stringify(activeTrack)} }`
         );
 
-        // First get IDs of PC members who aren't already track chairs
         const nonTrackChairIds = activeConference.pcMembers.filter(
           (pcMemberId) =>
             !activeTrack.track_chairs.includes(pcMemberId?.toString() ?? "")
         );
 
-        // Then map these IDs to the corresponding UserData objects
         const nonTracks = allUsers.filter((user) =>
           nonTrackChairIds.includes(user._id?.toString() ?? "")
         );
 
         return nonTracks;
       default:
-        // Default case - no filtering
         return allUsers;
     }
   };
 
   return (
-    <div className="conference-page">
+    <div
+      className="conference-page"
+      style={{
+        backgroundColor: colors.transparent,
+        color: colors.grey[100],
+      }}
+    >
       <div className="conference-container">
         <div className="content-container">
           <AppTitle text={activeConference?.name || "No Conference Selected"} />
 
           <div className="buttons-row">
-            {/* The first and third buttons open the popup with their respective text */}
             <AppButton
               icon={<FaPlusCircle />}
               text="Invite People"
@@ -261,7 +252,6 @@ const ConferencePage: React.FC = () => {
             <AppButton
               icon={<DashboardIcon sx={{ width: "26px", height: "26px" }} />}
               text="Conference Overview"
-              // no popup for this one
             />
             <AppButton
               icon={<FaPlusCircle />}
@@ -272,9 +262,7 @@ const ConferencePage: React.FC = () => {
               icon={<FaPlusCircle />}
               text="Add Track"
               onClick={() => navigate("/conference/createTrack")}
-              // no popup for this one
             />
-            {/* Added "Assign paper" button */}
             <AppButton
               icon={<AssignmentIcon sx={{ fontSize: 26 }} />}
               text="Add Submission"
@@ -282,7 +270,6 @@ const ConferencePage: React.FC = () => {
             />
           </div>
 
-          {/* Use ConferenceDetail directly instead of ConferenceDetailExample */}
           {activeConference && (
             <ConferenceDetail
               description={
@@ -339,10 +326,9 @@ const ConferencePage: React.FC = () => {
             />
           )}
 
-          {/* Display Superchairs */}
           {activeConference && activeConference.superchairs && (
             <div style={{ marginTop: "20px" }}>
-              <h3 style={{ color: "white", marginBottom: "10px" }}>
+              <h3 style={{ color: colors.grey[100], marginBottom: "10px" }}>
                 Superchair(s)
               </h3>
               <div style={{ display: "flex", flexWrap: "wrap", gap: "10px" }}>
@@ -353,13 +339,13 @@ const ConferencePage: React.FC = () => {
                     style={{
                       display: "flex",
                       alignItems: "center",
-                      border: "1px solid white",
+                      border: `1px solid ${colors.grey[100]}`,
                       borderRadius: "16px",
                       padding: "8px 12px",
                       cursor: "pointer",
                       minWidth: "160px",
-                      backgroundColor: "#2c3e50",
-                      color: "white",
+                      backgroundColor: colors.primary[1000],
+                      color: colors.grey[100],
                       width: "fit-content",
                     }}
                   >
@@ -379,7 +365,6 @@ const ConferencePage: React.FC = () => {
             </div>
           )}
 
-          {/* Conditionally render the popup if popupAction is set */}
           {popupAction && (
             <SelectPeoplePopup
               buttonText={popupAction}
