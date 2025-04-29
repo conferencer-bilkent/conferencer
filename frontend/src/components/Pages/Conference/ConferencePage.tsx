@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import AppButton from "../../global/AppButton";
 import { FaPlusCircle, FaBookOpen, FaUser } from "react-icons/fa";
-import DashboardIcon from '@mui/icons-material/Dashboard';
-import AssignmentIcon from '@mui/icons-material/Assignment';
+import DashboardIcon from "@mui/icons-material/Dashboard";
+import AssignmentIcon from "@mui/icons-material/Assignment";
 import { useNavigate } from "react-router-dom";
 
 import ConferenceDetail from "./components/ConferenceDetail";
@@ -40,7 +40,9 @@ const ConferencePage: React.FC = () => {
   };
 
   // State to store superchair user data
-  const [superchairUsers, setSuperchairUsers] = useState<Record<string, UserData>>({});
+  const [superchairUsers, setSuperchairUsers] = useState<
+    Record<string, UserData>
+  >({});
   const [loadingUsers, setLoadingUsers] = useState<Record<string, boolean>>({});
 
   // Fetch superchair data when activeConference changes
@@ -48,23 +50,23 @@ const ConferencePage: React.FC = () => {
     if (activeConference?.superchairs?.length) {
       // Reset state for new conference
       setSuperchairUsers({});
-      
+
       // Fetch each superchair's details
       activeConference.superchairs.forEach((chairId) => {
-        setLoadingUsers(prev => ({ ...prev, [chairId]: true }));
-        
+        setLoadingUsers((prev) => ({ ...prev, [chairId]: true }));
+
         getUserById(chairId)
-          .then(userData => {
-            setSuperchairUsers(prev => ({
+          .then((userData) => {
+            setSuperchairUsers((prev) => ({
               ...prev,
-              [chairId]: userData
+              [chairId]: userData,
             }));
           })
-          .catch(error => {
+          .catch((error) => {
             console.error(`Error fetching superchair ${chairId}:`, error);
           })
           .finally(() => {
-            setLoadingUsers(prev => ({ ...prev, [chairId]: false }));
+            setLoadingUsers((prev) => ({ ...prev, [chairId]: false }));
           });
       });
     }
@@ -73,9 +75,9 @@ const ConferencePage: React.FC = () => {
   // Function to handle selected users
   const handleSelectedUsers = (selectedUserIds: string[], action: string) => {
     console.log(`Selected users for ${action}:`, selectedUserIds);
-    
+
     // Different actions for different popup types
-    switch(action) {
+    switch (action) {
       case "Invite People":
         // Handle inviting people to the conference
         if (activeConference) {
@@ -83,26 +85,28 @@ const ConferencePage: React.FC = () => {
           console.log(`Inviting users to conference ${activeConference.id}`);
         }
         break;
-        
+
       case "Assign Superchair(s)":
         // Handle assigning superchairs
         if (activeConference) {
           // Call your API to assign these users as superchairs
-          console.log(`Assigning users as superchairs to conference ${activeConference.id}`);
+          console.log(
+            `Assigning users as superchairs to conference ${activeConference.id}`
+          );
         }
         break;
-        
+
       case "Add People to Track":
       case "Assign Trackchair(s)":
         // Handle track-related assignments
         // These would need track ID as well
         console.log(`${action} - Implementation needed`);
         break;
-        
+
       default:
         console.log(`No handler for action: ${action}`);
     }
-    
+
     // Close popup after action is taken
     closePopup();
   };
@@ -125,7 +129,7 @@ const ConferencePage: React.FC = () => {
         setLoadingAllUsers(false);
       }
     };
-    
+
     fetchAllUsers();
   }, []); // Empty dependency array ensures it only runs once on mount
 
@@ -134,23 +138,28 @@ const ConferencePage: React.FC = () => {
     if (!activeConference) return allUsers;
 
     // For different actions, we may want different filtering rules
-    switch(popupAction) {
+    switch (popupAction) {
       case "Invite People":
-        return allUsers;
-        
+        const nonMembers = allUsers.filter(
+          (user) =>
+            !activeConference.pcMembers.includes(user._id?.toString() ?? "")
+        );
+
+        return nonMembers;
+
       case "Assign Superchair(s)":
         // Filter out users who are already superchairs
-        return allUsers.filter(user => 
-          !activeConference.superchairs?.includes(user.id)
+        return allUsers.filter(
+          (user) => !activeConference.superchairs?.includes(user.id)
         );
-        
+
       case "Add People to Track":
       case "Assign Trackchair(s)":
         // For track-related actions, you might want to filter out existing track chairs
-        return allUsers.filter(user => 
-          !activeConference.trackChairs?.includes(user.id)
+        return allUsers.filter(
+          (user) => !activeConference.trackChairs?.includes(user.id)
         );
-        
+
       default:
         // Default case - no filtering
         return allUsers;
@@ -166,7 +175,9 @@ const ConferencePage: React.FC = () => {
             <SideMenu items={menuItems} onItemClick={handleItemClick} />
           </div>
           <div className="content-container">
-            <AppTitle text={activeConference?.name || "No Conference Selected"} />
+            <AppTitle
+              text={activeConference?.name || "No Conference Selected"}
+            />
 
             <div className="buttons-row">
               {/* The first and third buttons open the popup with their respective text */}
@@ -195,15 +206,22 @@ const ConferencePage: React.FC = () => {
 
             {/* Use ConferenceDetail directly instead of ConferenceDetailExample */}
             {activeConference && (
-              <ConferenceDetail 
-                description={activeConference.venue ? 
-                  `Venue: ${activeConference.venue}, ${activeConference.city || ''}, ${activeConference.country || ''}` : 
-                  'No venue information available'
+              <ConferenceDetail
+                description={
+                  activeConference.venue
+                    ? `Venue: ${activeConference.venue}, ${
+                        activeConference.city || ""
+                      }, ${activeConference.country || ""}`
+                    : "No venue information available"
                 }
                 texts={[
                   {
                     title: "Track Dates",
-                    content: `${new Date(activeConference.createdAt || Date.now()).toLocaleDateString()} - ${new Date(activeConference.licenseExpiry || Date.now()).toLocaleDateString()}`,
+                    content: `${new Date(
+                      activeConference.createdAt || Date.now()
+                    ).toLocaleDateString()} - ${new Date(
+                      activeConference.licenseExpiry || Date.now()
+                    ).toLocaleDateString()}`,
                   },
                   {
                     content: "See Full Calendar",
@@ -224,20 +242,20 @@ const ConferencePage: React.FC = () => {
                     icon: <FaBookOpen size={24} />,
                     text: "View Submissions and Paper Assignments",
                   },
-                  { 
-                    icon: <AssignmentIcon sx={{ fontSize: 26 }} />, 
+                  {
+                    icon: <AssignmentIcon sx={{ fontSize: 26 }} />,
                     text: "Assign Papers",
-                    onClick: () => openPopup("Select Paper(s)")
+                    onClick: () => openPopup("Select Paper(s)"),
                   },
-                  { 
-                    icon: <FaPlusCircle size={24} />, 
+                  {
+                    icon: <FaPlusCircle size={24} />,
                     text: "Add People to Track",
-                    onClick: () => openPopup("Add People to Track")
+                    onClick: () => openPopup("Add People to Track"),
                   },
-                  { 
-                    icon: <FaPlusCircle size={24} />, 
+                  {
+                    icon: <FaPlusCircle size={24} />,
                     text: "Assign Trackchair(s)",
-                    onClick: () => openPopup("Assign Trackchair(s)")
+                    onClick: () => openPopup("Assign Trackchair(s)"),
                   },
                 ]}
               />
@@ -245,31 +263,35 @@ const ConferencePage: React.FC = () => {
 
             {/* Display Superchairs */}
             {activeConference && activeConference.superchairs && (
-              <div style={{ marginTop: '20px' }}>
-                <h3 style={{ color: 'white', marginBottom: '10px' }}>Superchair(s)</h3>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
+              <div style={{ marginTop: "20px" }}>
+                <h3 style={{ color: "white", marginBottom: "10px" }}>
+                  Superchair(s)
+                </h3>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: "10px" }}>
                   {activeConference.superchairs.map((chairId, index) => (
-                    <div 
+                    <div
                       key={index}
                       onClick={() => navigate(`/profile/${chairId}`)}
                       style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        border: '1px solid white',
-                        borderRadius: '16px',
-                        padding: '8px 12px',
-                        cursor: 'pointer',
-                        minWidth: '160px',
-                        backgroundColor: '#2c3e50',
-                        color: 'white',
-                        width: 'fit-content'
+                        display: "flex",
+                        alignItems: "center",
+                        border: "1px solid white",
+                        borderRadius: "16px",
+                        padding: "8px 12px",
+                        cursor: "pointer",
+                        minWidth: "160px",
+                        backgroundColor: "#2c3e50",
+                        color: "white",
+                        width: "fit-content",
                       }}
                     >
-                      <FaUser style={{ marginRight: '8px' }} />
+                      <FaUser style={{ marginRight: "8px" }} />
                       {loadingUsers[chairId] ? (
                         <span>Loading...</span>
                       ) : superchairUsers[chairId] ? (
-                        <span>{`${superchairUsers[chairId].name} ${superchairUsers[chairId].surname || ''}`}</span>
+                        <span>{`${superchairUsers[chairId].name} ${
+                          superchairUsers[chairId].surname || ""
+                        }`}</span>
                       ) : (
                         <span>{chairId}</span>
                       )}
@@ -285,11 +307,12 @@ const ConferencePage: React.FC = () => {
                 buttonText={popupAction}
                 people={getFilteredUsersForPopup()}
                 onClose={closePopup}
-                onSelect={(selectedUserIds) => handleSelectedUsers(selectedUserIds, popupAction)}
+                onSelect={(selectedUserIds) =>
+                  handleSelectedUsers(selectedUserIds, popupAction)
+                }
               />
             )}
           </div>
-
         </div>
       </div>
     </>
@@ -297,4 +320,3 @@ const ConferencePage: React.FC = () => {
 };
 
 export default ConferencePage;
-

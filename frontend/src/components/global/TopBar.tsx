@@ -109,8 +109,6 @@ const Topbar: React.FC = () => {
 
   // 3. Compute unread count
   const unreadCount = notifications.filter((n) => !n.is_read).length;
-  console.log("Notifications:", notifications);
-  console.log("Unread notifications count:", unreadCount);
   const handleSearchFocus = async () => {
     if (users.length === 0) {
       await fetchUsers();
