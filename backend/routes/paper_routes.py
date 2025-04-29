@@ -3,6 +3,7 @@ from models.paper import Paper
 from models.review import Review
 from extensions import mongo
 from bson import ObjectId
+from datetime import datetime
 
 def get_paper(paper_id):
     try:
@@ -56,33 +57,35 @@ def submit_paper():
         return jsonify({"error": "Unauthorized"}), 401
 
     data = request.get_json()
-
     track = data.get("track_id")
 
     try:
-        paper = Paper(
-            paper_id=ObjectId(),
-            title=data.get("title"),
-            abstract=data.get("abstract"),
-            keywords=data.get("keywords", []),
-            paper_path=data.get("paper"),  
-            authors=data.get("authors", []),
-            created_at=None
-        )
+        paper_data = {
+            "title": data.get("title"),
+            "abstract": data.get("abstract"),
+            "keywords": data.get("keywords", []),
+            "paper_path": data.get("paper"),
+            "authors": data.get("authors", []),
+            "track_id": track,
+            "created_at": datetime.utcnow()
+        }
 
-        mongo.db.papers.insert_one(paper.to_dict())
+        # Insert the paper and capture its ObjectId
+        result = mongo.db.papers.insert_one(paper_data)
+        inserted_id = result.inserted_id
 
-        # Update the track with the new paper
+        # Now update the track with the actual MongoDB _id
         mongo.db.tracks.update_one(
             {"_id": ObjectId(track)},
-            {"$push": {"papers": str(paper.id)}}
+            {"$push": {"papers": inserted_id}}  # use actual _id here
         )
 
         return jsonify({
             "message": "Paper created successfully!",
-            "paper_id": paper.id
+            "paper_id": str(inserted_id)
         }), 201
 
     except Exception as e:
         print("Paper creation error:", e)
         return jsonify({"error": "Failed to create paper."}), 500
+
