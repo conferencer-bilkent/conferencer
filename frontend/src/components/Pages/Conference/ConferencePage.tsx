@@ -140,9 +140,13 @@ const ConferencePage: React.FC = () => {
         
       case "Assign Superchair(s)":
         // Filter out users who are already superchairs
-        return allUsers.filter(user => 
-          !activeConference.superchairs?.includes(user.id)
-        );
+        return allUsers.filter(jsonUser => {
+          const user = JSON.parse(JSON.stringify(jsonUser)); // convert JSON string to object
+          const isSuperchair = activeConference.superchairs?.includes(user._id);
+          console.log(`Checking user ID ${user._id}: isSuperchair = ${isSuperchair}`);
+          console.log(`isSuperchair: ${!isSuperchair}`);
+          return !isSuperchair;
+        });
         
       case "Add People to Track":
       case "Assign Trackchair(s)":
