@@ -69,6 +69,7 @@ def mark_notification_as_answered(notification_id, is_accepted):
 
     accepted = True if is_accepted.lower() == "true" else False
     try:
+        # Step 1: Mark notification as answered
         res = mongo.db.notifications.update_one(
             {"_id": ObjectId(notification_id), "to_whom": user_id},
             {"$set": {"is_answered": True, "is_accepted": accepted}}
@@ -76,41 +77,38 @@ def mark_notification_as_answered(notification_id, is_accepted):
         if res.modified_count == 0:
             return jsonify({"error": "Notification not found or already answered"}), 404
 
+        # Step 2: Get the notification again to find invitation ID
         notification = mongo.db.notifications.find_one({"_id": ObjectId(notification_id)})
         if notification.get("is_interactive", False):
             inv_id = notification.get("invitation_id")
             if inv_id:
+                # Step 3: Fetch invitation BEFORE updating it
                 invitation = mongo.db.pcmember_invitations.find_one({
                     "_id": ObjectId(inv_id),
-                    "user_id": user_id,
-                    "status": "pending"
+                    "user_id": user_id
                 })
-                if invitation:
+
+                if invitation and invitation.get("status") == "pending":
+                    # Step 4: Save conference_id before the update
+                    conf_id = invitation["conference_id"]
+
+                    # Step 5: Update the invitation
                     new_status = "accepted" if accepted else "rejected"
                     mongo.db.pcmember_invitations.update_one(
                         {"_id": ObjectId(inv_id)},
                         {"$set": {"status": new_status, "responded_at": datetime.utcnow()}}
                     )
+
+                    # Step 6: If accepted, add to conference
                     if accepted:
-                        print(f"User {user_id} accepted invitation to conference {invitation['conference_id']}")
-                        print(f"Adding user to pc_members list of conference")
-                        
-                        update_result = mongo.db.conferences.update_one(
-                            {"_id": invitation["conference_id"]},
+                        mongo.db.conferences.update_one(
+                            {"_id": ObjectId(conf_id)},
                             {"$addToSet": {"pc_members": user_id}}
                         )
-                        
-                        print(f"Update result: matched={update_result.matched_count}, modified={update_result.modified_count}")
-                        
-                        # Verify the update worked by retrieving the updated conference
-                        updated_conference = mongo.db.conferences.find_one({"_id": invitation["conference_id"]})
-                        if updated_conference:
-                            print(f"Conference after update: {updated_conference['name']}")
-                            print(f"PC members after update: {updated_conference.get('pc_members', [])}")
-                            print(f"User {user_id} in PC members: {user_id in updated_conference.get('pc_members', [])}")
-                        else:
-                            print(f"Warning: Could not retrieve updated conference {invitation['conference_id']}")
+
         return jsonify({"message": "Notification marked as answered"}), 200
 
     except Exception as e:
         return jsonify({"error": f"Failed to mark notification: {str(e)}"}), 500
+
+
