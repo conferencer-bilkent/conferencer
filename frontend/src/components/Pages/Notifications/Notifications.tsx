@@ -130,7 +130,7 @@ const NotificationsPage: React.FC = () => {
 const styles: { [key: string]: React.CSSProperties } = {
   notificationsContainer: {
     display: "flex",
-    height: "100vh",
+    height: "100%",
     alignItems: "start",
   },
   contentContainer: {

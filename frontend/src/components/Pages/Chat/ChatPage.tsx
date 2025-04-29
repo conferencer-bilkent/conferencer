@@ -116,7 +116,7 @@ const ChatPage: React.FC = () => {
         display="flex"
         justifyContent="center"
         alignItems="center"
-        height="100vh"
+        height="100%"
       >
         <CircularProgress />
       </Box>
@@ -129,7 +129,7 @@ const ChatPage: React.FC = () => {
         display="flex"
         justifyContent="center"
         alignItems="center"
-        height="100vh"
+        height="100%"
       >
         <Typography color="error">{error}</Typography>
       </Box>
@@ -188,7 +188,7 @@ const ChatPage: React.FC = () => {
       style={{
         display: "flex",
         flexDirection: "column",
-        height: "100vh",
+        height: "100%",
 
         backgroundColor: theme.palette.background.default,
       }}

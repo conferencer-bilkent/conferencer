@@ -55,13 +55,14 @@ const SideMenu: React.FC<SideMenuProps> = ({ items }) => {
   return (
     <Box
       sx={{
+        position: "fixed",
         width: { xs: "auto", sm: "250px" }, // Allow shrinking on small screens
         borderRadius: "10px",
         display: "flex",
         flexDirection: "column",
-        height: "100vh",
+        height: "100%",
         padding: { xs: "10px", sm: "0" }, // Add padding for small screens
-        marginTop: "calc(100vh/5)", // Start at 1/3 of the page height
+        marginTop: "calc(100%/10)", // Start at 1/3 of the page height
         paddingLeft: "3rem", // Ensure left padding is 3rem
       }}
     >

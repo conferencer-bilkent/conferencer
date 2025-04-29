@@ -192,6 +192,9 @@ const Topbar: React.FC = () => {
 
   return (
     <Box
+      position={"fixed"}
+      width={"100%"}
+      zIndex={1000}
       display="flex"
       alignItems="center"
       justifyContent="space-between"
@@ -203,9 +206,7 @@ const Topbar: React.FC = () => {
         alignItems="center"
         sx={{
           cursor: "pointer",
-          position: "absolute",
           left: 0,
-          paddingLeft: "3rem",
         }}
         onClick={() => navigate("/home")}
       >

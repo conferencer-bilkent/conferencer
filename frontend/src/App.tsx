@@ -49,17 +49,39 @@ const App: React.FC = () => {
                 <Route
                   path="*"
                   element={
-                    <div style={{ display: "flex", height: "100vh" }}>
-                      <SideMenu items={menuItems} />
+                    <div
+                      style={{
+                        display: "flex",
+                        height: "100vh",
+                        overflow: "hidden",
+                      }}
+                    >
+                      <div
+                        style={{
+                          display: "flex",
+                          flexDirection: "column",
+                          height: "100%",
+                          overflow: "hidden",
+                        }}
+                      >
+                        <TopBar />
+                        <SideMenu items={menuItems} />
+                      </div>
                       <div
                         style={{
                           flex: 1,
                           display: "flex",
                           flexDirection: "column",
+                          marginLeft: "240px", // Adjust based on TopBar width
                         }}
                       >
-                        <TopBar />
-                        <div style={{ flex: 1, overflowY: "auto" }}>
+                        <div
+                          style={{
+                            flex: 1,
+                            overflowY: "auto",
+                            marginTop: "64px",
+                          }}
+                        >
                           <Routes>
                             <Route path="/home" element={<HomePage />} />
                             <Route

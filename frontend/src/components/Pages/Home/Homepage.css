@@ -1,7 +1,7 @@
 .homepage-container {
   display: flex;
   flex-direction: column;
-  height: 100vh;
+  height: 100%;
   margin: 0; /* Add this */
   padding: 0; /* Add this */
 }
@@ -20,7 +20,7 @@
   display: flex;
   flex: 1;
   margin-top: 60px; /* Must match Topbar height */
-  height: calc(100vh - 60px); /* Must match Topbar height */
+  height: calc(100% - 60px); /* Must match Topbar height */
   overflow: hidden; /* Prevent any overflow */
 }
 
