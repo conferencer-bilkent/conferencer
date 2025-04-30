@@ -1,5 +1,5 @@
-import { act } from "react";
-import { useConference } from "../context/ConferenceContext";
+// import { act } from "react";
+// import { useConference } from "../context/ConferenceContext";
 /**
  * Interface for author information
  */

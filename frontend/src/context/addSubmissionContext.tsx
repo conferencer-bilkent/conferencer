@@ -4,7 +4,7 @@ import React, {
   createContext,
   ReactNode,
   useContext,
-  act,
+  // act,
 } from "react";
 import { Action, reducer } from "../reducer/reducer";
 import { initialState, State } from "../reducer/initailState";
