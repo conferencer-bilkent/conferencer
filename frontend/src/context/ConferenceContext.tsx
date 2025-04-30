@@ -8,8 +8,11 @@ type ContextType = {
 
 const ConferenceContext = createContext<ContextType | undefined>(undefined);
 
-export const ConferenceProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [activeConference, setActiveConferenceState] = useState<Conference | null>(null);
+export const ConferenceProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
+  const [activeConference, setActiveConferenceState] =
+    useState<Conference | null>(null);
 
   useEffect(() => {
     const stored = localStorage.getItem("activeConference");
@@ -22,7 +25,9 @@ export const ConferenceProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   };
 
   return (
-    <ConferenceContext.Provider value={{ activeConference, setActiveConference }}>
+    <ConferenceContext.Provider
+      value={{ activeConference, setActiveConference }}
+    >
       {children}
     </ConferenceContext.Provider>
   );
