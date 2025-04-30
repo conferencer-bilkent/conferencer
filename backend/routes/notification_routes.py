@@ -3,6 +3,7 @@ from models.notification import Notification
 from bson import ObjectId
 from datetime import datetime
 from extensions import mongo
+from routes.role_routes import assign_role
 
 def get_notification():
     user_id = session.get("user_id")
@@ -76,6 +77,15 @@ def mark_notification_as_answered(notification_id, is_accepted):
         )
         if res.modified_count == 0:
             return jsonify({"error": "Notification not found or already answered"}), 404
+        
+
+        # Add a role to the user accepting the invitation as PC member
+        if accepted:
+            # Use invitation's conference_id and the user's id for role assignment
+            response = assign_role({"user_id": user_id, "conference_id": conf_id, "position": "pc_member"})
+            if isinstance(response, tuple) and response[1] != 200:
+                print("Error assigning role:", response[0])
+                return response
 
         # Step 2: Get the notification again to find invitation ID
         notification = mongo.db.notifications.find_one({"_id": ObjectId(notification_id)})

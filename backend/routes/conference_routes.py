@@ -5,7 +5,7 @@ from extensions import mongo
 from models.pc_member_invitation import PCMemberInvitation
 from routes.notification_routes import send_notification
 from models.role import Role
-from routes.track_routes import get_tracks_by_conference
+from routes.role_routes import assign_role
 
 def create_conference():
     if "user_id" not in session:
