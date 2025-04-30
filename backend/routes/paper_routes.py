@@ -1,4 +1,4 @@
-from flask import request, jsonify, session
+from flask import request, jsonify, session, send_file
 from models.paper import Paper
 from models.review import Review
 from extensions import mongo
@@ -68,3 +68,18 @@ def submit_paper():
     except Exception as e:
         print("Paper creation error:", e)
         return jsonify({"error": "Failed to create paper."}), 500
+
+def download_paper(paper_id):
+    try:
+        paper = mongo.db.papers.find_one({"_id": ObjectId(paper_id)})
+        if not paper:
+            return jsonify({"error": "Paper not found"}), 404
+
+        paper_path = paper.get("paper")  # e.g., "uploads/papers/paper1.pdf"
+        if not paper_path or not os.path.exists(paper_path):
+            return jsonify({"error": "File not found on server"}), 404
+
+        return send_file(paper_path, as_attachment=True)
+
+    except Exception as e:
+        return jsonify({"error": f"Failed to download paper: {str(e)}"}), 500

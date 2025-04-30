@@ -5,7 +5,7 @@ from routes.ping_routes import ping
 from routes.profile_routes import get_profile, update_profile, get_all_users
 from routes.role_routes import assign_role, get_roles
 from routes.chad_routes import send_chad, get_received_chad, get_sent_chad
-from routes.paper_routes import  get_paper, submit_paper
+from routes.paper_routes import  get_paper, submit_paper, download_paper
 from routes.review_routes import get_review, submit_review
 from routes.upload_routes import upload_file
 from routes.notification_routes import get_notification, mark_notification_as_answered, mark_all_read
@@ -57,6 +57,7 @@ chad_bp.route("/outbox", methods=["GET"])(get_sent_chad)
 
 paper_bp.route("/<paper_id>", methods=["GET"])(get_paper)
 paper_bp.route("/submit", methods=["POST"])(submit_paper)
+paper_bp.route("/<paper_id>/download", methods=["GET"])(download_paper)
 
 review_bp.route("/<review_id>", methods=["GET"])(get_review)
 review_bp.route("/submit/<paper_id>", methods=["POST"])(submit_review)
