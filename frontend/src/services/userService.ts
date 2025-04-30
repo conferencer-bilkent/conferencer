@@ -2,6 +2,8 @@ import {
   UserData, 
 } from '../models/user';
 
+import { Role } from '../models/user';  // adjust path if needed
+
 // import { 
 //   dummyUserProfileResponse, 
 //   getDummyUserById, 
@@ -184,6 +186,32 @@ export const getAllUsers = async (): Promise<UserData[]> => {
     return Array.isArray(data) ? data : [];
   } catch (error) {
     console.error('Error fetching all users:', error);
+    throw error;
+  }
+};
+
+/**
+ * Fetches a single role by its ID
+ * 
+ * @param roleId - The ID of the role to fetch
+ * @returns Promise resolving to the Role object
+ */
+export const getRole = async (roleId: string): Promise<Role> => {
+  try {
+    const response = await fetch(`http://127.0.0.1:5000/role/${roleId}`, {
+      method: 'GET',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' }
+    });
+
+    if (!response.ok) {
+      const err = await response.json();
+      throw new Error(err.error || `Failed to fetch role ${roleId}`);
+    }
+
+    return await response.json() as Role;
+  } catch (error) {
+    console.error(`Error fetching role with ID ${roleId}:`, error);
     throw error;
   }
 };

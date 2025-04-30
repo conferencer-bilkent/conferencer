@@ -2,10 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./CreateTrack.css";
-// import {
-//   createTrack,
-//   mapApiResponseToTrack,
-// } from "../../../../services/trackService";
+import { createTrack, mapApiResponseToTrack } from "../../../../services/trackService";
 import { useConference } from "../../../../context/ConferenceContext";
 
 const steps = [
@@ -109,27 +106,30 @@ const CreateTrack: React.FC = () => {
       payload[k] =
         v && typeof v === "object" && "value" in v ? (v as any).value : v;
     });
+
     if (currentStep === steps.length - 1) {
       try {
         if (!activeConference) {
           throw new Error("No active conference selected");
         }
-
-        // Add conference_id to payload
+        // add conference_id
         payload.conference_id = activeConference.id;
 
-        // const trackId = await createTrack(payload);
-        // const newTrack = mapApiResponseToTrack({
-        //   track_id: trackId,
-        //   ...payload,
-        //   created_at: new Date().toISOString(),
-        // });
+        // create track via service
+        const trackId = await createTrack(payload);
 
-        // If you have an addTrack function in your context
-        // addTrack(newTrack);
+        // map response into Track model
+        const newTrack = mapApiResponseToTrack({
+          track_id: trackId,
+          ...payload,
+          created_at: new Date().toISOString(),
+        });
+        createTrack(newTrack);
+        // update context (if available)
+        
 
         alert("Track created successfully!");
-        navigate(`/conference/`);
+        navigate(`/conference/${activeConference.id}`);
       } catch (err: any) {
         alert(`Error: ${err.message}`);
       }
