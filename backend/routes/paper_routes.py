@@ -105,24 +105,6 @@ def submit_paper():
 
     except Exception as e:
         print("Paper creation error:", e)
-<<<<<<< HEAD
-        return jsonify({"error": "Failed to create paper."}), 500
-
-def download_paper(paper_id):
-    try:
-        paper = mongo.db.papers.find_one({"_id": ObjectId(paper_id)})
-        if not paper:
-            return jsonify({"error": "Paper not found"}), 404
-
-        paper_path = paper.get("paper")  # e.g., "uploads/papers/paper1.pdf"
-        if not paper_path or not os.path.exists(paper_path):
-            return jsonify({"error": "File not found on server"}), 404
-
-        return send_file(paper_path, as_attachment=True)
-
-    except Exception as e:
-        return jsonify({"error": f"Failed to download paper: {str(e)}"}), 500
-=======
         return jsonify({"error": f"Failed to create paper: {str(e)}"}), 500
 
 
@@ -132,4 +114,3 @@ ALLOWED_EXTENSIONS = {'pdf'}
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
->>>>>>> 30a6539b5e8dd4a79005887d88435ef1887726f6
