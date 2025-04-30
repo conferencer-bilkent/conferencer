@@ -12,9 +12,7 @@
 .radioSelectTrack label {
     font-size: 12px;
     align-items: center;
+    display: flex;
     
 }
 
-.radioSelectTrack input {
-    margin-right: 50px;
-}
