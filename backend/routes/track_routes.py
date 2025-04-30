@@ -96,10 +96,14 @@ def appoint_track_chair():
             "is_active": True
         }
 
-        # add the role to the user
+        # insert the role and get its ID
+        role_result = mongo.db.roles.insert_one(role)
+        role_id = str(role_result.inserted_id)
+
+        # add the role ID to the user's roles array
         mongo.db.users.update_one(
             {"_id": ObjectId(track_chair)},
-            {"$push": {"roles": role}}
+            {"$push": {"roles": role_id}}
         )
 
         return jsonify({"message": "Track chair appointed successfully"}), 200

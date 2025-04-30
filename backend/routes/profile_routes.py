@@ -71,7 +71,6 @@ def update_profile():
     return jsonify({"message": "Profile updated successfully"}), 200
 
 def get_all_users():
-    # Add authorization check (example - adjust based on your auth system)
     if "user_id" not in session:
         return jsonify({"error": "Unauthorized"}), 401
     
