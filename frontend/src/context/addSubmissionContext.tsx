@@ -1,6 +1,7 @@
 import React, { useReducer, useState, createContext, ReactNode, useContext } from "react";
 import { Action, reducer } from "../reducer/reducer";
 import { initialState, State } from "../reducer/initailState";
+import submitPaper, { PaperSubmission } from "../services/submissionService";
 
 interface MyContextType {
     state: State;
@@ -60,13 +61,48 @@ const SubmissionProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         setFile(selectedFile);
     };
 
-    const handleSendSubmission = () => {
-        if (file) {  // file kullanmadı hatasından kaçınmak için kullandım bu loop'u aslında gereksiz.
-            console.log("File ready for upload:", file.name); // Zaten database sendfile gibi bir konut olacak senin yaptığında.
-        } else {
-            console.log("No file selected.");
+    const handleSendSubmission = async () => {
+        try {
+            if (!file) {
+                console.error("No file selected");
+                // Show error message to user
+                return;
+            }
+
+            // Map persons array to authors format expected by the API
+            const authors = state.persons.map(person => ({
+                firstname: person.firstName,
+                lastname: person.lastName,
+                email: person.email,
+                country: person.selectedCountry,
+                organization: person.organization
+                // Note: user_id is missing but may be set by the server
+            }));
+
+            // Create submission data object matching PaperSubmission interface
+            const submissionData: PaperSubmission = {
+                title: state.title,
+                abstract: state.abstract,
+                keywords: state.keywords.split(',').map(k => k.trim()), // Convert to array format
+                track_id: "680fd4004703ed8e3c65c095", // Using the specified track_id
+                authors: authors
+            };
+
+            // Log JSON for Postman testing
+            console.log("JSON for Postman testing:", JSON.stringify({
+                ...submissionData,
+                paper: "paper will be uploaded as form-data file" // Just a placeholder for readability
+            }, null, 2));
+            
+            // Call the submitPaper function with the mapped data
+            const response = await submitPaper(submissionData, file);
+            console.log("Submission successful:", response);
+            
+            // Handle successful submission (e.g., show success message, redirect)
+        } catch (error) {
+            console.error("Error submitting paper:", error);
+            // Show error message to user
         }
-        console.log(state);
     };
 
     return (
@@ -92,4 +128,4 @@ export const useSubmissionContext = () => {
     return context;
 };
 
-export { SubmissionProvider }; 
+export { SubmissionProvider };
