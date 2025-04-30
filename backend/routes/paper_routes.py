@@ -119,13 +119,18 @@ def download_paper(paper_id):
         if not paper:
             return jsonify({"error": "Paper not found"}), 404
 
-        paper_path = paper.get("paper")  # e.g., "uploads/papers/paper1.pdf"
-        if not paper_path or not os.path.exists(paper_path):
-            return jsonify({"error": "File not found on server"}), 404
+        paper_path = paper.get("paper_path")
+        if not paper_path:
+            return jsonify({"error": "No file path associated with this paper"}), 404
 
-        return send_file(paper_path, as_attachment=True)
+        # Ensure the path is absolute
+        abs_path = os.path.abspath(paper_path.strip("/"))
+
+        if not os.path.exists(abs_path):
+            return jsonify({"error": "File does not exist on server"}), 404
+
+        return send_file(abs_path, as_attachment=True)
 
     except Exception as e:
         return jsonify({"error": f"Failed to download paper: {str(e)}"}), 500
 
-        
