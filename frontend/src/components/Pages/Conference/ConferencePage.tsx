@@ -17,6 +17,7 @@ import {
 } from "../../../services/conferenceService";
 
 import { getUserById, getAllUsers } from "../../../services/userService";
+
 import { UserData } from "../../../models/user";
 import IconButton from '@mui/material/IconButton';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
@@ -178,7 +179,41 @@ const ConferencePage: React.FC = () => {
         break;
 
       case "Add People to Track":
+
       case "Assign Trackchair(s)":
+        if (activeConference && activeTrack) {
+          // send each selected userId to the backend endpoint
+          const assignPromises = selectedUserIds.map((userId) =>
+            fetch('http://127.0.0.1:5000/track/appoint_track_chairs', {
+              method: 'POST',
+              credentials: 'include',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                track_id: activeTrack._id,      // the track you're assigning chairs to
+                track_chair: userId             // the user being made a chair
+              }),
+            }).then((res) => {
+              if (!res.ok) {
+                return res.json().then(err => {
+                  throw new Error(err.error || `Failed to assign trackchair ${userId}`);
+                });
+              }
+              return res.json();
+            })
+          );
+
+          Promise.all(assignPromises)
+            .then((results) => {
+              console.log("Successfully assigned trackchairs:", results);
+              // reload or update state to reflect new trackchairs
+              window.location.reload();
+            })
+            .catch((error) => {
+              console.error("Error assigning trackchairs:", error);
+            });
+
+          console.log(`Assigning users as trackchairs to track ${activeTrack._id}`);
+        }
         break;
 
       default:
@@ -232,6 +267,8 @@ const ConferencePage: React.FC = () => {
         return nonSupers;
 
       case "Add People to Track":
+        //
+
       case "Assign Trackchair(s)":
         console.log(
           `Assigning users to track ${JSON.stringify(activeTrack)} }`
@@ -251,6 +288,33 @@ const ConferencePage: React.FC = () => {
         return allUsers;
     }
   };
+
+  // State for fetched track‑chair user data
+  const [trackChairUsers, setTrackChairUsers] = useState<Record<string, UserData>>({});
+  const [loadingTrackChairs, setLoadingTrackChairs] = useState<Record<string, boolean>>({});
+
+  // Whenever activeTrack changes, fetch its chairs’ user data
+  useEffect(() => {
+    if (!activeTrack?.track_chairs?.length) return;
+
+    // reset
+    setTrackChairUsers({});
+    setLoadingTrackChairs({});
+
+    activeTrack.track_chairs.forEach((chairId: string) => {
+      setLoadingTrackChairs(prev => ({ ...prev, [chairId]: true }));
+      getUserById(chairId)
+        .then(userData => {
+          setTrackChairUsers(prev => ({ ...prev, [chairId]: userData }));
+        })
+        .catch(err => {
+          console.error(`Error fetching trackchair ${chairId}:`, err);
+        })
+        .finally(() => {
+          setLoadingTrackChairs(prev => ({ ...prev, [chairId]: false }));
+        });
+    });
+  }, [activeTrack]);
 
   return (
     <div className="conference-page" style={{ backgroundColor: colors.transparent, color: colors.grey[100] }}>
@@ -338,39 +402,64 @@ const ConferencePage: React.FC = () => {
             </div>
           )}
 
-          {activeConference && activeConference.superchairs && (
-            <div style={{ marginTop: "20px" }}>
-              <h3 style={{ color: colors.grey[100], marginBottom: "10px" }}>
-                Superchair(s)
-              </h3>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: "10px" }}>
-                {activeConference.superchairs.map((chairId, index) => (
+          {/* Superchairs */}
+          {(activeConference?.superchairs?.length ?? 0) > 0 && (
+            <div style={{ marginTop: 20 }}>
+              <h3 style={{ color: colors.grey[100], marginBottom: 10 }}>Superchair(s)</h3>
+              <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+                {activeConference?.superchairs?.map((id, idx) => (
                   <div
-                    key={index}
-                    onClick={() => navigate(`/profile/${chairId}`)}
+                    key={id || idx}
+                    onClick={() => navigate(`/profile/${id}`)}
                     style={{
                       display: "flex",
                       alignItems: "center",
                       border: `1px solid ${colors.grey[100]}`,
-                      borderRadius: "16px",
+                      borderRadius: 16,
                       padding: "8px 12px",
                       cursor: "pointer",
-                      minWidth: "160px",
                       backgroundColor: colors.primary[1000],
                       color: colors.grey[100],
-                      width: "fit-content",
                     }}
                   >
-                    <FaUser style={{ marginRight: "8px" }} />
-                    {loadingUsers[chairId] ? (
-                      <span>Loading...</span>
-                    ) : superchairUsers[chairId] ? (
-                      <span>{`${superchairUsers[chairId].name} ${
-                        superchairUsers[chairId].surname || ""
-                      }`}</span>
-                    ) : (
-                      <span>{chairId}</span>
-                    )}
+                    <FaUser style={{ marginRight: 8 }} />
+                    {loadingUsers[id]
+                      ? "Loading…"
+                      : superchairUsers[id]
+                      ? `${superchairUsers[id].name} ${superchairUsers[id].surname || ""}`
+                      : id}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Trackchairs */}
+          {activeTrack?.track_chairs?.length > 0 && (
+            <div style={{ marginTop: 20 }}>
+              <h3 style={{ color: colors.grey[100], marginBottom: 10 }}>Trackchair(s)</h3>
+              <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+                {activeTrack.track_chairs.map((id: string, idx: number) => (
+                  <div
+                    key={id || idx}
+                    onClick={() => navigate(`/profile/${id}`)}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      border: `1px solid ${colors.grey[100]}`,
+                      borderRadius: 16,
+                      padding: "8px 12px",
+                      cursor: "pointer",
+                      backgroundColor: colors.primary[1000],
+                      color: colors.grey[100],
+                    }}
+                  >
+                    <FaUser style={{ marginRight: 8 }} />
+                    {loadingTrackChairs[id]
+                      ? "Loading…"
+                      : trackChairUsers[id]
+                      ? `${trackChairUsers[id].name} ${trackChairUsers[id].surname || ""}`
+                      : id}
                   </div>
                 ))}
               </div>
