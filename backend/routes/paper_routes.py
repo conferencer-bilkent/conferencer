@@ -4,6 +4,9 @@ from models.review import Review
 from extensions import mongo
 from bson import ObjectId
 from datetime import datetime
+import os
+from werkzeug.utils import secure_filename
+
 
 def get_paper(paper_id):
     try:
@@ -25,48 +28,84 @@ def submit_paper():
     if "user_id" not in session:
         return jsonify({"error": "Unauthorized"}), 401
 
-    data = request.get_json()
-    track = data.get("track_id")
-
+    if 'file' not in request.files:
+        return jsonify({"error": "No file part"}), 400
+        
+    file = request.files['file']
+    
+    if file.filename == '':
+        return jsonify({"error": "No selected file"}), 400
+        
+    if not file or not allowed_file(file.filename):
+        return jsonify({"error": "Invalid file type"}), 400
+    
+    title = request.form.get("title")
+    abstract = request.form.get("abstract")
+    keywords = request.form.getlist("keywords") if request.form.getlist("keywords") else []
+    authors = request.form.getlist("authors") if request.form.getlist("authors") else []
+    track_id = request.form.get("track_id")
+    conference_id = request.form.get("conference_id")
+    
+    if not title or not track_id or not conference_id:
+        return jsonify({"error": "Missing required fields"}), 400
+    
     try:
+        # Get track name for folder creation
+        track = mongo.db.tracks.find_one({"_id": ObjectId(track_id)})
+        if not track:
+            return jsonify({"error": "Invalid track ID"}), 400
+        
+        track_name = track.get("name", "default")
+        
+        # Save file
+        safe_filename = secure_filename(file.filename)
+        paper_id = str(ObjectId())
+        
+        save_dir = os.path.join(UPLOAD_FOLDER, conference_id, track_name)
+        os.makedirs(save_dir, exist_ok=True)
+        
+        save_path = os.path.join(save_dir, f"{paper_id}_{safe_filename}")
+        file.save(save_path)
+        
+        # Create paper document
         paper = Paper(
-            paper_id=ObjectId(),
-            title=data.get("title"),
-            abstract=data.get("abstract"),
-            keywords=data.get("keywords", []),
-            paper_path=data.get("paper"),
-            authors=data.get("authors", []),  # Expecting full author objects
+            paper_id=ObjectId(paper_id),
+            title=title,
+            abstract=abstract,
+            keywords=keywords,
+            paper_path=f"/{save_path}",
+            authors=authors,
             created_by=session["user_id"],
-            track=track
+            track=track_id
         )
 
-        # Insert the paper and capture MongoDB _id
         result = mongo.db.papers.insert_one({
             "id": paper.id,
             "title": paper.title,
             "abstract": paper.abstract,
             "keywords": paper.keywords,
-            "paper": paper.paper,
+            "paper_path": paper.paper_path,
             "authors": paper.authors,
             "track": paper.track,
             "created_by": paper.created_by,
             "created_at": paper.created_at
         })
 
-        # Use MongoDB's _id for track linkage
         inserted_id = result.inserted_id
         mongo.db.tracks.update_one(
-            {"_id": ObjectId(track)},
+            {"_id": ObjectId(track_id)},
             {"$push": {"papers": inserted_id}}
         )
 
         return jsonify({
             "message": "Paper created successfully!",
-            "paper_id": str(inserted_id)
+            "paper_id": str(inserted_id),
+            "file_path": f"/{save_path}"
         }), 201
 
     except Exception as e:
         print("Paper creation error:", e)
+<<<<<<< HEAD
         return jsonify({"error": "Failed to create paper."}), 500
 
 def download_paper(paper_id):
@@ -83,3 +122,14 @@ def download_paper(paper_id):
 
     except Exception as e:
         return jsonify({"error": f"Failed to download paper: {str(e)}"}), 500
+=======
+        return jsonify({"error": f"Failed to create paper: {str(e)}"}), 500
+
+
+
+UPLOAD_FOLDER = "uploads"
+ALLOWED_EXTENSIONS = {'pdf'}
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+>>>>>>> 30a6539b5e8dd4a79005887d88435ef1887726f6
