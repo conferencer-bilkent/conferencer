@@ -14,9 +14,10 @@ const AddAuthor: React.FC<AuthorProps> = ({person, index}) => {
   return (
     <div>
         <div 
-            key={index} 
+             
             className="authorPartContainer"
-            style={{display: index === authorIndex ? "block": "none"}}
+            style={{
+                display: index === authorIndex ? "block": "none"}}
         >
         <div className="authorTitle">
             <p>Author {index + 1}</p>
