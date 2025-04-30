@@ -3,7 +3,6 @@ import os
 from werkzeug.utils import secure_filename
 from bson import ObjectId
 
-upload_bp = Blueprint('upload', __name__)
 
 UPLOAD_FOLDER = "uploads"
 ALLOWED_EXTENSIONS = {'pdf'}
