@@ -18,6 +18,9 @@ import {
 
 import { getUserById, getAllUsers } from "../../../services/userService";
 import { UserData } from "../../../models/user";
+import IconButton from '@mui/material/IconButton';
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 
 const ConferencePage: React.FC = () => {
   const { activeConference, setActiveConference } = useConference();
@@ -25,13 +28,28 @@ const ConferencePage: React.FC = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   
-  // Initialize active track state with safe default
-  const [activeTrack, setActiveTrack] = useState<any>(
-    activeConference?.tracks?.[0] || null
-  );
-
   // Track which popup button (if any) is clicked
   const [popupAction, setPopupAction] = useState<string | null>(null);
+
+  const tracks = activeConference?.tracks || [];
+
+  // initialize to null (we’ll set it in an effect)
+  const [activeTrack, setActiveTrack] = useState<any>(null);
+
+  // now that tracks may arrive asynchronously, grab the first one
+  useEffect(() => {
+    if (!activeTrack && tracks.length > 0) {
+      setActiveTrack(tracks[0]);
+      console.log(`Initial active track set: ${tracks[0].track_name} (ID: ${tracks[0]._id})`);
+    }
+  }, [tracks, activeTrack]);
+
+  // compare on _id, not id
+  const currentIndex = tracks.findIndex(t => t._id === activeTrack?._id);
+  const hasPrev = currentIndex > 0;
+  const hasNext = currentIndex >= 0 && currentIndex < tracks.length - 1;
+  const handlePrevTrack = () => hasPrev && setActiveTrack(tracks[currentIndex - 1]);
+  const handleNextTrack = () => hasNext && setActiveTrack(tracks[currentIndex + 1]);
 
   useEffect(() => {
     // First, try to get the activeConference if not already set
@@ -45,6 +63,9 @@ const ConferencePage: React.FC = () => {
           // Also set active track immediately
           if (parsedConference?.tracks?.length > 0) {
             setActiveTrack(parsedConference.tracks[0]);
+            console.log(
+              `Active track set: ${parsedConference.tracks[0].name} (ID: ${parsedConference.tracks[0].id})`
+            );
           }
         } catch (error) {
           console.error("Error parsing stored conference:", error);
@@ -108,7 +129,7 @@ const ConferencePage: React.FC = () => {
           });
       });
     }
-  }, [activeConference?.superchairs]);
+  }, []);
 
   const handleSelectedUsers = (selectedUserIds: string[], action: string) => {
     console.log(`Selected users for ${action}:`, selectedUserIds);
@@ -232,17 +253,11 @@ const ConferencePage: React.FC = () => {
   };
 
   return (
-    <div
-      className="conference-page"
-      style={{
-        backgroundColor: colors.transparent,
-        color: colors.grey[100],
-      }}
-    >
+    <div className="conference-page" style={{ backgroundColor: colors.transparent, color: colors.grey[100] }}>
       <div className="conference-container">
         <div className="content-container">
+          {/* Conference title & buttons */}
           <AppTitle text={activeConference?.name || "No Conference Selected"} />
-
           <div className="buttons-row">
             <AppButton
               icon={<FaPlusCircle />}
@@ -270,60 +285,57 @@ const ConferencePage: React.FC = () => {
             />
           </div>
 
+          {/* NEW: Active Track name */}
           {activeConference && (
-            <ConferenceDetail
-              description={
-                activeConference.venue
-                  ? `Venue: ${activeConference.venue}, ${
-                      activeConference.city || ""
-                    }, ${activeConference.country || ""}`
-                  : "No venue information available"
-              }
-              texts={[
-                {
-                  title: "Track Dates",
-                  content: `${new Date(
-                    activeConference.createdAt || Date.now()
-                  ).toLocaleDateString()} - ${new Date(
-                    activeConference.licenseExpiry || Date.now()
-                  ).toLocaleDateString()}`,
-                },
-                {
-                  content: "See Full Calendar",
-                  link: "#",
-                },
-                {
-                  content: `Total Submissions: 0`,
-                },
-                {
-                  content: `Assigned Reviews: 0`,
-                },
-                {
-                  content: `Pending Reviews: 0`,
-                },
-              ]}
-              buttons={[
-                {
-                  icon: <FaBookOpen size={24} />,
-                  text: "View Submissions and Paper Assignments",
-                },
-                {
-                  icon: <AssignmentIcon sx={{ fontSize: 26 }} />,
-                  text: "Assign Papers",
-                  onClick: () => openPopup("Select Paper(s)"),
-                },
-                {
-                  icon: <FaPlusCircle size={24} />,
-                  text: "Add People to Track",
-                  onClick: () => openPopup("Add People to Track"),
-                },
-                {
-                  icon: <FaPlusCircle size={24} />,
-                  text: "Assign Trackchair(s)",
-                  onClick: () => openPopup("Assign Trackchair(s)"),
-                },
-              ]}
+            <AppTitle
+              text={activeTrack?.track_name || "No Track Selected"}
+              // you can pass additional props if needed
             />
+          )}
+
+          {/* NEW: Arrows + Detail */}
+          {activeConference && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <IconButton
+                onClick={handlePrevTrack}
+                disabled={!hasPrev}
+                sx={{ color: hasPrev ? colors.grey[100] : 'transparent' }}
+              >
+                <ChevronLeftIcon sx={{ color: 'inherit' }} />
+              </IconButton>
+
+              <ConferenceDetail
+                description={
+                  activeConference.venue
+                    ? `Venue: ${activeConference.venue}, ${activeConference.city || ""}, ${activeConference.country || ""}`
+                    : "No venue information available"
+                }
+                texts={[
+                  {
+                    title: "Track Dates",
+                    content: `${new Date(activeConference.createdAt || Date.now()).toLocaleDateString()} - ${new Date(activeConference.licenseExpiry || Date.now()).toLocaleDateString()}`
+                  },
+                  { content: "See Full Calendar", link: "#" },
+                  { content: `Total Submissions: 0` },
+                  { content: `Assigned Reviews: 0` },
+                  { content: `Pending Reviews: 0` }
+                ]}
+                buttons={[
+                  { icon: <FaBookOpen size={24} />, text: "View Submissions and Paper Assignments" },
+                  { icon: <AssignmentIcon sx={{ fontSize: 26 }} />, text: "Assign Papers", onClick: () => openPopup("Select Paper(s)") },
+                  { icon: <FaPlusCircle size={24} />, text: "Add People to Track", onClick: () => openPopup("Add People to Track") },
+                  { icon: <FaPlusCircle size={24} />, text: "Assign Trackchair(s)", onClick: () => openPopup("Assign Trackchair(s)") },
+                ]}
+              />
+
+              <IconButton
+                onClick={handleNextTrack}
+                disabled={!hasNext}
+                sx={{ color: hasNext ? colors.grey[100] : 'transparent' }}
+              >
+                <ChevronRightIcon sx={{ color: 'inherit' }} />
+              </IconButton>
+            </div>
           )}
 
           {activeConference && activeConference.superchairs && (

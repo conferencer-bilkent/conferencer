@@ -25,7 +25,11 @@ const AddSubmissionPage: React.FC = () => {
                 </div>
                 <SelectTrackPage />               
                 {state.persons.map((person: Person, index: number) => (
-                    <AddAuthor person={person} index={index} />
+                    <AddAuthor
+                      key={index}
+                      person={person}
+                      index={index}
+                    />
                 ))}
             <div className="addPersonContainer">
                 <AppButton icon={<AddCircleOutlineIcon />} text={'Add Another Author'} onClick={addPerson}/>
