@@ -36,6 +36,12 @@ interface Message {
   read?: boolean;
 }
 
+interface User {
+  id: string;
+  name: string;
+  surname: string;
+}
+
 const ChatPage: React.FC = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
@@ -53,6 +59,7 @@ const ChatPage: React.FC = () => {
   const [composeTo, setComposeTo] = useState("");
   const [composeSubject, setComposeSubject] = useState("");
   const [composeContent, setComposeContent] = useState("");
+  const [userDetails, setUserDetails] = useState<{ [key: string]: User }>({});
 
   const fetchMessages = async () => {
     try {
@@ -77,9 +84,45 @@ const ChatPage: React.FC = () => {
     }
   };
 
+  const fetchUserDetails = async (userIds: string[]) => {
+    try {
+      const uniqueIds = [...new Set(userIds)];
+      const promises = uniqueIds.map((id) =>
+        fetch(`http://127.0.0.1:5000/profile/${id}`, {
+          credentials: "include",
+        }).then((res) => res.json())
+      );
+      const users = await Promise.all(promises); //correctly await all promises
+      const userMap = users.reduce((acc, user, index) => {
+        const userId = uniqueIds[index]; // Map the user to the corresponding ID
+        if (userId) {
+          acc[userId] = user;
+        } else {
+          console.warn("User ID is missing for fetched user:", user);
+        }
+        return acc;
+      }, {});
+      console.log("Fetched user details:", userMap);
+      setUserDetails((prevDetails) => ({ ...prevDetails, ...userMap }));
+    } catch (error) {
+      console.error("Failed to fetch user details:", error);
+    }
+  };
+
   useEffect(() => {
     fetchMessages();
   }, []);
+
+  useEffect(() => {
+    const userIds = [
+      ...inboxMessages.map((m) => m.from),
+      ...sentMessages.map((m) => m.to),
+    ].filter((id): id is string => !!id && !userDetails[id]);
+    if (userIds.length > 0) {
+      console.log("userid ler bunlar AAAAAAAAAA", userIds);
+      fetchUserDetails(userIds);
+    }
+  }, [inboxMessages, sentMessages]);
 
   const groupMessagesBySubject = () => {
     const allMessages = [...inboxMessages, ...sentMessages];
@@ -96,6 +139,13 @@ const ChatPage: React.FC = () => {
       )
     );
     return grouped;
+  };
+
+  const getUserFullName = (userId: string) => {
+    const user = userDetails[userId];
+    console.log("User details:", userDetails);
+
+    return user ? `${user.name} ${user.surname}` : "Unknown User";
   };
 
   const navButtonStyle = (active: boolean): React.CSSProperties => ({
@@ -154,11 +204,12 @@ const ChatPage: React.FC = () => {
             (activeView === "inbox" ? inboxMessages : sentMessages).map(
               (msg) => {
                 const contactId = activeView === "inbox" ? msg.from : msg.to;
+                const contactName = getUserFullName(contactId || "");
                 return [
                   contactId,
                   {
                     id: contactId,
-                    name: contactId ?? "Unknown",
+                    name: contactName,
                     subject: msg.subject,
                     timestamp: msg.timestamp,
                   },
@@ -275,10 +326,18 @@ const ChatPage: React.FC = () => {
                   onClick={() => setSelectedContact(item.id || item)}
                 >
                   <Avatar sx={{ bgcolor: colors.greenAccent[500], mr: 2 }}>
-                    {(item.name || item).substring(0, 2).toUpperCase()}
+                    {activeView === "chats"
+                      ? (item.name || "").substring(0, 2).toUpperCase()
+                      : getUserFullName(item.id || "")
+                          .substring(0, 2)
+                          .toUpperCase()}
                   </Avatar>
                   <ListItemText
-                    primary={item.name || item}
+                    primary={
+                      activeView === "chats"
+                        ? item.name
+                        : getUserFullName(item.id || "")
+                    }
                     secondary={item.subject || ""}
                     primaryTypographyProps={{ fontWeight: "bold" }}
                     secondaryTypographyProps={{
@@ -430,14 +489,18 @@ const ChatPage: React.FC = () => {
                           sx={{
                             overflow: "hidden",
                             textOverflow: "ellipsis",
-                            whiteSpace: "normal", // ⭐ allow wrapping
+                            whiteSpace: "normal",
                           }}
                         >
                           <Box component="span" fontWeight="bold">
-                            From user:
+                            {activeView === "inbox" ? "From: " : "To: "}
                           </Box>{" "}
                           <Box component="span" fontWeight="normal">
-                            {activeView === "inbox" ? message.from : message.to}
+                            {getUserFullName(
+                              activeView === "inbox"
+                                ? message.from ?? "Unknown"
+                                : message.to ?? "Unknown"
+                            )}
                           </Box>
                         </Typography>
 
@@ -467,8 +530,8 @@ const ChatPage: React.FC = () => {
                         variant="body2"
                         sx={{
                           color: theme.palette.text.secondary,
-                          wordBreak: "break-word", // ⭐ allows long words like URLs to break
-                          whiteSpace: "pre-wrap", // ⭐ respects new lines and wraps properly
+                          wordBreak: "break-word",
+                          whiteSpace: "pre-wrap",
                         }}
                       >
                         {message.content}
