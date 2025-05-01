@@ -82,7 +82,6 @@ def get_roles():
 
 
 def get_role(role_id):
-    print(f"[DEBUG] get_role called with: {role_id}")
     try:
         role = mongo.db.roles.find_one({'_id': ObjectId(role_id)})
         if not role:
