@@ -10,25 +10,19 @@ const SelectTrackPage: React.FC = () => {
   if (!activeConference?.tracks) {
     return <div>No tracks available</div>;
   }
-  console.log("activeConference", activeConference.tracks);
   return (
     <div className="radioSelectTrack">
-      {activeConference.tracks.map(
-        (track) => (
-          console.log("track", track),
-          (
-            <label key={track._id}>
-              <input
-                type="radio"
-                value={track.track_name}
-                checked={state.selectedTrack === track.track_name}
-                onChange={(e) => handleInput(e, "selectedTrack")}
-              />
-              {track.track_name}
-            </label>
-          )
-        )
-      )}
+      {activeConference.tracks.map((track) => (
+        <label key={track._id}>
+          <input
+            type="radio"
+            value={track._id}
+            checked={state.selectedTrack === track._id}
+            onChange={(e) => handleInput(e, "selectedTrack")}
+          />
+          {track.track_name}
+        </label>
+      ))}
     </div>
   );
 };

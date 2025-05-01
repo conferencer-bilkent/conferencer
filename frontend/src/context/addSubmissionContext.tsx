@@ -46,7 +46,9 @@ const SubmissionProvider: React.FC<{ children: ReactNode }> = ({
     const value = e.target.value;
 
     if (field === "selectedTrack") {
-      dispatch({ type: "SET_SELECTED_TRACK", value });
+      // Get the track ID from the select value
+      const trackId = e.target.value;
+      dispatch({ type: "SET_SELECTED_TRACK", value: trackId });
     } else if (field === "title") {
       dispatch({ type: "SET_TITLE", value });
     } else if (field === "abstract") {
@@ -69,7 +71,6 @@ const SubmissionProvider: React.FC<{ children: ReactNode }> = ({
   const addPerson = () => {
     setAuthorIndex(authorIndex + 1);
     dispatch({ type: "ADD_PERSON" });
-    console.log("Author index:", activeConference);
   };
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -81,7 +82,11 @@ const SubmissionProvider: React.FC<{ children: ReactNode }> = ({
     try {
       if (!file) {
         console.error("No file selected");
-        // Show error message to user
+        return;
+      }
+
+      if (!state.selectedTrack) {
+        console.error("No track selected");
         return;
       }
 
@@ -92,41 +97,21 @@ const SubmissionProvider: React.FC<{ children: ReactNode }> = ({
         email: person.email,
         country: person.selectedCountry,
         organization: person.organization,
-        // Note: user_id is missing but may be set by the server
       }));
 
       // Create submission data object matching PaperSubmission interface
       const submissionData: PaperSubmission = {
         title: state.title,
         abstract: state.abstract,
-        keywords: state.keywords.split(",").map((k) => k.trim()), // Convert to array format
-        track_id: state.selectedTrack, // Using the specified track_id
-        conference_id: activeConference?.id, // Added conference_id
+        keywords: state.keywords.split(",").map((k) => k.trim()),
+        track_id: state.selectedTrack, // This now contains the track ID
+        conference_id: activeConference?.id,
         authors: authors,
       };
 
-      console.log("Selected adsfasdffile:", file);
-      // Log JSON for Postman testing
-      console.log(
-        "JSON for Postman testing:",
-        JSON.stringify(
-          {
-            ...submissionData,
-            paper: "paper will be uploaded as form-data file", // Just a placeholder for readability
-          },
-          null,
-          2
-        )
-      );
-
-      // Call the submitPaper function with the mapped data
-      const response = await submitPaper(submissionData, file);
-      console.log("Submission successful:", response);
-
-      // Handle successful submission (e.g., show success message, redirect)
+      await submitPaper(submissionData, file);
     } catch (error) {
       console.error("Error submitting paper:", error);
-      // Show error message to user
     }
   };
 

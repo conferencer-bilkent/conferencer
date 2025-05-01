@@ -134,3 +134,22 @@ def download_paper(paper_id):
     except Exception as e:
         return jsonify({"error": f"Failed to download paper: {str(e)}"}), 500
 
+def get_all_papers():
+    if "user_id" not in session:
+        return jsonify({"error": "Unauthorized"}), 401
+
+    try:
+        papers = mongo.db.papers.find()
+        paper_list = []
+        
+        for paper in papers:
+            # Convert ObjectId to string for JSON serialization
+            paper["_id"] = str(paper["_id"])
+            if "created_at" in paper:
+                paper["created_at"] = paper["created_at"].isoformat()
+            paper_list.append(paper)
+
+        return jsonify({"papers": paper_list}), 200
+    except Exception as e:
+        return jsonify({"error": f"Failed to fetch papers: {str(e)}"}), 500
+
