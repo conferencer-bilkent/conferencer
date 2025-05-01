@@ -15,6 +15,8 @@ import {
   Paper,
   CircularProgress,
   Modal,
+  ClickAwayListener,
+  IconButton,
 } from "@mui/material";
 import {
   Send as SendIcon,
@@ -23,6 +25,7 @@ import {
   Send as SentIcon,
   Forum as ForumIcon,
   Search as SearchIcon,
+  Close as CloseIcon,
 } from "@mui/icons-material";
 import { useUser } from "../../../context/UserContext";
 
@@ -42,6 +45,11 @@ interface User {
   surname: string;
 }
 
+interface SelectedUser {
+  id: string;
+  email: string;
+}
+
 const ChatPage: React.FC = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
@@ -56,10 +64,12 @@ const ChatPage: React.FC = () => {
   const [inboxMessages, setInboxMessages] = useState<Message[]>([]);
   const [sentMessages, setSentMessages] = useState<Message[]>([]);
   const [composeOpen, setComposeOpen] = useState(false);
-  const [composeTo, setComposeTo] = useState("");
   const [composeSubject, setComposeSubject] = useState("");
   const [composeContent, setComposeContent] = useState("");
   const [userDetails, setUserDetails] = useState<{ [key: string]: User }>({});
+  const [users, setUsers] = useState<any[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedUsers, setSelectedUsers] = useState<SelectedUser[]>([]);
 
   const fetchMessages = async () => {
     try {
@@ -92,9 +102,9 @@ const ChatPage: React.FC = () => {
           credentials: "include",
         }).then((res) => res.json())
       );
-      const users = await Promise.all(promises); //correctly await all promises
+      const users = await Promise.all(promises);
       const userMap = users.reduce((acc, user, index) => {
-        const userId = uniqueIds[index]; // Map the user to the corresponding ID
+        const userId = uniqueIds[index];
         if (userId) {
           acc[userId] = user;
         } else {
@@ -106,6 +116,19 @@ const ChatPage: React.FC = () => {
       setUserDetails((prevDetails) => ({ ...prevDetails, ...userMap }));
     } catch (error) {
       console.error("Failed to fetch user details:", error);
+    }
+  };
+
+  const fetchUsers = async () => {
+    try {
+      const res = await fetch("http://127.0.0.1:5000/profile/users", {
+        credentials: "include",
+      });
+      if (!res.ok) throw new Error("Fetch failed");
+      const data = await res.json();
+      setUsers(data);
+    } catch (err) {
+      console.error("Error fetching users:", err);
     }
   };
 
@@ -123,6 +146,12 @@ const ChatPage: React.FC = () => {
       fetchUserDetails(userIds);
     }
   }, [inboxMessages, sentMessages]);
+
+  useEffect(() => {
+    if (composeOpen) {
+      fetchUsers();
+    }
+  }, [composeOpen]);
 
   const groupMessagesBySubject = () => {
     const allMessages = [...inboxMessages, ...sentMessages];
@@ -159,6 +188,14 @@ const ChatPage: React.FC = () => {
     backgroundColor: selected ? colors.blueAccent[700] : "transparent",
     cursor: "pointer",
   });
+
+  const filteredUsers = users.filter(
+    (u) =>
+      u._id !== user?.id &&
+      `${u.name} ${u.surname} ${u.email}`
+        .toLowerCase()
+        .includes(searchQuery.toLowerCase())
+  );
 
   if (loading) {
     return (
@@ -373,7 +410,6 @@ const ChatPage: React.FC = () => {
 
           {selectedContact && displayedMessages.length > 0 ? (
             activeView === "chats" ? (
-              // ⭐️ Keep CHAT view as BUBBLE MESSAGES
               <Box
                 sx={{
                   flexGrow: 1,
@@ -455,7 +491,6 @@ const ChatPage: React.FC = () => {
                 </List>
               </Box>
             ) : (
-              // ⭐️ New MAIL view for Inbox/Sent
               <Box
                 sx={{
                   flexGrow: 1,
@@ -566,23 +601,134 @@ const ChatPage: React.FC = () => {
             top: "50%",
             left: "50%",
             transform: "translate(-50%, -50%)",
-            width: 400,
+            width: 600,
+            maxHeight: "80vh",
             bgcolor: theme.palette.background.default,
             borderRadius: 2,
             boxShadow: 24,
             p: 4,
+            overflow: "hidden",
+            display: "flex",
+            flexDirection: "column",
           }}
         >
           <Typography variant="h6" mb={2}>
             New Message
           </Typography>
-          <TextField
-            fullWidth
-            label="To User ID"
-            value={composeTo}
-            onChange={(e) => setComposeTo(e.target.value)}
-            sx={{ mb: 2 }}
-          />
+          <ClickAwayListener
+            onClickAway={() => !selectedUsers.length && setSearchQuery("")}
+          >
+            <Box position="relative" mb={2}>
+              <TextField
+                fullWidth
+                label="Search Users"
+                value={searchQuery}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                }}
+                sx={{ mb: 2 }}
+              />
+              {selectedUsers.length > 0 && (
+                <Box
+                  sx={{
+                    mb: 2,
+                    display: "flex",
+                    flexWrap: "wrap",
+                    gap: 1,
+                  }}
+                >
+                  {selectedUsers.map((selected) => (
+                    <Box
+                      key={selected.id}
+                      sx={{
+                        backgroundColor: colors.primary[400],
+                        borderRadius: 1,
+                        padding: "4px 8px",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 1,
+                      }}
+                    >
+                      <Typography variant="body2">{selected.email}</Typography>
+                      <IconButton
+                        size="small"
+                        onClick={() =>
+                          setSelectedUsers((prev) =>
+                            prev.filter((user) => user.id !== selected.id)
+                          )
+                        }
+                        sx={{ p: 0.5 }}
+                      >
+                        <CloseIcon fontSize="small" />
+                      </IconButton>
+                    </Box>
+                  ))}
+                </Box>
+              )}
+              {searchQuery && (
+                <Paper
+                  sx={{
+                    position: "absolute",
+                    top: "100%",
+                    left: 0,
+                    right: 0,
+                    maxHeight: "200px",
+                    overflowY: "auto",
+                    zIndex: 1300,
+                    mt: 1,
+                    backgroundColor: colors.primary[400],
+                  }}
+                >
+                  <List>
+                    {filteredUsers.length > 0 ? (
+                      filteredUsers
+                        .filter(
+                          (u) =>
+                            !selectedUsers.some(
+                              (selected) => selected.id === u._id
+                            )
+                        )
+                        .map((u) => (
+                          <ListItem
+                            key={u._id}
+                            sx={{
+                              cursor: "pointer",
+                              "&:hover": {
+                                bgcolor: colors.primary[500],
+                              },
+                            }}
+                            onClick={() => {
+                              setSelectedUsers((prev) => [
+                                ...prev,
+                                { id: u._id, email: u.email },
+                              ]);
+                              setSearchQuery("");
+                            }}
+                          >
+                            <Box
+                              display="flex"
+                              flexDirection="column"
+                              width="100%"
+                            >
+                              <Typography>
+                                {u.name} {u.surname}
+                              </Typography>
+                              <Typography variant="body2" color="textSecondary">
+                                {u.email}
+                              </Typography>
+                            </Box>
+                          </ListItem>
+                        ))
+                    ) : (
+                      <ListItem>
+                        <Typography>No users found</Typography>
+                      </ListItem>
+                    )}
+                  </List>
+                </Paper>
+              )}
+            </Box>
+          </ClickAwayListener>
           <TextField
             fullWidth
             label="Subject"
@@ -604,33 +750,36 @@ const ChatPage: React.FC = () => {
             color="primary"
             startIcon={<SendIcon />}
             fullWidth
+            disabled={
+              selectedUsers.length === 0 || !composeSubject || !composeContent
+            }
             onClick={async () => {
               try {
-                const response = await fetch(
-                  "http://127.0.0.1:5000/chad/send",
-                  {
+                const sendPromises = selectedUsers.map((recipient) =>
+                  fetch("http://127.0.0.1:5000/chad/send", {
                     method: "POST",
                     headers: {
                       "Content-Type": "application/json",
                     },
                     credentials: "include",
                     body: JSON.stringify({
-                      to_user: composeTo,
+                      to_user: recipient.id,
                       subject: composeSubject,
                       content: composeContent,
                     }),
-                  }
+                  })
                 );
 
-                if (!response.ok) throw new Error("Failed to send message");
+                const results = await Promise.all(sendPromises);
+                if (results.some((res) => !res.ok)) {
+                  throw new Error("Failed to send some messages");
+                }
 
-                // Refresh messages after sending
                 await fetchMessages();
-
-                // Clear fields and close modal
-                setComposeTo("");
+                setSelectedUsers([]);
                 setComposeSubject("");
                 setComposeContent("");
+                setSearchQuery("");
                 setComposeOpen(false);
               } catch (error) {
                 console.error(error);
