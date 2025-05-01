@@ -1,9 +1,9 @@
 from flask import jsonify, request, session, Blueprint
 from models.notification import Notification
+from models.role import Role
 from bson import ObjectId
 from datetime import datetime
 from extensions import mongo
-from routes.role_routes import assign_role
 
 def get_notification():
     user_id = session.get("user_id")
@@ -79,14 +79,6 @@ def mark_notification_as_answered(notification_id, is_accepted):
             return jsonify({"error": "Notification not found or already answered"}), 404
         
 
-        # Add a role to the user accepting the invitation as PC member
-        if accepted:
-            # Use invitation's conference_id and the user's id for role assignment
-            response = assign_role({"user_id": user_id, "conference_id": conf_id, "position": "pc_member"})
-            if isinstance(response, tuple) and response[1] != 200:
-                print("Error assigning role:", response[0])
-                return response
-
         # Step 2: Get the notification again to find invitation ID
         notification = mongo.db.notifications.find_one({"_id": ObjectId(notification_id)})
         if notification.get("is_interactive", False):
@@ -115,6 +107,28 @@ def mark_notification_as_answered(notification_id, is_accepted):
                             {"_id": ObjectId(conf_id)},
                             {"$addToSet": {"pc_members": user_id}}
                         )
+                        new_role = Role(
+                            conference_id=conf_id,
+                            track_id=None,
+                            position="pc_member"
+                        )
+
+                        role_dict = {
+                            "_id": new_role.id,
+                            "id": str(new_role.id),
+                            "conference_id": str(new_role.conference_id),
+                            "track_id": str(new_role.track_id) if new_role.track_id else None,
+                            "position": new_role.position,
+                            "is_active": new_role.is_active
+                        }
+
+                        mongo.db.roles.insert_one(role_dict)
+
+                        mongo.db.users.update_one(
+                            {"_id": ObjectId(user_id)},
+                            {"$addToSet": {"roles": str(new_role.id)}}
+                        )
+
 
         return jsonify({"message": "Notification marked as answered"}), 200
 
