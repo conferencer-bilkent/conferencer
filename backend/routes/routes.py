@@ -3,7 +3,7 @@ from routes.auth_routes import login, signup, logout, check_session, login_googl
 from routes.conference_routes import create_conference, get_conferences, get_conference, invite_pc_member, appoint_superchair
 from routes.ping_routes import ping
 from routes.profile_routes import get_profile, update_profile, get_all_users
-from routes.role_routes import assign_role, get_roles
+from routes.role_routes import assign_role, get_roles, get_role
 from routes.chad_routes import send_chad, get_received_chad, get_sent_chad
 from routes.paper_routes import  get_paper, submit_paper, download_paper
 from routes.review_routes import get_review, submit_review
@@ -49,6 +49,7 @@ profile_bp.route("/users", methods=["GET"])(get_all_users)
 
 role_bp.route("/", methods=["POST"])(assign_role)
 role_bp.route("/", methods=["GET"])(get_roles)
+role_bp.route("/<user_id>", methods=["GET"])(get_role)
 
 chad_bp.route("/send", methods=["POST"])(send_chad)
 chad_bp.route("/inbox", methods=["GET"])(get_received_chad)
