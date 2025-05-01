@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useTheme } from "@mui/material/styles";
+import { useLocation } from "react-router-dom";
 import AppTitle from "../../global/AppTitle";
 import { tokens } from "../../../theme";
 import {
@@ -55,6 +56,10 @@ const ChatPage: React.FC = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const { user } = useUser();
+  const location = useLocation();
+  const initialState = location.state as {
+    selectedUser?: { id: string; email: string; openCompose: boolean };
+  };
 
   const [activeView, setActiveView] = useState<"inbox" | "sent" | "chats">(
     "inbox"
@@ -153,6 +158,20 @@ const ChatPage: React.FC = () => {
       fetchUsers();
     }
   }, [composeOpen]);
+
+  useEffect(() => {
+    if (initialState?.selectedUser?.openCompose) {
+      setSelectedUsers([
+        {
+          id: initialState.selectedUser.id,
+          email: initialState.selectedUser.email,
+        },
+      ]);
+      setComposeOpen(true);
+      // Clear the state after using it
+      window.history.replaceState({}, document.title);
+    }
+  }, [initialState]);
 
   const groupMessagesBySubject = () => {
     const allMessages = [...inboxMessages, ...sentMessages];

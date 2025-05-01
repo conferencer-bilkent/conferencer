@@ -147,8 +147,16 @@ const Topbar: React.FC = () => {
     setSearchTerm("");
   };
 
-  const handleChatClick = (id: string) => {
-    navigate(`/chat/${id}`);
+  const handleChatClick = (user: any) => {
+    navigate("/chat", {
+      state: {
+        selectedUser: {
+          id: user._id,
+          email: user.email,
+          openCompose: true,
+        },
+      },
+    });
     setShowUsers(false);
     setSearchTerm("");
   };
@@ -282,7 +290,7 @@ const Topbar: React.FC = () => {
                           <Button
                             size="small"
                             variant="outlined"
-                            onClick={() => handleChatClick(u._id)}
+                            onClick={() => handleChatClick(u)}
                           >
                             Chat
                           </Button>
