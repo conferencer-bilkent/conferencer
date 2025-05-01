@@ -82,21 +82,23 @@ def get_roles():
 
 
 def get_role(role_id):
+    print(f"[DEBUG] get_role called with: {role_id}")
     try:
         role = mongo.db.roles.find_one({'_id': ObjectId(role_id)})
-        if role:
-            role_obj = Role(
-                id=role['_id'],
-                conference_id=role.get('conference_id'),
-                track_id=role.get('track_id'),
-                position=role.get('position'),
-                is_active=role.get('is_active', True)
-            )
-            return jsonify(role_obj.to_dict()), 200
-        else:
+        if not role:
             return jsonify({'error': 'Role not found'}), 404
+
+        role_obj = Role(
+            id=role['_id'],
+            conference_id=role.get('conference_id'),
+            track_id=role.get('track_id'),
+            position=role.get('position'),
+            is_active=role.get('is_active', True)
+        )
+        return jsonify(role_obj.to_dict()), 200
+
     except Exception as e:
         return jsonify({'error': str(e)}), 500
-    
+
 
 
