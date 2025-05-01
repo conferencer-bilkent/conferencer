@@ -26,6 +26,7 @@ import {
   Forum as ForumIcon,
   Search as SearchIcon,
   Close as CloseIcon,
+  Reply as ReplyIcon,
 } from "@mui/icons-material";
 import { useUser } from "../../../context/UserContext";
 
@@ -196,6 +197,41 @@ const ChatPage: React.FC = () => {
         .toLowerCase()
         .includes(searchQuery.toLowerCase())
   );
+
+  const handleReply = async (message: Message) => {
+    const replyToId = message.from;
+
+    // Fetch users if not already loaded
+    if (users.length === 0) {
+      await fetchUsers();
+    }
+
+    const replyToUser = users.find((u) => u._id === replyToId);
+
+    if (replyToId) {
+      // If user not found in users array, fetch their details directly
+      if (!replyToUser) {
+        try {
+          const response = await fetch(
+            `http://127.0.0.1:5000/profile/${replyToId}`,
+            {
+              credentials: "include",
+            }
+          );
+          const userData = await response.json();
+          setSelectedUsers([{ id: replyToId, email: userData.email }]);
+        } catch (error) {
+          console.error("Failed to fetch user details:", error);
+          return;
+        }
+      } else {
+        setSelectedUsers([{ id: replyToId, email: replyToUser.email }]);
+      }
+
+      setComposeSubject(`${message.subject}`);
+      setComposeOpen(true);
+    }
+  };
 
   if (loading) {
     return (
@@ -456,8 +492,27 @@ const ChatPage: React.FC = () => {
                             flexDirection: "column",
                             whiteSpace: "pre-wrap",
                             wordBreak: "break-word",
+                            position: "relative",
                           }}
                         >
+                          {message.from !== user?.id && (
+                            <IconButton
+                              size="small"
+                              onClick={() => handleReply(message)}
+                              sx={{
+                                position: "absolute",
+                                right: -40,
+                                top: "50%",
+                                transform: "translateY(-50%)",
+                                backgroundColor: colors.primary[400],
+                                "&:hover": {
+                                  backgroundColor: colors.primary[300],
+                                },
+                              }}
+                            >
+                              <ReplyIcon fontSize="small" />
+                            </IconButton>
+                          )}
                           <Typography
                             variant="subtitle2"
                             sx={{
@@ -511,8 +566,24 @@ const ChatPage: React.FC = () => {
                         p: 2,
                         borderRadius: 2,
                         backgroundColor: theme.palette.background.default,
+                        position: "relative",
                       }}
                     >
+                      {activeView === "inbox" && (
+                        <IconButton
+                          size="small"
+                          onClick={() => handleReply(message)}
+                          sx={{
+                            position: "absolute",
+                            right: 16,
+                            top: 16,
+                            backgroundColor: colors.primary[400],
+                            "&:hover": { backgroundColor: colors.primary[300] },
+                          }}
+                        >
+                          <ReplyIcon fontSize="small" />
+                        </IconButton>
+                      )}
                       <Box
                         display="flex"
                         justifyContent="space-between"
