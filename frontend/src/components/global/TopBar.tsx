@@ -166,13 +166,11 @@ const Topbar: React.FC = () => {
     isAccepted: boolean
   ) => {
     try {
-      const response = await fetch(
-        `http://127.0.0.1:5000/notification/mark_answered/${id}/${isAccepted}`,
-        {
-          method: "POST",
-          credentials: "include",
-        }
-      );
+      // build the full URL
+      const response = await fetch(`http://127.0.0.1:5000/notification/mark_answered/${id}/${isAccepted}`, {
+        method: "POST",
+        credentials: "include",
+      });
       if (response.ok) {
         setNotifications((prev) =>
           prev.map((notification) =>

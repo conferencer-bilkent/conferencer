@@ -20,8 +20,9 @@ import ProfileUserRoles from "./components/ProfileUserRoles";
 import { tokens } from "../../../theme";
 import { useNavigate, useParams } from "react-router-dom";
 import { useUser } from "../../../context/UserContext";
-import { emptyRole, getUserStats, UserData } from "../../../models/user";
+import { getUserStats, UserData, Role } from "../../../models/user";
 import { getUserById } from "../../../services/userService";
+import userService from "../../../services/userService";
 
 const ProfilePage: React.FC = () => {
   const theme = useTheme();
@@ -30,6 +31,7 @@ const ProfilePage: React.FC = () => {
   const { user: currentUser, loading: contextLoading } = useUser();
   const { id } = useParams<{ id: string }>();
   const [profileUser, setProfileUser] = useState<UserData | null>(null);
+  const [userRoles, setUserRoles] = useState<Role[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isEditOpen, setIsEditOpen] = useState(false);
@@ -47,7 +49,12 @@ const ProfilePage: React.FC = () => {
     const fetchUserData = async () => {
       try {
         const userData = await getUserById(id!);
+        const roleObjs: Role[] = userData.roles
+          ? await Promise.all(userData.roles.map((rid) => userService.getRoleById(rid)))
+          : [];
+        // Store roles separately from userData
         setProfileUser(userData);
+        setUserRoles(roleObjs);
       } catch (err) {
         console.error("Error fetching user profile:", err);
         setError("Failed to load user profile");
@@ -91,6 +98,9 @@ const ProfilePage: React.FC = () => {
     console.log("Profile User:", profileUser);
     console.log("Preferred Keywords:", preferredKeywords);
   }, [profileUser]);
+
+  const activeRoles = userRoles.filter((r) => r.is_active);
+  const pastRoles = userRoles.filter((r) => !r.is_active);
 
   const handleEditOpen = () => setIsEditOpen(true);
   const handleEditClose = () => setIsEditOpen(false);
@@ -179,10 +189,6 @@ const ProfilePage: React.FC = () => {
         conferencesWorked: 0,
         submissions: 0,
       };
-
-  const userRoles = profileUser.roles;
-  const activeRoles = userRoles?.active || [emptyRole];
-  const pastRoles = userRoles?.past || [emptyRole];
 
   // Add this style for the flex container
   const flexContainerStyle: React.CSSProperties = {
@@ -286,10 +292,10 @@ const ProfilePage: React.FC = () => {
           <div style={rolesContainerStyle}>
             <ProfileUserRoles
               activeRoles={activeRoles.map((role) => ({
-                name: role?.name || "Unknown",
+                name: role.position || "Unknown",
               }))}
               pastRoles={pastRoles.map((role) => ({
-                name: role?.name || "Unknown",
+                name: role.position || "Unknown",
               }))}
             />
           </div>
