@@ -166,25 +166,24 @@ const Topbar: React.FC = () => {
     isAccepted: boolean
   ) => {
     try {
-      // build the full URL
-      const url = `http://127.0.0.1:5000/notification/mark_answered/${id}/${isAccepted}`;
-      // print it
-       console.log(url);
-      // const response = await fetch(url, {
-      //   method: "POST",
-      //   credentials: "include",
-      // });
-      // if (response.ok) {
-      //   setNotifications((prev) =>
-      //     prev.map((notification) =>
-      //       notification.id === id
-      //         ? { ...notification, is_answered: true, is_accepted: isAccepted }
-      //         : notification
-      //     )
-      //   );
-      // } else {
-      //   console.error("Failed to update notification");
-      // }
+      const response = await fetch(
+        `http://127.0.0.1:5000/notification/mark_answered/${id}/${isAccepted}`,
+        {
+          method: "POST",
+          credentials: "include",
+        }
+      );
+      if (response.ok) {
+        setNotifications((prev) =>
+          prev.map((notification) =>
+            notification.id === id
+              ? { ...notification, is_answered: true, is_accepted: isAccepted }
+              : notification
+          )
+        );
+      } else {
+        console.error("Failed to update notification");
+      }
     } catch (error) {
       console.error("Error updating notification:", error);
     }

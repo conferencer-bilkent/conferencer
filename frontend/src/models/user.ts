@@ -7,19 +7,15 @@
  * Interface for a user role, representing a position in a conference
  */
 export interface Role {
-  id: string
-  conference_id: string
-  track_id: string
-  position: string
-  is_active: boolean
+  name: string;
+  conferenceId?: string;
+  trackId?: string;
 }
 
-export const emptyRole: Role = { 
-  id: "-",
-  conference_id: "-",
-  track_id: "-",
-  position: "-",
-  is_active: false, // Default value for is_active 
+export const emptyRole: Role = {
+  name: "-",
+  conferenceId: "-",
+  trackId: "-",
 };
 
 /**
@@ -68,7 +64,7 @@ export interface UserData {
   surname?: string | null;
   email: string;
   bio: string | null;
-  roles?: string[]; // Changed to string[] to match API response
+  roles?: UserRoles;
   stats: UserStats[]; // Changed to array to match API response
   auth_provider?: string;
   google_id?: string | null;

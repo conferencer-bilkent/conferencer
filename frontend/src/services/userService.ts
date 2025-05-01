@@ -188,32 +188,12 @@ export const getAllUsers = async (): Promise<UserData[]> => {
   }
 };
 
-/**
- * Fetches a role by its ID
- * 
- * @param roleId - The ID of the role to fetch
- * @returns Promise resolving to the role data
- */
-export const getRoleById = async (roleId: string): Promise<Role> => {
-  const response = await fetch(`${API_BASE_URL}/role/${roleId}`, {
-    method: 'GET',
-    headers: { 'Content-Type': 'application/json' },
-    credentials: 'include',
-  })
-  if (!response.ok) {
-    const err = await response.json()
-    throw new Error(err.error || 'Failed to fetch role')
-  }
-  return await response.json()
-}
-
 const userService = {
   getUserById,
-  loginUser,
+ loginUser,
   signupUser,
   logoutUser,
-  checkSession,
-  getRoleById,     // ← added here
-}
+  checkSession,  // Add checkSession to the exported object
+};
 
 export default userService;

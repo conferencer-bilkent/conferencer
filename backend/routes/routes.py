@@ -49,7 +49,7 @@ profile_bp.route("/users", methods=["GET"])(get_all_users)
 
 role_bp.route("/", methods=["POST"])(assign_role)
 role_bp.route("/", methods=["GET"])(get_roles)
-role_bp.route("/<role_id>", methods=["GET"])(get_role)
+role_bp.route("/<user_id>", methods=["GET"])(get_role)
 
 chad_bp.route("/send", methods=["POST"])(send_chad)
 chad_bp.route("/inbox", methods=["GET"])(get_received_chad)
