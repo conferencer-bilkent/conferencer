@@ -139,7 +139,7 @@ const App: React.FC = () => {
                               path="/conference/createTrack"
                               element={<CreateTrack />}
                             />
-                            <Route path="/mytasks" element={<MyTasks />} />
+                            <Route path="/tasks" element={<MyTasks />} />
                             <Route
                               path="/notifications"
                               element={<NotificationsPage />}
