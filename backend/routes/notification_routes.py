@@ -92,8 +92,12 @@ def mark_notification_as_answered(notification_id, is_accepted):
 
                 if invitation and invitation.get("status") == "pending":
                     # Step 4: Save conference_id before the update
+                    print(f"Debug: Invitation found with ID {invitation}")
                     conf_id = invitation["conference_id"]
 
+                    # Add this before the update_one operation
+                    conf_doc = mongo.db.conferences.find_one({"conference_id": conf_id})
+                    
                     # Step 5: Update the invitation
                     new_status = "accepted" if accepted else "rejected"
                     mongo.db.pcmember_invitations.update_one(
@@ -103,10 +107,15 @@ def mark_notification_as_answered(notification_id, is_accepted):
 
                     # Step 6: If accepted, add to conference
                     if accepted:
-                        mongo.db.conferences.update_one(
-                            {"_id": ObjectId(conf_id)},
-                            {"$addToSet": {"pc_members": user_id}}
-                        )
+                        print(f"Debug: Adding user {user_id} to conference {conf_id}")
+                        try:
+                            update_result = mongo.db.conferences.update_one(
+                                {"conference_id": conf_id},
+                                {"$addToSet": {"pc_members": user_id}}
+                            )
+                        except Exception as e:
+                            print(f"Debug: Error updating conference: {str(e)}")
+
                         new_role = Role(
                             conference_id=conf_id,
                             track_id=None,
