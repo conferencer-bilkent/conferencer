@@ -329,16 +329,19 @@ const ConferencePage: React.FC = () => {
     });
   }, [activeTrack]);
 
+  // Determine if we have an active track
+  const hasActiveTrack = Boolean(activeTrack);
+
   return (
     <div
       className="conference-page"
       style={{ backgroundColor: colors.transparent, color: colors.grey[100] }}
     >
       <div className="conference-container">
-        <div className="content-container">
+        <div className="content-container" style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
           {/* Conference title & buttons */}
           <AppTitle text={activeConference?.name || "No Conference Selected"} />
-          <div className="buttons-row">
+          <div className="buttons-row" style={{ marginBottom: 20 }}>
             <AppButton
               icon={<FaPlusCircle />}
               text="Invite People"
@@ -365,17 +368,24 @@ const ConferencePage: React.FC = () => {
             />
           </div>
 
-          {/* NEW: Active Track name */}
+          {/* Only show track name if we have an active track, otherwise show placeholder */}
           {activeConference && (
             <AppTitle
+              
               text={activeTrack?.track_name || "No Track Selected"}
-              // you can pass additional props if needed
             />
           )}
 
-          {/* NEW: Arrows + Detail */}
+          {/* Arrows + Detail with conditional styles */}
           {activeConference && (
-            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+            <div style={{ 
+              display: 'flex', 
+              width: '100%',
+              alignItems: 'center', 
+              gap: '8px',
+              
+              opacity: hasActiveTrack ? 1 : 0.9 // Grey out the entire section
+            }}>
               <IconButton
                 onClick={handlePrevTrack}
                 disabled={!hasPrev}
@@ -386,46 +396,27 @@ const ConferencePage: React.FC = () => {
 
               <ConferenceDetail
                 description={
-                  activeConference.venue
-                    ? `Venue: ${activeConference.venue}, ${
-                        activeConference.city || ""
-                      }, ${activeConference.country || ""}`
-                    : "No venue information available"
+                  hasActiveTrack && activeConference.venue
+                    ? `Venue: ${activeConference.venue}, ${activeConference.city || ""}, ${activeConference.country || ""}`
+                    : "Select a track to view details"
                 }
                 texts={[
                   {
                     title: "Track Dates",
-                    content: `${new Date(
-                      activeConference.createdAt || Date.now()
-                    ).toLocaleDateString()} - ${new Date(
-                      activeConference.licenseExpiry || Date.now()
-                    ).toLocaleDateString()}`,
+                    content: hasActiveTrack 
+                      ? `${new Date(activeConference.createdAt || Date.now()).toLocaleDateString()} - ${new Date(activeConference.licenseExpiry || Date.now()).toLocaleDateString()}`
+                      : "-"
                   },
-                  { content: "See Full Calendar", link: "#" },
-                  { content: `Total Submissions: 0` },
-                  { content: `Assigned Reviews: 0` },
-                  { content: `Pending Reviews: 0` },
+                  { content: "See Full Calendar", link: hasActiveTrack ? "#" : undefined },
+                  { content: `Total Submissions: ${hasActiveTrack ? 0 : '-'}` },
+                  { content: `Assigned Reviews: ${hasActiveTrack ? 0 : '-'}` },
+                  { content: `Pending Reviews: ${hasActiveTrack ? 0 : '-'}` }
                 ]}
                 buttons={[
-                  {
-                    icon: <FaBookOpen size={24} />,
-                    text: "View Submissions and Paper Assignments",
-                  },
-                  {
-                    icon: <AssignmentIcon sx={{ fontSize: 26 }} />,
-                    text: "Assign Papers",
-                    onClick: () => openPopup("Select Paper(s)"),
-                  },
-                  {
-                    icon: <FaPlusCircle size={24} />,
-                    text: "Add People to Track",
-                    onClick: () => openPopup("Add People to Track"),
-                  },
-                  {
-                    icon: <FaPlusCircle size={24} />,
-                    text: "Assign Trackchair(s)",
-                    onClick: () => openPopup("Assign Trackchair(s)"),
-                  },
+                  { icon: <FaBookOpen size={24} />, text: "View Submissions and Paper Assignments", disabled: !hasActiveTrack },
+                  { icon: <AssignmentIcon sx={{ fontSize: 26 }} />, text: "Assign Papers", onClick: hasActiveTrack ? () => openPopup("Select Paper(s)") : undefined, disabled: !hasActiveTrack },
+                  { icon: <FaPlusCircle size={24} />, text: "Add People to Track", onClick: hasActiveTrack ? () => openPopup("Add People to Track") : undefined, disabled: !hasActiveTrack },
+                  { icon: <FaPlusCircle size={24} />, text: "Assign Trackchair(s)", onClick: hasActiveTrack ? () => openPopup("Assign Trackchair(s)") : undefined, disabled: !hasActiveTrack },
                 ]}
               />
 
@@ -439,12 +430,10 @@ const ConferencePage: React.FC = () => {
             </div>
           )}
 
-          {/* Superchairs */}
+          {/* Superchairs section - removed marginTop since we use gap now */}
           {(activeConference?.superchairs?.length ?? 0) > 0 && (
-            <div style={{ marginTop: 20 }}>
-              <h3 style={{ color: colors.grey[100], marginBottom: 10 }}>
-                Superchair(s)
-              </h3>
+            <div>
+              <h3 style={{ color: colors.grey[100], marginBottom: 10 }}>Superchair(s)</h3>
               <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
                 {activeConference?.superchairs?.map((id, idx) => (
                   <div
@@ -475,12 +464,10 @@ const ConferencePage: React.FC = () => {
             </div>
           )}
 
-          {/* Trackchairs */}
-          {activeTrack?.track_chairs?.length > 0 && (
-            <div style={{ marginTop: 20 }}>
-              <h3 style={{ color: colors.grey[100], marginBottom: 10 }}>
-                Trackchair(s)
-              </h3>
+          {/* Trackchairs section - removed marginTop since we use gap now */}
+          {hasActiveTrack && activeTrack.track_chairs?.length > 0 && (
+            <div>
+              <h3 style={{ color: colors.grey[100], marginBottom: 10 }}>Trackchair(s)</h3>
               <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
                 {activeTrack.track_chairs.map((id: string, idx: number) => (
                   <div
@@ -511,6 +498,7 @@ const ConferencePage: React.FC = () => {
             </div>
           )}
 
+          {/* Popup remains unchanged */}
           {popupAction && (
             <SelectPeoplePopup
               buttonText={popupAction}
