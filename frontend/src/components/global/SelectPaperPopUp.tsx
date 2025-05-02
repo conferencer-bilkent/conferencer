@@ -120,38 +120,27 @@ const SelectPaperPopup: React.FC<Props> = ({
   }, [trackId]);
 
   useEffect(() => {
-    // Only fetch track chairs when a paper is selected
+    // Only fetch track members when a paper is selected
     if (selectedPaper) {
-      const fetchTrackChairs = async () => {
+      const fetchTrackMembers = async () => {
         try {
           const response = await fetch(
-            `http://127.0.0.1:5000/track/${trackId}`,
+            `http://127.0.0.1:5000/track/${trackId}/members`,
             {
               credentials: "include",
             }
           );
           const data = await response.json();
-          console.log("Track data:", data);
-          // Get track chairs array from track data
-          const chairIds = data.track_chairs || [];
-
-          // Fetch user details for each track chair
-          const chairDetailsPromises: Promise<UserData>[] = chairIds.map(
-            (id: string) =>
-              fetch(`http://127.0.0.1:5000/profile/${id}`, {
-                credentials: "include",
-              }).then((res: Response) => res.json() as Promise<UserData>)
-          );
-
-          const chairDetails = await Promise.all(chairDetailsPromises);
-          setReviewers(chairDetails);
+          console.log("Track members data:", data);
+          // Use track_members array directly from response
+          setReviewers(data.track_members || []);
         } catch (error) {
-          console.error("Error fetching track chairs:", error);
+          console.error("Error fetching track members:", error);
           setReviewers([]);
         }
       };
 
-      fetchTrackChairs();
+      fetchTrackMembers();
       setStep("reviewers");
     }
   }, [selectedPaper, trackId]);
@@ -162,10 +151,17 @@ const SelectPaperPopup: React.FC<Props> = ({
   };
 
   const handleReviewerToggle = (reviewerId: number) => {
-    setSelectedReviewers((prev) => {
-      const id = reviewerId.toString();
-      return prev.includes(id) ? prev.filter((r) => r !== id) : [...prev, id];
-    });
+    const reviewer = reviewers[reviewerId];
+    const actualUserId =
+      typeof reviewer._id === "string" ? reviewer._id : reviewer._id?.$oid;
+
+    if (actualUserId) {
+      setSelectedReviewers((prev) => {
+        return prev.includes(actualUserId)
+          ? prev.filter((r) => r !== actualUserId)
+          : [...prev, actualUserId];
+      });
+    }
   };
 
   const handleAssignment = async () => {
@@ -247,19 +243,17 @@ const SelectPaperPopup: React.FC<Props> = ({
           />
         ) : (
           <SelectPeopleItem
-            people={(reviewers || []) // Add null check here
-              .filter((r) =>
-                `${r.name} ${r.surname}`
-                  .toLowerCase()
-                  .includes(search.toLowerCase())
+            people={reviewers.map((r, idx) => ({
+              id: idx,
+              name: `${r.name} ${r.surname}`,
+              email: r.email || "",
+              userId: typeof r._id === "string" ? r._id : r._id?.$oid || "",
+            }))}
+            selectedIds={selectedReviewers.map((id) =>
+              reviewers.findIndex(
+                (r) => (typeof r._id === "string" ? r._id : r._id?.$oid) === id
               )
-              .map((r, idx) => ({
-                id: idx,
-                name: `${r.name} ${r.surname}`,
-                email: r.email || "",
-                userId: typeof r._id === "string" ? r._id : r._id?.$oid || "",
-              }))}
-            selectedIds={selectedReviewers.map(Number)}
+            )}
             onToggle={handleReviewerToggle}
           />
         )}
