@@ -67,7 +67,6 @@ def submit_review(paper_id):
 def get_reviews_by_paper(paper_id):
     if "user_id" not in session:
         return jsonify({"error": "Unauthorized"}), 401
-    print("Fetching reviews for paper ID:", paper_id)
     try:
         reviews = mongo.db.reviews.find({"paper_id": paper_id})
         review_list = []

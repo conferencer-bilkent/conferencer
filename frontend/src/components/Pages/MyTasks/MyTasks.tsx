@@ -17,6 +17,7 @@ import {
 import AppButton from "../../../components/global/AppButton";
 import { RateReview, Edit } from "@mui/icons-material";
 import { useUser } from "../../../context/UserContext";
+import { useNavigate } from "react-router-dom";
 
 interface User {
   id: string;
@@ -49,6 +50,7 @@ interface Paper {
 const MyTasks: React.FC = () => {
   const theme = useTheme();
   const { user } = useUser();
+  const navigate = useNavigate();
   const [unreviewedPapers, setUnreviewedPapers] = useState<Paper[]>([]);
   const [reviewedPapers, setReviewedPapers] = useState<Paper[]>([]);
 
@@ -62,6 +64,10 @@ const MyTasks: React.FC = () => {
       console.error(`Error fetching paper ${paperId}:`, error);
       return null;
     }
+  };
+
+  const handleMakeReview = (paper: Paper) => {
+    navigate(`/review/${paper.id}`, { state: { paper } });
   };
 
   useEffect(() => {
@@ -150,9 +156,7 @@ const MyTasks: React.FC = () => {
                       <AppButton
                         icon={<RateReview />}
                         text="Make Review"
-                        onClick={() =>
-                          console.log(`Making review for ${paper.id}`)
-                        }
+                        onClick={() => handleMakeReview(paper)}
                       />
                     </TableCell>
                   </TableRow>
