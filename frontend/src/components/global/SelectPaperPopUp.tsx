@@ -169,6 +169,7 @@ const SelectPaperPopup: React.FC<Props> = ({
   };
 
   const handleAssignment = async () => {
+    console.log("Assigning paper:", selectedPaper, selectedReviewers);
     if (!selectedPaper || selectedReviewers.length === 0) return;
 
     try {

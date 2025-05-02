@@ -6,6 +6,7 @@ class Track:
                  track_name, 
                  conference_id,
                  track_chairs=None, 
+                 track_members=None,
                  papers=None, 
                  reviews=None, 
                  assignments=None, 
@@ -15,6 +16,7 @@ class Track:
         self.track_name = track_name
         self.conference_id = str(conference_id) if isinstance(conference_id, ObjectId) else conference_id
         self.track_chairs = track_chairs or []
+        self.track_members = track_members or []
         self.papers = papers or []
         self.reviews = reviews or []
         self.assignments = assignments or []  
@@ -26,6 +28,7 @@ class Track:
             "track_name": self.track_name,
             "conference_id": self.conference_id,
             "track_chairs": self.track_chairs,
+            "track_members": self.track_members,
             "papers": self.papers,
             "reviews": self.reviews,
             "assignments": self.assignments,

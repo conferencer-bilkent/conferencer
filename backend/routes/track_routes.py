@@ -110,6 +110,65 @@ def appoint_track_chair():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+def appoint_track_member():
+    if "user_id" not in session:
+        return jsonify({"error": "Unauthorized"}), 401
+
+    data = request.get_json()
+
+    try:
+        track_id = data.get("track_id")
+        track_member = data.get("track_member")
+
+        if not track_id or track_member is None:
+            return jsonify({"error": "Missing track_id or track_member"}), 400
+
+        # Add track member to the track_members array
+        mongo.db.tracks.update_one(
+            {"_id": ObjectId(track_id)},
+            {"$push": {"track_members": track_member}}
+        )
+
+        # send notification to the track member
+        title = "Track Member Appointment"
+        content = f"You have been appointed as a track member for track ID: {track_id}."
+        response, status_code = send_notification(
+            to_whom=track_member,
+            title=title,
+            content=content,
+            is_interactive=False
+        )
+        if status_code != 201:
+            return jsonify({"error": "Failed to send notification"}), 500
+
+        # get the conference_id from the track
+        track = mongo.db.tracks.find_one({"_id": ObjectId(track_id)})
+        if not track:
+            return jsonify({"error": "Track not found"}), 404
+        conference_id = track.get("conference_id")
+
+        # create the role
+        role = {
+            "position": "track_member",
+            "track_id": track_id,
+            "conference_id": conference_id,
+            "is_active": True
+        }
+
+        # insert the role and get its ID
+        role_result = mongo.db.roles.insert_one(role)
+        role_id = str(role_result.inserted_id)
+
+        # add the role ID to the user's roles array
+        mongo.db.users.update_one(
+            {"_id": ObjectId(track_member)},
+            {"$push": {"roles": role_id}}
+        )
+
+        return jsonify({"message": "Track member appointed successfully"}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 def get_tracks_by_conference(conference_id):
     if "user_id" not in session:
         return jsonify({"error": "Unauthorized"}), 401
@@ -264,3 +323,26 @@ def get_all_papers_in_track(track_id):
 
     except Exception as e:
         return jsonify({"error": f"Failed to retrieve papers: {str(e)}"}), 500
+
+def get_track_members(track_id):
+    if "user_id" not in session:
+        return jsonify({"error": "Unauthorized"}), 401
+
+    try:
+        track = mongo.db.tracks.find_one({"_id": ObjectId(track_id)})
+        if not track:
+            return jsonify({"error": "Track not found"}), 404
+
+        track_members = track.get("track_members", [])
+        
+        # Get full user details for each track member
+        member_details = []
+        for member_id in track_members:
+            user = mongo.db.users.find_one({"_id": ObjectId(member_id)})
+            if user:
+                user["_id"] = str(user["_id"])
+                member_details.append(user)
+
+        return jsonify({"track_members": member_details}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
