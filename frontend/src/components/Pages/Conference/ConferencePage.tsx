@@ -388,6 +388,10 @@ const ConferencePage: React.FC = () => {
   // Determine if we have an active track
   const hasActiveTrack = Boolean(activeTrack);
 
+  const handleConferenceOverviewClick = () => {
+    navigate("/conference/overview");
+  };
+
   return (
     <div
       className="conference-page"
@@ -408,6 +412,7 @@ const ConferencePage: React.FC = () => {
             <AppButton
               icon={<DashboardIcon sx={{ width: "26px", height: "26px" }} />}
               text="Conference Overview"
+              onClick={handleConferenceOverviewClick}
             />
             {isCurrentUserSuperchair && (
               <AppButton
@@ -452,8 +457,8 @@ const ConferencePage: React.FC = () => {
 
               <ConferenceDetail
                 description={
-                  hasActiveTrack && activeConference.venue
-                    ? `Venue: ${activeConference.venue}, ${activeConference.city || ""}, ${activeConference.country || ""}`
+                  hasActiveTrack && activeTrack.description
+                    ? activeTrack.description
                     : "Select a track to view details"
                 }
                 texts={[
@@ -471,9 +476,8 @@ const ConferencePage: React.FC = () => {
                 buttons={[
                   { icon: <FaBookOpen size={24} />, text: "View Submissions and Paper Assignments", disabled: !hasActiveTrack },
                   { icon: <AssignmentIcon sx={{ fontSize: 26 }} />, text: "Assign Papers", onClick: hasActiveTrack ? () => openPopup("Select Paper(s)") : undefined, disabled: !hasActiveTrack },
-                    { icon: <FaPlusCircle size={24} />, text: "Add People to Track", onClick: hasActiveTrack ? () => openPopup("Add People to Track") : undefined, disabled: !hasActiveTrack },
-                    { icon: <FaPlusCircle size={24} />, text: "Assign Trackchair(s)", onClick: hasActiveTrack ? () => openPopup("Assign Trackchair(s)") : undefined, disabled: !hasActiveTrack }
-                  
+                  { icon: <FaPlusCircle size={24} />, text: "Add People to Track", onClick: hasActiveTrack ? () => openPopup("Add People to Track") : undefined, disabled: !hasActiveTrack },
+                  { icon: <FaPlusCircle size={24} />, text: "Assign Trackchair(s)", onClick: hasActiveTrack ? () => openPopup("Assign Trackchair(s)") : undefined, disabled: !hasActiveTrack }
                 ]}
               />
 

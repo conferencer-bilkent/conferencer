@@ -22,6 +22,7 @@ import NotificationsPage from "./components/Pages/Notifications/Notifications";
 import CreateTrack from "./components/Pages/Conference/CreateTrack/CreateTrack";
 import SideMenu from "./components/global/SideMenu";
 import TopBar from "./components/global/TopBar";
+import ConferenceOverview from './components/Pages/Conference/ConferenceOverview';
 
 const App: React.FC = () => {
   const [theme, colorMode] = useMode();
@@ -138,6 +139,10 @@ const App: React.FC = () => {
                             <Route
                               path="/conference/createTrack"
                               element={<CreateTrack />}
+                            />
+                            <Route
+                              path="/conference/overview"
+                              element={<ConferenceOverview />}
                             />
                             <Route path="/tasks" element={<MyTasks />} />
                             <Route

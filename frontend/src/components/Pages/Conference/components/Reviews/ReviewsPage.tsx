@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import Topbar from "../../../../global/TopBar";
 import AppTitle from "../../../../global/AppTitle";
 import SideMenu from "../../../../global/SideMenu";
 import { getMenuItemsForPage } from "../../../../global/sideMenuConfig";
@@ -17,6 +16,8 @@ import {
   Typography,
 } from "@mui/material";
 import { tokens } from "../../../../../theme";
+// Import the useConference hook
+import { useConference } from "../../../../../context/ConferenceContext";
 
 const mockReviews = [
   {
@@ -56,6 +57,8 @@ const ReviewsPage: React.FC = () => {
   const colors = tokens(theme.palette.mode);
   const menuItems = getMenuItemsForPage("home");
   const navigate = useNavigate();
+  // Use the conference context
+  const { activeConference } = useConference();
 
   // Allow multiple expanded items using a Set
   const [expandedIds, setExpandedIds] = useState<Set<number>>(new Set());
@@ -78,6 +81,11 @@ const ReviewsPage: React.FC = () => {
     navigate(`/reviews/`);
   };
 
+  // Handler to navigate back to the conference page
+  const handleBackToTrackView = () => {
+    navigate('/conference');
+  };
+
   const getReviewColor = (completed: number, assigned: number) => {
     return completed < assigned
       ? colors.redAccent[400]
@@ -86,10 +94,7 @@ const ReviewsPage: React.FC = () => {
 
   return (
     <>
-      <Topbar />
       <Box display="flex">
-        <SideMenu items={menuItems} onItemClick={() => {}} />
-
         <Box
           flex="1"
           p={3}
@@ -97,7 +102,8 @@ const ReviewsPage: React.FC = () => {
           flexDirection="column"
           alignItems="center"
         >
-          <AppTitle text="CS FAIR 2024: Reviews" />
+          {/* Update AppTitle to use the actual activeConference name */}
+          <AppTitle text={`${activeConference?.name || "Conference"}: Reviews`} />
 
           <Box
             display="flex"
@@ -108,7 +114,11 @@ const ReviewsPage: React.FC = () => {
             my={3}
             width="800px"
           >
-            <AppButton icon={<FaFilter />} text="Switch Back to Track View" />
+            <AppButton 
+              icon={<FaFilter />} 
+              text="Switch Back to Track View" 
+              onClick={handleBackToTrackView} 
+            />
             <TextField
               placeholder="Search by Title or Author Name"
               variant="outlined"
