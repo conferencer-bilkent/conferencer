@@ -200,7 +200,6 @@ def get_track(track_id):
         # Convert any other ObjectId fields if present
         if "conference_id" in track:
             track["conference_id"] = str(track["conference_id"])
-        
         return jsonify(track), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500

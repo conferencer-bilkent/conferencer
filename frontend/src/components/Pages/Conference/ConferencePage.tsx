@@ -474,7 +474,7 @@ const ConferencePage: React.FC = () => {
                   { content: `Pending Reviews: ${hasActiveTrack ? 0 : '-'}` }
                 ]}
                 buttons={[
-                  { icon: <FaBookOpen size={24} />, text: "View Submissions and Paper Assignments", disabled: !hasActiveTrack },
+                  { icon: <FaBookOpen size={24} />, text: "View Submissions and Paper Assignments", onClick: hasActiveTrack ? () => navigate('/review', { state: { activeTrack } }) : undefined, disabled: !hasActiveTrack },
                   { icon: <AssignmentIcon sx={{ fontSize: 26 }} />, text: "Assign Papers", onClick: hasActiveTrack ? () => openPopup("Select Paper(s)") : undefined, disabled: !hasActiveTrack },
                   { icon: <FaPlusCircle size={24} />, text: "Add People to Track", onClick: hasActiveTrack ? () => openPopup("Add People to Track") : undefined, disabled: !hasActiveTrack },
                   { icon: <FaPlusCircle size={24} />, text: "Assign Trackchair(s)", onClick: hasActiveTrack ? () => openPopup("Assign Trackchair(s)") : undefined, disabled: !hasActiveTrack }

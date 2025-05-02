@@ -1,4 +1,5 @@
 import { Track, mapResponseToTrack } from "../models/track";
+import { Paper, mapResponseToPaper } from "../models/paper";
 
 // The API base URL - adjust if needed
 const API_BASE_URL = "http://127.0.0.1:5000";
@@ -82,9 +83,36 @@ export const getTrackById = async (trackId: string): Promise<Track> => {
     }
 
     const data = await response.json();
-    return mapResponseToTrack(data.track);
+    console.log("Track data:", data);
+    return mapResponseToTrack(data);
   } catch (error) {
     console.error(`Error fetching track ${trackId}:`, error);
+    throw error;
+  }
+};
+
+/**
+ * Get papers for a specific track
+ * 
+ * @param trackId - ID of the track to fetch papers for
+ * @returns Promise with array of papers
+ */
+export const getPapersForTrack = async (trackId: string): Promise<Paper[]> => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/track/${trackId}/papers`, {
+      credentials: "include",
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || "Failed to fetch papers");
+    }
+
+    const data = await response.json();
+    // Map each raw paper object from the API response to a Paper object
+    return data.papers.map((paper: any) => mapResponseToPaper(paper));
+  } catch (error) {
+    console.error(`Error fetching papers for track ${trackId}:`, error);
     throw error;
   }
 };

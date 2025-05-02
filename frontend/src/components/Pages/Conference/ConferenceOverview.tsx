@@ -131,11 +131,6 @@ const ConferenceOverview: React.FC = () => {
   const handleSwitchToTrackView = () => {
     navigate('/conference');
   };
-  
-  const handleConfigureTrack = (trackId: string) => {
-    // Navigate to track configuration page with the track ID
-    navigate(`/conference/track/edit/${trackId}`);
-  };
 
   const handleInviteMore = () => {
     // Logic to invite more participants

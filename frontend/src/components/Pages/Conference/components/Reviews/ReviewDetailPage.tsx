@@ -1,7 +1,5 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
-
-//import AppTitle from "../../../../global/AppTitle";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
 import AppButton from "../../../../global/AppButton";
 import { FaArrowLeft, FaDownload, FaUserPlus, FaPen } from "react-icons/fa";
 import {
@@ -18,7 +16,34 @@ import {
   Paper,
 } from "@mui/material";
 import { tokens } from "../../../../../theme";
-import { getMenuItemsForPage } from "../../../../global/sideMenuConfig";
+import { Track } from "../../../../../models/conference";
+import AppTitle from "../../../../global/AppTitle";
+
+// Define the interface for location state
+interface LocationState {
+  paperId: number;
+  activeTrack: Track | null;
+  reviewData?: ReviewData;
+}
+
+// Define the interface for review data
+interface ReviewData {
+  title: string;
+  completed: number;
+  pending: number;
+  decision: string;
+  reviewers: Reviewer[];
+}
+
+interface Reviewer {
+  name: string;
+  deadline: string;
+  uploaded: string;
+  decision: string;
+  confidence: number | string;
+  file: string;
+  feedback: boolean;
+}
 
 const mockReviewData = {
   title: "Impact of Virtual Reality on Cognitive Learning in Higher Education",
@@ -68,15 +93,25 @@ const mockReviewData = {
 const ReviewDetailPage: React.FC = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
-  const menuItems = getMenuItemsForPage("home");
   const navigate = useNavigate();
-  //const { id } = useParams(); // e.g., /reviews/:id
+  const location = useLocation();
+  
+  // Get the state passed from navigation
+  const state = location.state as LocationState | undefined;
+  const activeTrack = state?.activeTrack || null;
+  const reviewData = state?.reviewData || mockReviewData;
+
+  const handleBackToReviews = () => {
+    navigate("/review", { 
+      state: { 
+        activeTrack
+      } 
+    });
+  };
 
   return (
     <>
       <Box display="flex">
-        {/* Side Menu */}
-
         {/* Main Content */}
         <Box flex="1" p={3}>
           {/* Header */}
@@ -87,35 +122,22 @@ const ReviewDetailPage: React.FC = () => {
             mb={2}
           >
             <Typography color={colors.grey[100]} variant="h4" fontWeight="bold">
-              Completed Reviews: {mockReviewData.completed}, Pending:{" "}
-              {mockReviewData.pending}
+              Completed Reviews: {reviewData.completed}, Pending:{" "}
+              {reviewData.pending}
             </Typography>
-            <Button
-              variant="outlined"
-              onClick={() => navigate("/review")}
-              sx={{
-                borderRadius: "10px",
-                color: colors.grey[100],
-                borderColor: colors.grey[300],
-                "&:hover": { backgroundColor: colors.primary[500] },
-              }}
-            >
-              <FaArrowLeft style={{ marginRight: 8 }} />
-              Switch Back to Reviews
-            </Button>
+            <AppButton
+              onClick={handleBackToReviews}
+              icon={<FaArrowLeft style={{ marginRight: 8 }} />}
+              text="Switch Back to Reviews"
+              
+            />
           </Box>
 
           {/* Paper Title */}
-          <Box
-            border={`1px solid ${colors.grey[300]}`}
-            borderRadius="12px"
-            p={2}
-            mb={3}
-          >
-            <Typography color={colors.grey[100]} variant="h5" align="center">
-              {mockReviewData.title}
-            </Typography>
-          </Box>
+          <AppTitle
+            text={reviewData.title}>
+              
+            </AppTitle>
 
           {/* Actions Row */}
           <Box
@@ -142,12 +164,12 @@ const ReviewDetailPage: React.FC = () => {
               display="inline"
               px={1.5}
               py={0.5}
-              bgcolor={colors.redAccent[900]} // buraya bgcolor decision a göre getirilebilir
+              bgcolor={colors.redAccent[900]}
               borderRadius="8px"
               color={colors.grey[100]}
               ml={1}
             >
-              {mockReviewData.decision}
+              {reviewData.decision}
             </Box>
           </Typography>
 
@@ -169,7 +191,7 @@ const ReviewDetailPage: React.FC = () => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {mockReviewData.reviewers.map((r, idx) => (
+                {reviewData.reviewers.map((r, idx) => (
                   <TableRow key={idx}>
                     <TableCell>{r.name}</TableCell>
                     <TableCell>{r.deadline}</TableCell>
