@@ -48,18 +48,10 @@ export const submitPaper = async (
     fileFormData.append('track_id', submissionData.track_id || '');
     fileFormData.append('abstract', submissionData.abstract);
     
-    // Add keywords as array
-    submissionData.keywords.forEach((keyword) => {
-      fileFormData.append('keywords[]', keyword);
-    });
+    fileFormData.append('keywords', JSON.stringify(submissionData.keywords));
 
-    // Add authors as array
-    submissionData.authors.forEach((author, index) => {
-      Object.entries(author).forEach(([key, value]) => {
-        fileFormData.append(`authors[${index}][${key}]`, value || '');
-      });
-    });
-
+    // Convert authors array to JSON string and append it
+    fileFormData.append('authors', JSON.stringify(submissionData.authors));
 
     const fileUploadResponse = await fetch('http://127.0.0.1:5000/paper/submit', {
       method: 'POST',
