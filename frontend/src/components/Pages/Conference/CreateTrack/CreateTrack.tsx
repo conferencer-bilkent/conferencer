@@ -2,10 +2,10 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./CreateTrack.css";
-// import {
-//   createTrack,
-//   mapApiResponseToTrack,
-// } from "../../../../services/trackService";
+import {
+  createTrack,
+  mapApiResponseToTrack,
+} from "../../../../services/trackService";
 import { useConference } from "../../../../context/ConferenceContext";
 
 const steps = [
@@ -118,15 +118,14 @@ const CreateTrack: React.FC = () => {
         // Add conference_id to payload
         payload.conference_id = activeConference.id;
 
-        // const trackId = await createTrack(payload);
-        // const newTrack = mapApiResponseToTrack({
-        //   track_id: trackId,
-        //   ...payload,
-        //   created_at: new Date().toISOString(),
-        // });
+        const trackId = await createTrack(payload);
+        const newTrack = mapApiResponseToTrack({
+          track_id: trackId,
+          ...payload,
+          created_at: new Date().toISOString(),
+        });
+        console.log("Track created:", newTrack);
 
-        // If you have an addTrack function in your context
-        // addTrack(newTrack);
 
         alert("Track created successfully!");
         navigate(`/conference/`);

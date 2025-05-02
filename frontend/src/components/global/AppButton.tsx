@@ -6,35 +6,49 @@ type AppButtonProps = {
   icon: React.ReactNode;
   text: string;
   onClick?: () => void;
+  disabled?: boolean; // Add disabled prop
 };
 
-const AppButton: React.FC<AppButtonProps> = ({ icon, text, onClick }) => {
+const AppButton: React.FC<AppButtonProps> = ({ icon, text, onClick, disabled = false }) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
 
   const [isHovered, setIsHovered] = React.useState(false);
 
+  // Only apply hover state if not disabled
+  const handleMouseEnter = () => {
+    if (!disabled) setIsHovered(true);
+  };
+
+  const handleMouseLeave = () => {
+    if (!disabled) setIsHovered(false);
+  };
+
   return (
     <button
-      onClick={onClick}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
+      onClick={disabled ? undefined : onClick}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+      disabled={disabled}
       style={{
         display: "flex",
         alignItems: "center",
-        backgroundColor: isHovered
-          ? theme.palette.mode === "dark"
-            ? colors.grey[600]
-            : colors.grey[600]
-          : colors.primary[1000],
+        backgroundColor: disabled
+          ? colors.grey[800] // Darker gray when disabled
+          : isHovered
+            ? theme.palette.mode === "dark"
+              ? colors.grey[600]
+              : colors.grey[600]
+            : colors.primary[1000],
         width: "240px",
         height: "56px",
-        border: `2px solid ${colors.grey[100]}`,
+        border: `2px solid ${disabled ? colors.grey[700] : colors.grey[100]}`,
         borderRadius: "16px",
         padding: "8px 16px",
-        color: colors.grey[100],
-        cursor: "pointer",
-        transition: "background-color 0.2s ease",
+        color: disabled ? colors.grey[500] : colors.grey[100],
+        cursor: disabled ? "not-allowed" : "pointer",
+        transition: "all 0.2s ease",
+        opacity: disabled ? 0.7 : 1,
       }}
     >
       <div
@@ -46,6 +60,7 @@ const AppButton: React.FC<AppButtonProps> = ({ icon, text, onClick }) => {
           alignItems: "center",
           justifyContent: "center",
           marginRight: "12px",
+          opacity: disabled ? 0.7 : 1,
         }}
       >
         {React.cloneElement(icon as React.ReactElement, {

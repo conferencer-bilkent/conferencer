@@ -20,6 +20,7 @@ interface ButtonInfo {
   icon: JSX.Element;
   text: string;
   onClick?: () => void;
+  disabled?: boolean; // Added disabled property
 }
 
 interface ConferenceDetailProps {
@@ -73,20 +74,33 @@ const ConferenceDetail: React.FC<ConferenceDetailProps> = ({
           <div
             key={index}
             className="button"
-            onClick={button.onClick}
+            onClick={button.disabled ? undefined : button.onClick}
             style={{
-              cursor: button.onClick ? "pointer" : "default",
+              cursor: button.disabled
+                ? "not-allowed"
+                : button.onClick
+                ? "pointer"
+                : "default",
               borderRight:
                 index !== buttons.length - 1
                   ? `1px solid ${colors.grey[100]}`
                   : "none",
               backgroundColor: colors.primary[1000],
-
-              color: colors.grey[100],
+              color: button.disabled ? colors.grey[400] : colors.grey[400],
+              opacity: button.disabled ? 0.8 : 1,
             }}
           >
-            {button.icon}
-            <p style={{ color: colors.grey[100] }}>{button.text}</p>
+            <div style={{ opacity: button.disabled ? 0.8 : 1 }}>
+              {button.icon}
+            </div>
+            <p
+              style={{
+                color: button.disabled ? colors.grey[400] : colors.grey[100],
+                opacity: button.disabled ? 0.8 : 1,
+              }}
+            >
+              {button.text}
+            </p>
           </div>
         ))}
       </div>
