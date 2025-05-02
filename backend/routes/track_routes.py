@@ -128,19 +128,21 @@ def get_tracks_by_conference(conference_id):
         return jsonify({"error": str(e)}), 500
 
 def get_track(track_id):
-    print("get_track")
     if "user_id" not in session:
         return jsonify({"error": "Unauthorized"}), 401
 
     try:
-        print(track_id)
         track = mongo.db.tracks.find_one({"_id": ObjectId(track_id)})
-
         if not track:
             return jsonify({"error": "Track not found"}), 404
 
-        track_obj = Track(**track)
-        return jsonify({"track": track_obj.to_dict()}), 200
+        # Convert ObjectId to string for JSON serialization
+        track["_id"] = str(track["_id"])
+        # Convert any other ObjectId fields if present
+        if "conference_id" in track:
+            track["conference_id"] = str(track["conference_id"])
+        
+        return jsonify(track), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 

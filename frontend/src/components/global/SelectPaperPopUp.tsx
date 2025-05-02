@@ -1,25 +1,14 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { FaSearch } from "react-icons/fa";
 import SelectPaperItem, { Paper } from "./SelectPaperItem";
+import SelectPeopleItem from "./SelectPeopleItem";
+import { UserData } from "../../models/user";
 
 interface Props {
-  buttonText: string; // e.g. “Select Paper(s)”
+  buttonText: string;
+  trackId: string;
   onClose: () => void;
 }
-
-// Demo data; replace with real fetch if needed
-const EXAMPLE_PAPERS: Paper[] = [
-  {
-    id: 1,
-    title: "Impact of Virtual Reality on Cognitive Learning",
-    authors: "Jane Doe, Memduh Tutus",
-  },
-  {
-    id: 2,
-    title: "AI-Powered Learning Tools: A Future Perspective",
-    authors: "Alice Johnson, Bob Smith",
-  },
-];
 
 const styles = {
   overlay: {
@@ -76,20 +65,131 @@ const styles = {
     width: "100%",
     cursor: "pointer",
   } as React.CSSProperties,
+  stepIndicator: {
+    display: "flex",
+    justifyContent: "space-between",
+    marginBottom: "1rem",
+  },
+  step: {
+    padding: "0.5rem",
+    color: "#fff",
+    opacity: 0.5,
+  },
+  activeStep: {
+    opacity: 1,
+    borderBottom: "2px solid #00aaff",
+  },
 };
 
-const SelectPaperPopup: React.FC<Props> = ({ buttonText, onClose }) => {
+const SelectPaperPopup: React.FC<Props> = ({
+  buttonText,
+  trackId,
+  onClose,
+}) => {
+  const [step, setStep] = useState<"papers" | "reviewers">("papers");
   const [search, setSearch] = useState("");
-  const [selected, setSelected] = useState<number[]>([]);
+  const [papers, setPapers] = useState<Paper[]>([]);
+  const [selectedPaper, setSelectedPaper] = useState<Paper | null>(null);
+  const [reviewers, setReviewers] = useState<UserData[]>([]);
+  const [selectedReviewers, setSelectedReviewers] = useState<string[]>([]);
 
-  const toggle = (id: number) =>
-    setSelected((s) =>
-      s.includes(id) ? s.filter((x) => x !== id) : [...s, id]
-    );
+  useEffect(() => {
+    // Fetch papers for this track
+    const fetchPapers = async () => {
+      try {
+        const response = await fetch(
+          `http://127.0.0.1:5000/track/${trackId}/papers`,
+          {
+            credentials: "include",
+          }
+        );
+        const data = await response.json();
+        setPapers(
+          data.papers.map((p: any) => ({
+            id: p._id,
+            title: p.title,
+            authors: p.authors.join(", "),
+          }))
+        );
+      } catch (error) {
+        console.error("Error fetching papers:", error);
+      }
+    };
 
-  const filtered = EXAMPLE_PAPERS.filter((p) =>
-    p.title.toLowerCase().includes(search.toLowerCase())
-  );
+    fetchPapers();
+  }, [trackId]);
+
+  useEffect(() => {
+    // Only fetch track chairs when a paper is selected
+    if (selectedPaper) {
+      const fetchTrackChairs = async () => {
+        try {
+          const response = await fetch(
+            `http://127.0.0.1:5000/track/${trackId}`,
+            {
+              credentials: "include",
+            }
+          );
+          const data = await response.json();
+          console.log("Track data:", data);
+          // Get track chairs array from track data
+          const chairIds = data.track_chairs || [];
+
+          // Fetch user details for each track chair
+          const chairDetailsPromises: Promise<UserData>[] = chairIds.map(
+            (id: string) =>
+              fetch(`http://127.0.0.1:5000/profile/${id}`, {
+                credentials: "include",
+              }).then((res: Response) => res.json() as Promise<UserData>)
+          );
+
+          const chairDetails = await Promise.all(chairDetailsPromises);
+          setReviewers(chairDetails);
+        } catch (error) {
+          console.error("Error fetching track chairs:", error);
+          setReviewers([]);
+        }
+      };
+
+      fetchTrackChairs();
+      setStep("reviewers");
+    }
+  }, [selectedPaper, trackId]);
+
+  const handlePaperSelection = (paperId: number) => {
+    const paper = papers.find((p) => p.id === paperId);
+    setSelectedPaper(paper || null);
+  };
+
+  const handleReviewerToggle = (reviewerId: number) => {
+    setSelectedReviewers((prev) => {
+      const id = reviewerId.toString();
+      return prev.includes(id) ? prev.filter((r) => r !== id) : [...prev, id];
+    });
+  };
+
+  const handleAssignment = async () => {
+    if (!selectedPaper || selectedReviewers.length === 0) return;
+
+    try {
+      for (const reviewerId of selectedReviewers) {
+        await fetch(`http://127.0.0.1:5000/track/${trackId}/assign`, {
+          method: "POST",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            paper_id: selectedPaper.id,
+            reviewer_id: reviewerId,
+          }),
+        });
+      }
+      onClose();
+    } catch (error) {
+      console.error("Error assigning paper:", error);
+    }
+  };
 
   return (
     <div style={styles.overlay} onClick={onClose}>
@@ -97,11 +197,33 @@ const SelectPaperPopup: React.FC<Props> = ({ buttonText, onClose }) => {
         <button style={styles.close} onClick={onClose}>
           ✕
         </button>
+
+        <div style={styles.stepIndicator}>
+          <div
+            style={{
+              ...styles.step,
+              ...(step === "papers" ? styles.activeStep : {}),
+            }}
+          >
+            Select Paper
+          </div>
+          <div
+            style={{
+              ...styles.step,
+              ...(step === "reviewers" ? styles.activeStep : {}),
+            }}
+          >
+            Select Reviewers
+          </div>
+        </div>
+
         <div style={styles.search}>
           <FaSearch style={{ marginRight: 8 }} />
           <input
             type="text"
-            placeholder="Search papers..."
+            placeholder={`Search ${
+              step === "papers" ? "papers" : "reviewers"
+            }...`}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             style={{
@@ -113,13 +235,42 @@ const SelectPaperPopup: React.FC<Props> = ({ buttonText, onClose }) => {
             }}
           />
         </div>
-        <SelectPaperItem
-          papers={filtered}
-          selectedIds={selected}
-          onToggle={toggle}
-        />
-        <button style={styles.action} onClick={onClose}>
-          {buttonText}
+
+        {step === "papers" ? (
+          <SelectPaperItem
+            papers={papers.filter((p) =>
+              p.title.toLowerCase().includes(search.toLowerCase())
+            )}
+            selectedIds={selectedPaper ? [selectedPaper.id] : []}
+            onToggle={handlePaperSelection}
+          />
+        ) : (
+          <SelectPeopleItem
+            people={(reviewers || []) // Add null check here
+              .filter((r) =>
+                `${r.name} ${r.surname}`
+                  .toLowerCase()
+                  .includes(search.toLowerCase())
+              )
+              .map((r, idx) => ({
+                id: idx,
+                name: `${r.name} ${r.surname}`,
+                email: r.email || "",
+                userId: typeof r._id === "string" ? r._id : r._id?.$oid || "",
+              }))}
+            selectedIds={selectedReviewers.map(Number)}
+            onToggle={handleReviewerToggle}
+          />
+        )}
+
+        <button
+          style={styles.action}
+          onClick={step === "papers" ? () => {} : handleAssignment}
+          disabled={
+            step === "papers" ? !selectedPaper : selectedReviewers.length === 0
+          }
+        >
+          {step === "papers" ? "Select Paper" : buttonText}
         </button>
       </div>
     </div>

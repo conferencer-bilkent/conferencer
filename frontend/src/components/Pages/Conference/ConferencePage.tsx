@@ -9,6 +9,7 @@ import { tokens } from "../../../theme";
 import ConferenceDetail from "./components/ConferenceDetail";
 import AppTitle from "../../global/AppTitle";
 import SelectPeoplePopup from "../../global/SelectPeoplePopUp";
+import SelectPaperPopup from "../../global/SelectPaperPopUp";
 import "./ConferencePage.css";
 import { useConference } from "../../../context/ConferenceContext";
 import {
@@ -19,16 +20,16 @@ import {
 import { getUserById, getAllUsers } from "../../../services/userService";
 
 import { UserData } from "../../../models/user";
-import IconButton from '@mui/material/IconButton';
-import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
-import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import IconButton from "@mui/material/IconButton";
+import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
+import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 
 const ConferencePage: React.FC = () => {
   const { activeConference, setActiveConference } = useConference();
   const navigate = useNavigate();
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
-  
+
   // Track which popup button (if any) is clicked
   const [popupAction, setPopupAction] = useState<string | null>(null);
 
@@ -41,16 +42,20 @@ const ConferencePage: React.FC = () => {
   useEffect(() => {
     if (!activeTrack && tracks.length > 0) {
       setActiveTrack(tracks[0]);
-      console.log(`Initial active track set: ${tracks[0].track_name} (ID: ${tracks[0]._id})`);
+      console.log(
+        `Initial active track set: ${tracks[0].track_name} (ID: ${tracks[0]._id})`
+      );
     }
   }, [tracks, activeTrack]);
 
   // compare on _id, not id
-  const currentIndex = tracks.findIndex(t => t._id === activeTrack?._id);
+  const currentIndex = tracks.findIndex((t) => t._id === activeTrack?._id);
   const hasPrev = currentIndex > 0;
   const hasNext = currentIndex >= 0 && currentIndex < tracks.length - 1;
-  const handlePrevTrack = () => hasPrev && setActiveTrack(tracks[currentIndex - 1]);
-  const handleNextTrack = () => hasNext && setActiveTrack(tracks[currentIndex + 1]);
+  const handlePrevTrack = () =>
+    hasPrev && setActiveTrack(tracks[currentIndex - 1]);
+  const handleNextTrack = () =>
+    hasNext && setActiveTrack(tracks[currentIndex + 1]);
 
   useEffect(() => {
     // First, try to get the activeConference if not already set
@@ -60,7 +65,7 @@ const ConferencePage: React.FC = () => {
         try {
           const parsedConference = JSON.parse(stored);
           setActiveConference(parsedConference);
-          
+
           // Also set active track immediately
           if (parsedConference?.tracks?.length > 0) {
             setActiveTrack(parsedConference.tracks[0]);
@@ -184,18 +189,20 @@ const ConferencePage: React.FC = () => {
         if (activeConference && activeTrack) {
           // send each selected userId to the backend endpoint
           const assignPromises = selectedUserIds.map((userId) =>
-            fetch('http://127.0.0.1:5000/track/appoint_track_chairs', {
-              method: 'POST',
-              credentials: 'include',
-              headers: { 'Content-Type': 'application/json' },
+            fetch("http://127.0.0.1:5000/track/appoint_track_chairs", {
+              method: "POST",
+              credentials: "include",
+              headers: { "Content-Type": "application/json" },
               body: JSON.stringify({
-                track_id: activeTrack._id,      // the track you're assigning chairs to
-                track_chair: userId             // the user being made a chair
+                track_id: activeTrack._id, // the track you're assigning chairs to
+                track_chair: userId, // the user being made a chair
               }),
             }).then((res) => {
               if (!res.ok) {
-                return res.json().then(err => {
-                  throw new Error(err.error || `Failed to assign trackchair ${userId}`);
+                return res.json().then((err) => {
+                  throw new Error(
+                    err.error || `Failed to assign trackchair ${userId}`
+                  );
                 });
               }
               return res.json();
@@ -212,7 +219,9 @@ const ConferencePage: React.FC = () => {
               console.error("Error assigning trackchairs:", error);
             });
 
-          console.log(`Assigning users as trackchairs to track ${activeTrack._id}`);
+          console.log(
+            `Assigning users as trackchairs to track ${activeTrack._id}`
+          );
         }
         break;
 
@@ -267,7 +276,7 @@ const ConferencePage: React.FC = () => {
         return nonSupers;
 
       case "Add People to Track":
-        //
+      //
 
       case "Assign Trackchair(s)":
         console.log(
@@ -290,8 +299,12 @@ const ConferencePage: React.FC = () => {
   };
 
   // State for fetched track‑chair user data
-  const [trackChairUsers, setTrackChairUsers] = useState<Record<string, UserData>>({});
-  const [loadingTrackChairs, setLoadingTrackChairs] = useState<Record<string, boolean>>({});
+  const [trackChairUsers, setTrackChairUsers] = useState<
+    Record<string, UserData>
+  >({});
+  const [loadingTrackChairs, setLoadingTrackChairs] = useState<
+    Record<string, boolean>
+  >({});
 
   // Whenever activeTrack changes, fetch its chairs’ user data
   useEffect(() => {
@@ -302,22 +315,25 @@ const ConferencePage: React.FC = () => {
     setLoadingTrackChairs({});
 
     activeTrack.track_chairs.forEach((chairId: string) => {
-      setLoadingTrackChairs(prev => ({ ...prev, [chairId]: true }));
+      setLoadingTrackChairs((prev) => ({ ...prev, [chairId]: true }));
       getUserById(chairId)
-        .then(userData => {
-          setTrackChairUsers(prev => ({ ...prev, [chairId]: userData }));
+        .then((userData) => {
+          setTrackChairUsers((prev) => ({ ...prev, [chairId]: userData }));
         })
-        .catch(err => {
+        .catch((err) => {
           console.error(`Error fetching trackchair ${chairId}:`, err);
         })
         .finally(() => {
-          setLoadingTrackChairs(prev => ({ ...prev, [chairId]: false }));
+          setLoadingTrackChairs((prev) => ({ ...prev, [chairId]: false }));
         });
     });
   }, [activeTrack]);
 
   return (
-    <div className="conference-page" style={{ backgroundColor: colors.transparent, color: colors.grey[100] }}>
+    <div
+      className="conference-page"
+      style={{ backgroundColor: colors.transparent, color: colors.grey[100] }}
+    >
       <div className="conference-container">
         <div className="content-container">
           {/* Conference title & buttons */}
@@ -359,45 +375,66 @@ const ConferencePage: React.FC = () => {
 
           {/* NEW: Arrows + Detail */}
           {activeConference && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
               <IconButton
                 onClick={handlePrevTrack}
                 disabled={!hasPrev}
-                sx={{ color: hasPrev ? colors.grey[100] : 'transparent' }}
+                sx={{ color: hasPrev ? colors.grey[100] : "transparent" }}
               >
-                <ChevronLeftIcon sx={{ color: 'inherit' }} />
+                <ChevronLeftIcon sx={{ color: "inherit" }} />
               </IconButton>
 
               <ConferenceDetail
                 description={
                   activeConference.venue
-                    ? `Venue: ${activeConference.venue}, ${activeConference.city || ""}, ${activeConference.country || ""}`
+                    ? `Venue: ${activeConference.venue}, ${
+                        activeConference.city || ""
+                      }, ${activeConference.country || ""}`
                     : "No venue information available"
                 }
                 texts={[
                   {
                     title: "Track Dates",
-                    content: `${new Date(activeConference.createdAt || Date.now()).toLocaleDateString()} - ${new Date(activeConference.licenseExpiry || Date.now()).toLocaleDateString()}`
+                    content: `${new Date(
+                      activeConference.createdAt || Date.now()
+                    ).toLocaleDateString()} - ${new Date(
+                      activeConference.licenseExpiry || Date.now()
+                    ).toLocaleDateString()}`,
                   },
                   { content: "See Full Calendar", link: "#" },
                   { content: `Total Submissions: 0` },
                   { content: `Assigned Reviews: 0` },
-                  { content: `Pending Reviews: 0` }
+                  { content: `Pending Reviews: 0` },
                 ]}
                 buttons={[
-                  { icon: <FaBookOpen size={24} />, text: "View Submissions and Paper Assignments" },
-                  { icon: <AssignmentIcon sx={{ fontSize: 26 }} />, text: "Assign Papers", onClick: () => openPopup("Select Paper(s)") },
-                  { icon: <FaPlusCircle size={24} />, text: "Add People to Track", onClick: () => openPopup("Add People to Track") },
-                  { icon: <FaPlusCircle size={24} />, text: "Assign Trackchair(s)", onClick: () => openPopup("Assign Trackchair(s)") },
+                  {
+                    icon: <FaBookOpen size={24} />,
+                    text: "View Submissions and Paper Assignments",
+                  },
+                  {
+                    icon: <AssignmentIcon sx={{ fontSize: 26 }} />,
+                    text: "Assign Papers",
+                    onClick: () => openPopup("Select Paper(s)"),
+                  },
+                  {
+                    icon: <FaPlusCircle size={24} />,
+                    text: "Add People to Track",
+                    onClick: () => openPopup("Add People to Track"),
+                  },
+                  {
+                    icon: <FaPlusCircle size={24} />,
+                    text: "Assign Trackchair(s)",
+                    onClick: () => openPopup("Assign Trackchair(s)"),
+                  },
                 ]}
               />
 
               <IconButton
                 onClick={handleNextTrack}
                 disabled={!hasNext}
-                sx={{ color: hasNext ? colors.grey[100] : 'transparent' }}
+                sx={{ color: hasNext ? colors.grey[100] : "transparent" }}
               >
-                <ChevronRightIcon sx={{ color: 'inherit' }} />
+                <ChevronRightIcon sx={{ color: "inherit" }} />
               </IconButton>
             </div>
           )}
@@ -405,7 +442,9 @@ const ConferencePage: React.FC = () => {
           {/* Superchairs */}
           {(activeConference?.superchairs?.length ?? 0) > 0 && (
             <div style={{ marginTop: 20 }}>
-              <h3 style={{ color: colors.grey[100], marginBottom: 10 }}>Superchair(s)</h3>
+              <h3 style={{ color: colors.grey[100], marginBottom: 10 }}>
+                Superchair(s)
+              </h3>
               <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
                 {activeConference?.superchairs?.map((id, idx) => (
                   <div
@@ -426,7 +465,9 @@ const ConferencePage: React.FC = () => {
                     {loadingUsers[id]
                       ? "Loading…"
                       : superchairUsers[id]
-                      ? `${superchairUsers[id].name} ${superchairUsers[id].surname || ""}`
+                      ? `${superchairUsers[id].name} ${
+                          superchairUsers[id].surname || ""
+                        }`
                       : id}
                   </div>
                 ))}
@@ -437,7 +478,9 @@ const ConferencePage: React.FC = () => {
           {/* Trackchairs */}
           {activeTrack?.track_chairs?.length > 0 && (
             <div style={{ marginTop: 20 }}>
-              <h3 style={{ color: colors.grey[100], marginBottom: 10 }}>Trackchair(s)</h3>
+              <h3 style={{ color: colors.grey[100], marginBottom: 10 }}>
+                Trackchair(s)
+              </h3>
               <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
                 {activeTrack.track_chairs.map((id: string, idx: number) => (
                   <div
@@ -458,7 +501,9 @@ const ConferencePage: React.FC = () => {
                     {loadingTrackChairs[id]
                       ? "Loading…"
                       : trackChairUsers[id]
-                      ? `${trackChairUsers[id].name} ${trackChairUsers[id].surname || ""}`
+                      ? `${trackChairUsers[id].name} ${
+                          trackChairUsers[id].surname || ""
+                        }`
                       : id}
                   </div>
                 ))}
@@ -474,6 +519,14 @@ const ConferencePage: React.FC = () => {
               onSelect={(selectedUserIds) =>
                 handleSelectedUsers(selectedUserIds, popupAction)
               }
+            />
+          )}
+
+          {popupAction === "Select Paper(s)" && (
+            <SelectPaperPopup
+              buttonText="Assign Papers"
+              trackId={activeTrack._id}
+              onClose={closePopup}
             />
           )}
         </div>
