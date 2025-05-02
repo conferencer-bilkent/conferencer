@@ -1,7 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import Topbar from "../../../../global/TopBar";
-import SideMenu from "../../../../global/SideMenu";
+
 //import AppTitle from "../../../../global/AppTitle";
 import AppButton from "../../../../global/AppButton";
 import { FaArrowLeft, FaDownload, FaUserPlus, FaPen } from "react-icons/fa";
@@ -75,10 +74,8 @@ const ReviewDetailPage: React.FC = () => {
 
   return (
     <>
-      <Topbar />
       <Box display="flex">
         {/* Side Menu */}
-        <SideMenu items={menuItems} onItemClick={() => {}} />
 
         {/* Main Content */}
         <Box flex="1" p={3}>

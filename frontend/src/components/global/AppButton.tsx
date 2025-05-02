@@ -3,10 +3,10 @@ import { useTheme } from "@mui/material";
 import { tokens } from "../../theme";
 
 type AppButtonProps = {
-  icon: React.ReactNode;
+  icon?: React.ReactNode; // Made icon optional
   text: string;
   onClick?: () => void;
-  disabled?: boolean; // Add disabled prop
+  disabled?: boolean;
 };
 
 const AppButton: React.FC<AppButtonProps> = ({ icon, text, onClick, disabled = false }) => {
@@ -51,26 +51,28 @@ const AppButton: React.FC<AppButtonProps> = ({ icon, text, onClick, disabled = f
         opacity: disabled ? 0.5 : 1,
       }}
     >
-      <div
-        style={{
-          fontSize: "24px",
-          width: "24px",
-          height: "24px",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          marginRight: "12px",
-          opacity: disabled ? 0.5 : 1,
-        }}
-      >
-        {React.cloneElement(icon as React.ReactElement, {
-          style: {
+      {icon && (
+        <div
+          style={{
+            fontSize: "24px",
             width: "24px",
             height: "24px",
-            ...((icon as React.ReactElement)?.props?.style || {}),
-          },
-        })}
-      </div>
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            marginRight: "12px",
+            opacity: disabled ? 0.5 : 1,
+          }}
+        >
+          {React.cloneElement(icon as React.ReactElement, {
+            style: {
+              width: "24px",
+              height: "24px",
+              ...((icon as React.ReactElement)?.props?.style || {}),
+            },
+          })}
+        </div>
+      )}
       <span
         style={{
           fontSize: "14px",
