@@ -209,6 +209,7 @@ const ProfilePage: React.FC = () => {
   const statsContainerStyle: React.CSSProperties = {
     flex: "1",
     border: `1px solid ${colors.grey[100]}`,
+
     borderRadius: "12px",
     padding: "15px",
     height: "fit-content", // Adapt to content size
@@ -218,6 +219,7 @@ const ProfilePage: React.FC = () => {
   const statsTableStyle: React.CSSProperties = {
     borderCollapse: "collapse",
     width: "100%",
+    
     marginTop: "10px",
   };
 
@@ -229,6 +231,7 @@ const ProfilePage: React.FC = () => {
     borderRight: `1px solid ${colors.grey[100]}`,
     borderTop: `1px solid ${colors.grey[100]}`,
     borderLeft: `1px solid ${colors.grey[100]}`,
+    backgroundColor: colors.primary[400],
   };
 
   // Add a style for the last column cells without right border
@@ -240,6 +243,7 @@ const ProfilePage: React.FC = () => {
     borderRight: `1px solid ${colors.grey[100]}`,
     borderTop: `1px solid ${colors.grey[100]}`,
     borderLeft: `1px solid ${colors.grey[100]}`,
+    backgroundColor: colors.primary[400],
   };
 
   const statsTitleStyle: React.CSSProperties = {
@@ -255,6 +259,7 @@ const ProfilePage: React.FC = () => {
     border: `1px solid ${colors.grey[100]}`,
     borderRadius: "12px",
     padding: "15px",
+    backgroundColor: colors.primary[500],
   };
 
   const keywordsTitleStyle: React.CSSProperties = {
@@ -262,6 +267,8 @@ const ProfilePage: React.FC = () => {
     marginBottom: "10px",
     color: colors.grey[100],
     fontFamily: theme.typography.fontFamily,
+    backgroundColor: colors.primary[500],
+
   };
 
   return (
@@ -346,6 +353,8 @@ const ProfilePage: React.FC = () => {
                 <TableCell
                   style={{
                     color: colors.grey[100],
+                    backgroundColor: colors.primary[400],
+
                     borderBottom: `1px solid ${colors.grey[100]}`,
                   }}
                 >
@@ -354,6 +363,8 @@ const ProfilePage: React.FC = () => {
                 <TableCell
                   style={{
                     color: colors.grey[100],
+                       backgroundColor: colors.primary[400],
+
                     borderBottom: `1px solid ${colors.grey[100]}`,
                   }}
                 >

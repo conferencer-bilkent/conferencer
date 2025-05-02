@@ -34,7 +34,7 @@ const AppButton: React.FC<AppButtonProps> = ({ icon, text, onClick, disabled = f
         display: "flex",
         alignItems: "center",
         backgroundColor: disabled
-          ? colors.grey[800] // Darker gray when disabled
+          ? colors.grey[900] // Darker gray when disabled
           : isHovered
             ? theme.palette.mode === "dark"
               ? colors.grey[600]
@@ -42,13 +42,13 @@ const AppButton: React.FC<AppButtonProps> = ({ icon, text, onClick, disabled = f
             : colors.primary[1000],
         width: "240px",
         height: "56px",
-        border: `2px solid ${disabled ? colors.grey[700] : colors.grey[100]}`,
+        border: `2px solid ${colors.grey[100]}`,
         borderRadius: "16px",
         padding: "8px 16px",
-        color: disabled ? colors.grey[500] : colors.grey[100],
+        color: colors.grey[100],
         cursor: disabled ? "not-allowed" : "pointer",
         transition: "all 0.2s ease",
-        opacity: disabled ? 0.7 : 1,
+        opacity: disabled ? 0.5 : 1,
       }}
     >
       <div
@@ -60,7 +60,7 @@ const AppButton: React.FC<AppButtonProps> = ({ icon, text, onClick, disabled = f
           alignItems: "center",
           justifyContent: "center",
           marginRight: "12px",
-          opacity: disabled ? 0.7 : 1,
+          opacity: disabled ? 0.5 : 1,
         }}
       >
         {React.cloneElement(icon as React.ReactElement, {

@@ -24,6 +24,8 @@ import { UserData } from "../../../models/user";
 import IconButton from "@mui/material/IconButton";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
+// Import useUser instead of useAuth
+import { useUser } from "../../../context/UserContext";
 
 const ConferencePage: React.FC = () => {
   const { activeConference, setActiveConference } = useConference();
@@ -31,6 +33,8 @@ const ConferencePage: React.FC = () => {
   const navigate = useNavigate();
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
+  // Replace useAuth with useUser
+  const { user } = useUser();
 
   // Track which popup button (if any) is clicked
   const [popupAction, setPopupAction] = useState<string | null>(null);
@@ -375,6 +379,12 @@ const ConferencePage: React.FC = () => {
     });
   }, [activeTrack]);
 
+  // Check if current user is a superchair
+  const isCurrentUserSuperchair = React.useMemo(() => {
+    if (!user || !activeConference?.superchairs) return false;
+    return activeConference.superchairs.includes(user.id);
+  }, [user, activeConference]);
+
   // Determine if we have an active track
   const hasActiveTrack = Boolean(activeTrack);
 
@@ -388,30 +398,31 @@ const ConferencePage: React.FC = () => {
           {/* Conference title & buttons */}
           <AppTitle text={activeConference?.name || "No Conference Selected"} />
           <div className="buttons-row" style={{ marginBottom: 20 }}>
-            <AppButton
-              icon={<FaPlusCircle />}
-              text="Invite People"
-              onClick={() => openPopup("Invite People")}
-            />
+            {isCurrentUserSuperchair && (
+              <AppButton
+                icon={<FaPlusCircle />}
+                text="Invite People"
+                onClick={() => openPopup("Invite People")}
+              />
+            )}
             <AppButton
               icon={<DashboardIcon sx={{ width: "26px", height: "26px" }} />}
               text="Conference Overview"
             />
-            <AppButton
-              icon={<FaPlusCircle />}
-              text="Assign Superchair(s)"
-              onClick={() => openPopup("Assign Superchair(s)")}
-            />
-            <AppButton
-              icon={<FaPlusCircle />}
-              text="Add Track"
-              onClick={() => navigate("/conference/createTrack")}
-            />
-            <AppButton
-              icon={<AssignmentIcon sx={{ fontSize: 26 }} />}
-              text="Add Submission"
-              onClick={() => navigate("/addSubmission")}
-            />
+            {isCurrentUserSuperchair && (
+              <AppButton
+                icon={<FaPlusCircle />}
+                text="Assign Superchair(s)"
+                onClick={() => openPopup("Assign Superchair(s)")}
+              />
+            )}
+            {isCurrentUserSuperchair && (
+              <AppButton
+                icon={<FaPlusCircle />}
+                text="Add Track"
+                onClick={() => navigate("/conference/createTrack")}
+              />
+            )}
           </div>
 
           {/* Only show track name if we have an active track, otherwise show placeholder */}
@@ -460,8 +471,9 @@ const ConferencePage: React.FC = () => {
                 buttons={[
                   { icon: <FaBookOpen size={24} />, text: "View Submissions and Paper Assignments", disabled: !hasActiveTrack },
                   { icon: <AssignmentIcon sx={{ fontSize: 26 }} />, text: "Assign Papers", onClick: hasActiveTrack ? () => openPopup("Select Paper(s)") : undefined, disabled: !hasActiveTrack },
-                  { icon: <FaPlusCircle size={24} />, text: "Add People to Track", onClick: hasActiveTrack ? () => openPopup("Add People to Track") : undefined, disabled: !hasActiveTrack },
-                  { icon: <FaPlusCircle size={24} />, text: "Assign Trackchair(s)", onClick: hasActiveTrack ? () => openPopup("Assign Trackchair(s)") : undefined, disabled: !hasActiveTrack },
+                    { icon: <FaPlusCircle size={24} />, text: "Add People to Track", onClick: hasActiveTrack ? () => openPopup("Add People to Track") : undefined, disabled: !hasActiveTrack },
+                    { icon: <FaPlusCircle size={24} />, text: "Assign Trackchair(s)", onClick: hasActiveTrack ? () => openPopup("Assign Trackchair(s)") : undefined, disabled: !hasActiveTrack }
+                  
                 ]}
               />
 
@@ -594,6 +606,14 @@ const ConferencePage: React.FC = () => {
                 )}
               </div>
             </div>
+          </div>
+
+          <div className="buttons-row" style={{ marginTop: 20 }}>
+            <AppButton
+              icon={<AssignmentIcon sx={{ fontSize: 26 }} />}
+              text="Add Submission"
+              onClick={() => navigate("/addSubmission")}
+            />
           </div>
 
           {/* Popup remains unchanged */}
