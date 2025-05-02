@@ -184,6 +184,46 @@ const ConferencePage: React.FC = () => {
         break;
 
       case "Add People to Track":
+        if (activeConference && activeTrack) {
+          console.log(
+            `Adding users to track ${activeTrack._id} userid ${selectedUserIds}`
+          );
+          // send each selected userId to the backend endpoint for track members
+          const assignPromises = selectedUserIds.map((userId) =>
+            fetch("http://127.0.0.1:5000/track/appoint_track_members", {
+              method: "POST",
+              credentials: "include",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                track_id: activeTrack._id,
+                track_member: userId,
+              }),
+            }).then((res) => {
+              if (!res.ok) {
+                return res.json().then((err) => {
+                  throw new Error(
+                    err.error || `Failed to add track member ${userId}`
+                  );
+                });
+              }
+              return res.json();
+            })
+          );
+
+          Promise.all(assignPromises)
+            .then((results) => {
+              console.log("Successfully added track members:", results);
+              window.location.reload();
+            })
+            .catch((error) => {
+              console.error("Error adding track members:", error);
+            });
+
+          console.log(
+            `Adding users as track members to track ${activeTrack._id}`
+          );
+        }
+        break;
 
       case "Assign Trackchair(s)":
         if (activeConference && activeTrack) {
