@@ -652,14 +652,19 @@ const ChatPage: React.FC = () => {
                       </Typography>
 
                       <Typography
-                        variant="body2"
+                        variant="body1"
                         sx={{
                           color: theme.palette.text.secondary,
                           wordBreak: "break-word",
                           whiteSpace: "pre-wrap",
                         }}
                       >
-                        {message.content}
+                        <Box component="span" fontWeight="bold">
+                          Content:
+                        </Box>{" "}
+                        <Box component="span" fontWeight="normal">
+                          {message.content || "No Content"}
+                        </Box>
                       </Typography>
                     </Paper>
                   ))}

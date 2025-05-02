@@ -50,7 +50,9 @@ const ProfilePage: React.FC = () => {
       try {
         const userData = await getUserById(id!);
         const roleObjs: Role[] = userData.roles
-          ? await Promise.all(userData.roles.map((rid) => userService.getRoleById(rid)))
+          ? await Promise.all(
+              userData.roles.map((rid) => userService.getRoleById(rid))
+            )
           : [];
         // Store roles separately from userData
         setProfileUser(userData);
@@ -219,10 +221,10 @@ const ProfilePage: React.FC = () => {
   const statsTableStyle: React.CSSProperties = {
     borderCollapse: "collapse",
     width: "100%",
-    
+
     marginTop: "10px",
   };
-
+  // BUNU AL
   const statsCellStyle: React.CSSProperties = {
     padding: "8px",
     color: colors.grey[100],
@@ -268,7 +270,6 @@ const ProfilePage: React.FC = () => {
     color: colors.grey[100],
     fontFamily: theme.typography.fontFamily,
     backgroundColor: colors.primary[500],
-
   };
 
   return (
@@ -363,7 +364,7 @@ const ProfilePage: React.FC = () => {
                 <TableCell
                   style={{
                     color: colors.grey[100],
-                       backgroundColor: colors.primary[400],
+                    backgroundColor: colors.primary[400],
 
                     borderBottom: `1px solid ${colors.grey[100]}`,
                   }}

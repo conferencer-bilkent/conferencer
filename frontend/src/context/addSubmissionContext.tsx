@@ -24,6 +24,7 @@ interface MyContextType {
   ) => void;
   handleFileChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   handleSendSubmission: () => void;
+  showValidation: boolean;
 }
 
 const SubmissionContext = createContext<MyContextType | undefined>(undefined);
@@ -34,6 +35,7 @@ const SubmissionProvider: React.FC<{ children: ReactNode }> = ({
   const [state, dispatch] = useReducer(reducer, initialState);
   const [authorIndex, setAuthorIndex] = useState(0);
   const [file, setFile] = useState<File | null>(null);
+  const [showValidation, setShowValidation] = useState(false);
   const { activeConference } = useConference();
 
   const handleInput = (
@@ -69,6 +71,20 @@ const SubmissionProvider: React.FC<{ children: ReactNode }> = ({
   };
 
   const addPerson = () => {
+    const currentPerson = state.persons[authorIndex];
+    if (
+      !currentPerson.firstName ||
+      !currentPerson.lastName ||
+      !currentPerson.email ||
+      !currentPerson.organization ||
+      !currentPerson.selectedCountry
+    ) {
+      setShowValidation(true);
+      alert(
+        "Please fill in all required fields for the current author before adding another."
+      );
+      return;
+    }
     setAuthorIndex(authorIndex + 1);
     dispatch({ type: "ADD_PERSON" });
   };
@@ -79,6 +95,43 @@ const SubmissionProvider: React.FC<{ children: ReactNode }> = ({
   };
 
   const handleSendSubmission = async () => {
+    setShowValidation(true);
+
+    // Check paper information
+    const missingPaperInfo = [];
+    if (!state.title) missingPaperInfo.push("Title");
+    if (!state.abstract) missingPaperInfo.push("Abstract");
+    if (!state.keywords) missingPaperInfo.push("Keywords");
+    if (!state.selectedTrack) missingPaperInfo.push("Track");
+    if (!file) missingPaperInfo.push("Paper File");
+
+    if (missingPaperInfo.length > 0) {
+      alert(
+        `Please fill in required paper information: ${missingPaperInfo.join(
+          ", "
+        )}`
+      );
+      return;
+    }
+
+    // Check author information
+    const invalidAuthors = state.persons.filter((person) => {
+      return (
+        !person.firstName ||
+        !person.lastName ||
+        !person.email ||
+        !person.organization ||
+        !person.selectedCountry
+      );
+    });
+
+    if (invalidAuthors.length > 0) {
+      alert(
+        `Please fill in all required fields for all authors before submitting.`
+      );
+      return;
+    }
+
     try {
       if (!file) {
         console.error("No file selected");
@@ -124,6 +177,7 @@ const SubmissionProvider: React.FC<{ children: ReactNode }> = ({
         handleFileChange,
         handleInput,
         handleSendSubmission,
+        showValidation,
       }}
     >
       {children}
