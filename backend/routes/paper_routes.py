@@ -115,10 +115,11 @@ def allowed_file(filename):
 
 def download_paper(paper_id):
     try:
-        paper = mongo.db.papers.find_one({"_id": ObjectId(paper_id)})
+        print(f"Downloading paper with ID: {paper_id}")
+        paper = mongo.db.papers.find_one({"id":paper_id})
+        print(f"paper path: {paper}")
         if not paper:
             return jsonify({"error": "Paper not found"}), 404
-
         paper_path = paper.get("paper_path")
         if not paper_path:
             return jsonify({"error": "No file path associated with this paper"}), 404
