@@ -63,3 +63,22 @@ def submit_review(paper_id):
     except Exception as e:
         print("Review creation error:", e)
         return jsonify({"error": "Failed to create review"}), 500
+
+def get_reviews_by_paper(paper_id):
+    if "user_id" not in session:
+        return jsonify({"error": "Unauthorized"}), 401
+    print("Fetching reviews for paper ID:", paper_id)
+    try:
+        reviews = mongo.db.reviews.find({"paper_id": paper_id})
+        review_list = []
+        
+        for review in reviews:
+            # Convert ObjectId to string for JSON serialization
+            review["_id"] = str(review["_id"])
+            if "created_at" in review:
+                review["created_at"] = review["created_at"].isoformat()
+            review_list.append(review)
+
+        return jsonify({"reviews": review_list}), 200
+    except Exception as e:
+        return jsonify({"error": f"Failed to fetch reviews: {str(e)}"}), 500

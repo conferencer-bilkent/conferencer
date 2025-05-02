@@ -6,7 +6,7 @@ from routes.profile_routes import get_profile, update_profile, get_all_users
 from routes.role_routes import assign_role, get_roles, get_role
 from routes.chad_routes import send_chad, get_received_chad, get_sent_chad
 from routes.paper_routes import  get_paper, get_all_papers, submit_paper, download_paper
-from routes.review_routes import get_review, submit_review
+from routes.review_routes import get_review, submit_review, get_reviews_by_paper
 from routes.notification_routes import get_notification, mark_notification_as_answered, mark_all_read
 from routes.keywords_routes import get_keywords, add_keyword, set_keywords
 from routes.track_routes import create_track, get_tracks_by_conference, appoint_track_chair, get_track_by_people, get_track_by_author, get_track_by_reviewer, get_track, get_all_tracks, get_all_relevant_people, get_all_papers_in_track, appoint_track_member, get_track_members
@@ -62,6 +62,7 @@ paper_bp.route("/<paper_id>/download", methods=["GET"])(download_paper)
 
 review_bp.route("/<review_id>", methods=["GET"])(get_review)
 review_bp.route("/submit/<paper_id>", methods=["POST"])(submit_review)
+review_bp.route("/paper/<paper_id>", methods=["GET"])(get_reviews_by_paper)
 
 notification_bp.route("/", methods=["GET"])(get_notification)
 notification_bp.route("/mark_answered/<notification_id>/<is_accepted>", methods=["POST"])(mark_notification_as_answered)
