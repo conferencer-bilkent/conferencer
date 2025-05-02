@@ -15,6 +15,7 @@ import { useConference } from "../../../context/ConferenceContext";
 import {
   assignSuperchair,
   invitePeopleToConference,
+  useRefreshConference,
 } from "../../../services/conferenceService";
 
 import { getUserById, getAllUsers } from "../../../services/userService";
@@ -26,6 +27,7 @@ import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 
 const ConferencePage: React.FC = () => {
   const { activeConference, setActiveConference } = useConference();
+  const refreshConference = useRefreshConference();
   const navigate = useNavigate();
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
@@ -115,7 +117,9 @@ const ConferencePage: React.FC = () => {
 
   useEffect(() => {
     if (activeConference?.superchairs?.length) {
+      // Reset existing superchair data
       setSuperchairUsers({});
+      setLoadingUsers({});
 
       activeConference.superchairs.forEach((chairId) => {
         setLoadingUsers((prev) => ({ ...prev, [chairId]: true }));
@@ -134,8 +138,12 @@ const ConferencePage: React.FC = () => {
             setLoadingUsers((prev) => ({ ...prev, [chairId]: false }));
           });
       });
+    } else {
+      // Clear superchairs when there are none
+      setSuperchairUsers({});
+      setLoadingUsers({});
     }
-  }, []);
+  }, [activeConference]); // Add activeConference to the dependency array
 
   const handleSelectedUsers = (selectedUserIds: string[], action: string) => {
     console.log(`Selected users for ${action}:`, selectedUserIds);
@@ -150,18 +158,19 @@ const ConferencePage: React.FC = () => {
           )
             .then((response) => {
               console.log("Successfully invited users:", response);
+              // Refresh conference data instead of full page reload
+              if (activeConference) {
+                refreshConference(activeConference.id);
+              }
             })
             .catch((error) => {
               console.error("Error inviting users:", error);
             });
-
-          console.log(`Inviting users to conference ${activeConference.id}`);
         }
         break;
 
       case "Assign Superchair(s)":
         if (activeConference) {
-          // Process each selected user to assign as superchair
           const assignPromises = selectedUserIds.map((userId) =>
             assignSuperchair(userId, activeConference.id)
           );
@@ -169,26 +178,19 @@ const ConferencePage: React.FC = () => {
           Promise.all(assignPromises)
             .then((results) => {
               console.log("Successfully assigned superchairs:", results);
-              // Refresh the page or update the UI to show new superchairs
-              window.location.reload(); // Simple refresh, or you could update state
+              // Refresh conference data instead of full page reload
+              if (activeConference) {
+                refreshConference(activeConference.id);
+              }
             })
             .catch((error) => {
               console.error("Error assigning superchair(s):", error);
-              // You could add an error notification here
             });
-
-          console.log(
-            `Assigning users as superchairs to conference ${activeConference.id}`
-          );
         }
         break;
 
       case "Add People to Track":
         if (activeConference && activeTrack) {
-          console.log(
-            `Adding users to track ${activeTrack._id} userid ${selectedUserIds}`
-          );
-          // send each selected userId to the backend endpoint for track members
           const assignPromises = selectedUserIds.map((userId) =>
             fetch("http://127.0.0.1:5000/track/appoint_track_members", {
               method: "POST",
@@ -213,29 +215,27 @@ const ConferencePage: React.FC = () => {
           Promise.all(assignPromises)
             .then((results) => {
               console.log("Successfully added track members:", results);
-              window.location.reload();
+              // Refresh conference data instead of full page reload
+              if (activeConference) {
+                refreshConference(activeConference.id);
+              }
             })
             .catch((error) => {
               console.error("Error adding track members:", error);
             });
-
-          console.log(
-            `Adding users as track members to track ${activeTrack._id}`
-          );
         }
         break;
 
       case "Assign Trackchair(s)":
         if (activeConference && activeTrack) {
-          // send each selected userId to the backend endpoint
           const assignPromises = selectedUserIds.map((userId) =>
             fetch("http://127.0.0.1:5000/track/appoint_track_chairs", {
               method: "POST",
               credentials: "include",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({
-                track_id: activeTrack._id, // the track you're assigning chairs to
-                track_chair: userId, // the user being made a chair
+                track_id: activeTrack._id,
+                track_chair: userId,
               }),
             }).then((res) => {
               if (!res.ok) {
@@ -252,16 +252,22 @@ const ConferencePage: React.FC = () => {
           Promise.all(assignPromises)
             .then((results) => {
               console.log("Successfully assigned trackchairs:", results);
-              // reload or update state to reflect new trackchairs
-              window.location.reload();
+              // Refresh conference data instead of full page reload
+              if (activeConference) {
+                refreshConference(activeConference.id)
+                  .then(() => {
+                    console.log(
+                      "Conference refreshed successfully after assigning trackchairs"
+                    );
+                  })
+                  .catch((error) => {
+                    console.error("Error refreshing conference data:", error);
+                  });
+              }
             })
             .catch((error) => {
               console.error("Error assigning trackchairs:", error);
             });
-
-          console.log(
-            `Assigning users as trackchairs to track ${activeTrack._id}`
-          );
         }
         break;
 
@@ -411,7 +417,6 @@ const ConferencePage: React.FC = () => {
           {/* Only show track name if we have an active track, otherwise show placeholder */}
           {activeConference && (
             <AppTitle
-              
               text={activeTrack?.track_name || "No Track Selected"}
             />
           )}
@@ -470,73 +475,126 @@ const ConferencePage: React.FC = () => {
             </div>
           )}
 
-          {/* Superchairs section - removed marginTop since we use gap now */}
-          {(activeConference?.superchairs?.length ?? 0) > 0 && (
-            <div>
-              <h3 style={{ color: colors.grey[100], marginBottom: 10 }}>Superchair(s)</h3>
-              <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-                {activeConference?.superchairs?.map((id, idx) => (
-                  <div
-                    key={id || idx}
-                    onClick={() => navigate(`/profile/${id}`)}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      border: `1px solid ${colors.grey[100]}`,
-                      borderRadius: 16,
-                      padding: "8px 12px",
-                      cursor: "pointer",
-                      backgroundColor: colors.primary[1000],
-                      color: colors.grey[100],
-                    }}
-                  >
-                    <FaUser style={{ marginRight: 8 }} />
-                    {loadingUsers[id]
-                      ? "Loading…"
-                      : superchairUsers[id]
-                      ? `${superchairUsers[id].name} ${
-                          superchairUsers[id].surname || ""
-                        }`
-                      : id}
+          {/* Chairs section with improved layout */}
+          <div style={{ 
+            display: 'flex',
+            width: '100%',
+            borderTop: `1px solid ${colors.grey[400]}`,
+            paddingTop: '12px',
+            marginTop: '12px'
+          }}>
+            {/* Superchairs column - left side */}
+            <div style={{ 
+              flex: 1, 
+              paddingRight: '16px',
+              borderRight: `1px solid ${colors.grey[400]}`
+            }}>
+              <h3 style={{ 
+                color: colors.grey[100], 
+                marginBottom: 10, 
+                fontSize: '16px', 
+                fontWeight: 600 
+              }}>
+                Superchair(s)
+              </h3>
+              <div style={{ 
+                display: "flex", 
+                flexDirection: "column", 
+                gap: 8
+              }}>
+                {(activeConference?.superchairs?.length ?? 0) > 0 ? (
+                  activeConference?.superchairs?.map((id, idx) => (
+                    <div
+                      key={id || idx}
+                      onClick={() => navigate(`/profile/${id}`)}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        border: `1px solid ${colors.grey[100]}`,
+                        borderRadius: 10,
+                        padding: "6px 10px",
+                        cursor: "pointer",
+                        backgroundColor: colors.primary[1000],
+                        color: colors.grey[100],
+                        fontSize: '14px'
+                      }}
+                    >
+                      <FaUser style={{ marginRight: 8, fontSize: '12px' }} />
+                      {loadingUsers[id]
+                        ? "Loading…"
+                        : superchairUsers[id]
+                        ? `${superchairUsers[id].name} ${
+                            superchairUsers[id].surname || ""
+                          }`
+                        : id}
+                    </div>
+                  ))
+                ) : (
+                  <div style={{ 
+                    color: colors.grey[300], 
+                    fontStyle: 'italic', 
+                    fontSize: '14px' 
+                  }}>
+                    No superchairs added yet
                   </div>
-                ))}
+                )}
               </div>
             </div>
-          )}
 
-          {/* Trackchairs section - removed marginTop since we use gap now */}
-          {hasActiveTrack && activeTrack.track_chairs?.length > 0 && (
-            <div>
-              <h3 style={{ color: colors.grey[100], marginBottom: 10 }}>Trackchair(s)</h3>
-              <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-                {activeTrack.track_chairs.map((id: string, idx: number) => (
-                  <div
-                    key={id || idx}
-                    onClick={() => navigate(`/profile/${id}`)}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      border: `1px solid ${colors.grey[100]}`,
-                      borderRadius: 16,
-                      padding: "8px 12px",
-                      cursor: "pointer",
-                      backgroundColor: colors.primary[1000],
-                      color: colors.grey[100],
-                    }}
-                  >
-                    <FaUser style={{ marginRight: 8 }} />
-                    {loadingTrackChairs[id]
-                      ? "Loading…"
-                      : trackChairUsers[id]
-                      ? `${trackChairUsers[id].name} ${
-                          trackChairUsers[id].surname || ""
-                        }`
-                      : id}
+            {/* Trackchairs column - right side */}
+            <div style={{ flex: 1, paddingLeft: '16px' }}>
+              <h3 style={{ 
+                color: colors.grey[100], 
+                marginBottom: 10, 
+                fontSize: '16px', 
+                fontWeight: 600 
+              }}>
+                Trackchair(s)
+              </h3>
+              <div style={{ 
+                display: "flex", 
+                flexDirection: "column", 
+                gap: 8
+              }}>
+                {hasActiveTrack && activeTrack.track_chairs?.length > 0 ? (
+                  activeTrack.track_chairs.map((id: string, idx: number) => (
+                    <div
+                      key={id || idx}
+                      onClick={() => navigate(`/profile/${id}`)}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        border: `1px solid ${colors.grey[100]}`,
+                        borderRadius: 10,
+                        padding: "6px 10px",
+                        cursor: "pointer",
+                        backgroundColor: colors.primary[1000],
+                        color: colors.grey[100],
+                        fontSize: '14px'
+                      }}
+                    >
+                      <FaUser style={{ marginRight: 8, fontSize: '12px' }} />
+                      {loadingTrackChairs[id]
+                        ? "Loading…"
+                        : trackChairUsers[id]
+                        ? `${trackChairUsers[id].name} ${
+                            trackChairUsers[id].surname || ""
+                          }`
+                        : id}
+                    </div>
+                  ))
+                ) : (
+                  <div style={{ 
+                    color: colors.grey[300], 
+                    fontStyle: 'italic', 
+                    fontSize: '14px' 
+                  }}>
+                    No track chairs added yet
                   </div>
-                ))}
+                )}
               </div>
             </div>
-          )}
+          </div>
 
           {/* Popup remains unchanged */}
           {popupAction && (

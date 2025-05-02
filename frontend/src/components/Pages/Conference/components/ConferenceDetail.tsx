@@ -86,7 +86,7 @@ const ConferenceDetail: React.FC<ConferenceDetailProps> = ({
                   ? `1px solid ${colors.grey[100]}`
                   : "none",
               backgroundColor: colors.primary[1000],
-              color: button.disabled ? colors.grey[400] : colors.grey[400],
+              color: button.disabled ? colors.grey[400] : colors.grey[100],
               opacity: button.disabled ? 0.8 : 1,
             }}
           >

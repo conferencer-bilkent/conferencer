@@ -1,4 +1,5 @@
 import { Conference } from "../models/conference";
+import { useConference } from "../context/ConferenceContext";
 
 export const mapApiResponseToConference = (apiConference: any): Conference => {
   return {
@@ -95,6 +96,71 @@ export const createConference = async (
     console.error("Failed to create conference:", err);
     throw err;
   }
+};
+
+/**
+ * Fetches a specific conference by its ID
+ * 
+ * @param conferenceId - ID of the conference to fetch
+ * @returns Promise with the Conference object
+ */
+export const getConferenceById = async (conferenceId: string): Promise<Conference> => {
+  try {
+    const response = await fetch(`http://127.0.0.1:5000/conference/${conferenceId}`, {
+      method: "GET",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Error fetching conference: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    // Transform API response to match the Conference interface
+    return mapApiResponseToConference(data.conference);
+  } catch (error) {
+    console.error(`Failed to fetch conference with ID ${conferenceId}:`, error);
+    throw error;
+  }
+};
+
+/**
+ * Refreshes the active conference by fetching the latest data from the backend
+ * and updating the conference context
+ * 
+ * @param conferenceId - ID of the conference to refresh
+ * @returns Promise with the updated Conference object
+ */
+export const refreshActiveConference = async (conferenceId: string): Promise<Conference> => {
+  try {
+    // Fetch the latest data
+    const updatedConference = await getConferenceById(conferenceId);
+    
+    // Get the context setter function (this needs to be used inside a component)
+    return updatedConference;
+  } catch (error) {
+    console.error(`Failed to refresh conference with ID ${conferenceId}:`, error);
+    throw error;
+  }
+};
+
+// React hook version for use inside components
+export const useRefreshConference = () => {
+  const { setActiveConference } = useConference();
+  
+  return async (conferenceId: string): Promise<Conference> => {
+    try {
+      const updatedConference = await getConferenceById(conferenceId);
+      setActiveConference(updatedConference);
+      return updatedConference;
+    } catch (error) {
+      console.error(`Failed to refresh conference with ID ${conferenceId}:`, error);
+      throw error;
+    }
+  };
 };
 
 /**

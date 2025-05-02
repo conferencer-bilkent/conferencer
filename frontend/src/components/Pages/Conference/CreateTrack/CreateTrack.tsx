@@ -7,6 +7,7 @@ import {
   mapApiResponseToTrack,
 } from "../../../../services/trackService";
 import { useConference } from "../../../../context/ConferenceContext";
+import { useRefreshConference } from "../../../../services/conferenceService";
 
 const steps = [
   {
@@ -68,6 +69,7 @@ const CreateTrack: React.FC = () => {
   const [form, setForm] = useState<TrackForm>(defaultForm);
   const [invalidFields, setInvalidFields] = useState<Set<string>>(new Set());
   const { activeConference } = useConference();
+  const refreshConference = useRefreshConference();
 
   useEffect(() => {
     setInvalidFields(new Set());
@@ -126,7 +128,8 @@ const CreateTrack: React.FC = () => {
         });
         console.log("Track created:", newTrack);
 
-
+        // Refresh the conference data to include the new track
+        await refreshConference(activeConference.id);
         alert("Track created successfully!");
         navigate(`/conference/`);
       } catch (err: any) {
