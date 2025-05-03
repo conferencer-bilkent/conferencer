@@ -8,6 +8,7 @@ class Assignment:
         self.paper_id = str(paper_id)
         self.track_id = str(track_id)
         self.created_at = created_at or datetime.utcnow()
+        self.is_pending = True
 
     def to_dict(self):
         return {
@@ -15,6 +16,7 @@ class Assignment:
             "reviewer_id": self.reviewer_id,
             "paper_id": self.paper_id,
             "track_id": self.track_id,
-            "created_at": self.created_at
+            "created_at": self.created_at,
+            "is_pending": self.is_pending
         }
 
