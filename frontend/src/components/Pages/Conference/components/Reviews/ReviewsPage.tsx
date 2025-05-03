@@ -92,8 +92,8 @@ const ReviewsPage: React.FC = () => {
 
   const isExpanded = (id: number) => expandedIds.has(id);
 
-  const handleNavigateToDetail = (/*id: number*/) => {
-    navigate(`/reviews/`);
+  const handleNavigateToDetail = (paper: Paper) => {
+    navigate("/review/detail", { state: { paper, activeTrack } });
   };
 
   // Handler to navigate back to the conference page
@@ -227,7 +227,7 @@ const ReviewsPage: React.FC = () => {
                     variant="contained"
                     onClick={(e) => {
                       e.stopPropagation(); // Prevent expand toggle
-                      handleNavigateToDetail(/*paper.id*/);
+                      handleNavigateToDetail(paper);
                     }}
                     sx={{
                       borderRadius: "8px",

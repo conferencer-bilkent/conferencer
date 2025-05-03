@@ -157,7 +157,7 @@ const App: React.FC = () => {
                               element={<ProfilePage />}
                             />
                             <Route
-                              path="/reviews"
+                              path="/review/detail"
                               element={<ReviewDetailPage />}
                             />
                             <Route
