@@ -1,17 +1,6 @@
 import { Track, mapResponseToTrack } from "../models/track";
 import { Paper, mapResponseToPaper } from "../models/paper";
-
-// Add Assignment interface
-interface Assignment {
-  _id: string;
-  id: string;
-  reviewer_id: string;
-  paper_id: string;
-  track_id: string;
-  created_at: {
-    $date: string;
-  };
-}
+import { Assignment } from "../models/assignment";
 
 // The API base URL - adjust if needed
 const API_BASE_URL = "http://127.0.0.1:5000";
@@ -147,7 +136,17 @@ export const getAssignmentsByPaper = async (paperId: string): Promise<Assignment
     }
 
     const data = await response.json();
-    return data; // Returns the list of assignments as returned by the API
+    
+    // Map each raw assignment to the Assignment interface
+    return data.map((assignment: any) => ({
+      _id: assignment._id,
+      id: assignment.id,
+      reviewer_id: assignment.reviewer_id,
+      paper_id: assignment.paper_id,
+      track_id: assignment.track_id,
+      created_at: assignment.created_at,
+      is_pending: assignment.is_pending || true // Default to true if not specified
+    }));
   } catch (error) {
     console.error(`Error fetching assignments for paper ${paperId}:`, error);
     throw error;
