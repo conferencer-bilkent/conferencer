@@ -32,7 +32,7 @@ class Paper:
             review = mongo.db.reviews.find_one({"_id": ObjectId(review_id)})
             if review:
                 eval_score = review.get("evaluation", 0)
-                confidence = review.get("confidence", 0)
+                confidence = review.get("confidence", 1)
                 total_weighted += eval_score * confidence
                 total_confidence += confidence
 

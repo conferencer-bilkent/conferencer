@@ -67,7 +67,8 @@ def submit_review(paper_id):
 
     data = request.get_json()
 
-    required_fields = ["reviewer_name", "sub_firstname", "sub_lastname", "sub_email", "evaluation", "confidence"]
+    # Change only this part as requested
+    required_fields = ["reviewer_name", "evaluation", "evaluation_text"]
     if not all(field in data for field in required_fields):
         # print the missing fields
         missing_fields = [field for field in required_fields if field not in data]
@@ -86,11 +87,11 @@ def submit_review(paper_id):
             paper_id=paper_id,
             reviewer_id=session["user_id"],
             reviewer_name=data["reviewer_name"],
-            sub_firstname=data["sub_firstname"],
-            sub_lastname=data["sub_lastname"],
-            sub_email=data["sub_email"],
+            sub_firstname=data.get("sub_firstname", ""),
+            sub_lastname=data.get("sub_lastname", ""),
+            sub_email=data.get("sub_email", ""),
             evaluation=data["evaluation"],
-            confidence=data["confidence"],
+            confidence=data.get("confidence", 1),
             evaluation_text=data.get("evaluation_text", ""),
             remarks=data.get("remarks", "")
         )
@@ -120,7 +121,7 @@ def submit_review(paper_id):
         
          
         # i need you to find the paper being reviewed
-        paper = mongo.db.papers.find_one({"id": paper_id})
+        paper = mongo.db.papers.find_one({"_id": ObjectId(paper_id)})
         if not paper:
             return jsonify({"error": "Paper not found"}), 404
 
