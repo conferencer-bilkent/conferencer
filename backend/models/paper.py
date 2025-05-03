@@ -25,8 +25,6 @@ class Paper:
         if not self.reviews:
             return 0.0
 
-        from extensions import mongo  # Prevent circular import
-
         total_weighted = 0
         total_confidence = 0
 

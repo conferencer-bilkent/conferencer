@@ -1,3 +1,6 @@
+from bson import ObjectId
+from datetime import datetime
+
 class Review:
     def __init__(self, paper_id, reviewer_id, reviewer_name, sub_firstname, sub_lastname, sub_email,
                  evaluation, confidence, evaluation_text="", remarks="", rates=None, created_at=None):
@@ -11,8 +14,8 @@ class Review:
         }
         self.evaluation = evaluation
         self.confidence = confidence
-        self.evaluation_text = evaluation_text
-        self.remarks = remarks
+        self.evaluation_text = evaluation_text or ""
+        self.remarks = remarks or ""
         self.rates = rates or []
         self.created_at = created_at or datetime.utcnow()
 

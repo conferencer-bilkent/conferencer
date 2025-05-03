@@ -61,19 +61,29 @@ def update_review(review_id):
     except Exception as e:
         return jsonify({"error": f"Failed to update review: {str(e)}"}), 500
 
-def submit_review():
+def submit_review(paper_id):
     if "user_id" not in session:
         return jsonify({"error": "Unauthorized"}), 401
 
     data = request.get_json()
 
-    required_fields = ["paper_id", "reviewer_name", "sub_firstname", "sub_lastname", "sub_email", "evaluation", "confidence"]
+    required_fields = ["reviewer_name", "sub_firstname", "sub_lastname", "sub_email", "evaluation", "confidence"]
     if not all(field in data for field in required_fields):
+        # print the missing fields
+        missing_fields = [field for field in required_fields if field not in data]
+        print(f"Missing fields: {missing_fields}")
+
         return jsonify({"error": "Missing required fields"}), 400
 
     try:
+
+        missing_fields = [field for field in required_fields if field not in data]
+        if missing_fields:
+            print(f"Missing fields: {missing_fields}")
+
+
         review = Review(
-            paper_id=data["paper_id"],
+            paper_id=paper_id,
             reviewer_id=session["user_id"],
             reviewer_name=data["reviewer_name"],
             sub_firstname=data["sub_firstname"],
@@ -85,6 +95,47 @@ def submit_review():
             remarks=data.get("remarks", "")
         )
 
+        user_id = session["user_id"]
+
+
+        # i need you to find the user submitting the review
+        user = mongo.db.users.find_one({"_id": ObjectId(user_id)})
+        if not user:
+            return jsonify({"error": "User not found"}), 404
+        # i need you to find the user stats id
+
+        users_stat_id = user.get("stat_id")
+        if not users_stat_id:
+            return jsonify({"error": "User stats not found"}), 404
+        
+         
+        # i need you to find the paper being reviewed
+        paper = mongo.db.papers.find_one({"id": paper_id})
+        if not paper:
+            return jsonify({"error": "Paper not found"}), 404
+
+        # i need you to calculate the time taken to review the paper
+        time_taken = datetime.utcnow() - paper["created_at"]
+
+        # the user has a field called stat. // "avg_time_to_review". update this field
+        # with the time taken to review the paper
+        time_taken_hours = time_taken.total_seconds() / 3600  # Convert to hours
+        days = int(time_taken_hours // 24)
+        remaining_hours = int(time_taken_hours % 24)
+        minutes = int((time_taken_hours % 1) * 60)
+        
+        time_taken_readable = f"{days} days {remaining_hours} hours {minutes} minutes"
+        if days == 0:
+            time_taken_readable = f"{remaining_hours} hours {minutes} minutes"
+        
+        # Update the user's stats, which is in stat collection with id = users_stat_id
+        mongo.db.stats.update_one(
+            {"_id": ObjectId(users_stat_id)},
+            {"$set": {
+                "avg_time_to_review": time_taken_readable
+            }}
+        )
+        
         result = mongo.db.reviews.insert_one(review.to_dict())
 
         return jsonify({
