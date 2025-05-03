@@ -9,7 +9,12 @@ type AppButtonProps = {
   disabled?: boolean;
 };
 
-const AppButton: React.FC<AppButtonProps> = ({ icon, text, onClick, disabled = false }) => {
+const AppButton: React.FC<AppButtonProps> = ({
+  icon,
+  text,
+  onClick,
+  disabled = false,
+}) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
 
@@ -36,18 +41,17 @@ const AppButton: React.FC<AppButtonProps> = ({ icon, text, onClick, disabled = f
         backgroundColor: disabled
           ? colors.grey[900] // Darker gray when disabled
           : isHovered
-            ? theme.palette.mode === "dark"
-              ? colors.grey[600]
-              : colors.grey[600]
-            : colors.primary[1000],
+          ? theme.palette.mode === "dark"
+            ? colors.grey[600]
+            : colors.grey[600]
+          : colors.primary[1000],
         width: "240px",
-        height: "56px",
+        height: "50px",
         border: `2px solid ${colors.grey[100]}`,
         borderRadius: "16px",
         padding: "8px 16px",
         color: colors.grey[100],
         cursor: disabled ? "not-allowed" : "pointer",
-        transition: "all 0.2s ease",
         opacity: disabled ? 0.5 : 1,
       }}
     >

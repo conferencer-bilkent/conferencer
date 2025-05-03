@@ -112,7 +112,6 @@ body {
   border-radius: 0.5rem;
   font-size: 0.875rem;
   line-height: 1.25rem;
-  transition: border-color 0.2s, box-shadow 0.2s;
 }
 
 .form-input:focus {

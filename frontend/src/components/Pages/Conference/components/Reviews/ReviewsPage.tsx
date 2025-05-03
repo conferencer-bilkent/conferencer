@@ -16,7 +16,10 @@ import {
 import { tokens } from "../../../../../theme";
 import { useConference } from "../../../../../context/ConferenceContext";
 import { Track } from "../../../../../models/conference";
-import { getTrackById, getPapersForTrack } from "../../../../../services/trackService";
+import {
+  getTrackById,
+  getPapersForTrack,
+} from "../../../../../services/trackService";
 import { Paper } from "../../../../../models/paper";
 
 // Define a type for the location state
@@ -30,25 +33,25 @@ const ReviewsPage: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { activeConference } = useConference();
-  
+
   // Get the track and view type from location state
   const state = location.state as LocationState;
   const activeTrack = state?.activeTrack || null;
 
   // State for fetched papers
   const [papers, setPapers] = useState<Paper[]>([]);
-  
+
   useEffect(() => {
     const fetchTrack = async () => {
       if (activeTrack) {
-        const actualActiveTrack = await getTrackById(activeTrack._id)
+        const actualActiveTrack = await getTrackById(activeTrack._id);
         console.log("actualActiveTrack", actualActiveTrack);
       }
     };
 
     fetchTrack();
   }, [activeTrack]);
-  
+
   useEffect(() => {
     const fetchPapers = async () => {
       if (activeTrack) {
@@ -72,9 +75,9 @@ const ReviewsPage: React.FC = () => {
   const getPageTitle = () => {
     console.log("activeTrack", activeTrack);
     if (activeTrack) {
-      return `${activeTrack.track_name || "Track"}: ${'Assignments'}`;
+      return `${activeTrack.track_name || "Track"}: ${"Assignments"}`;
     }
-    return `${activeConference?.name || "Conference"}: ${'All Assignments'}`;
+    return `${activeConference?.name || "Conference"}: ${"All Assignments"}`;
   };
 
   // Toggle expanded state for a paper
@@ -98,7 +101,7 @@ const ReviewsPage: React.FC = () => {
 
   // Handler to navigate back to the conference page
   const handleBackToTrackView = () => {
-    navigate('/conference');
+    navigate("/conference");
   };
 
   // Helper to format authors (assumes each author object has firstname/lastname)
@@ -139,10 +142,10 @@ const ReviewsPage: React.FC = () => {
             my={3}
             width="800px"
           >
-            <AppButton 
-              icon={<FaFilter />} 
-              text="Switch Back to Track View" 
-              onClick={handleBackToTrackView} 
+            <AppButton
+              icon={<FaFilter />}
+              text="Switch Back to Track View"
+              onClick={handleBackToTrackView}
             />
             <TextField
               placeholder="Search by Title or Author Name"
@@ -169,15 +172,16 @@ const ReviewsPage: React.FC = () => {
 
           {/* Display info about which track/view we're looking at */}
           {activeTrack && (
-            <Box 
-              width="800px" 
-              mb={3} 
-              p={2} 
+            <Box
+              width="800px"
+              mb={3}
+              p={2}
               bgcolor={colors.primary[600]}
               borderRadius="8px"
             >
               <Typography variant="body1">
-                Currently viewing: <strong>{ 'Assignments'}</strong> for track <strong>{activeTrack.track_name || "Unnamed Track"}</strong>
+                Currently viewing: <strong>{"Assignments"}</strong> for track{" "}
+                <strong>{activeTrack.track_name || "Unnamed Track"}</strong>
               </Typography>
             </Box>
           )}
@@ -194,7 +198,6 @@ const ReviewsPage: React.FC = () => {
                 bgcolor={colors.primary[400]}
                 boxShadow={4}
                 sx={{
-                  transition: "all 0.3s ease-in-out",
                   cursor: "pointer",
                 }}
                 onClick={() => handleToggleExpand(index)}
@@ -219,7 +222,8 @@ const ReviewsPage: React.FC = () => {
                       mt={1}
                       color={getReviewColor()}
                     >
-                      Created At: {new Date(paper.createdAt).toLocaleDateString()}
+                      Created At:{" "}
+                      {new Date(paper.createdAt).toLocaleDateString()}
                     </Typography>
                   </Box>
 
@@ -254,8 +258,7 @@ const ReviewsPage: React.FC = () => {
                         pr: 1,
                         color: colors.grey[100],
                       }}
-                    >
-                    </Box>
+                    ></Box>
                     <Typography variant="body2" color={colors.grey[300]} mt={2}>
                       <strong>Keywords:</strong>{" "}
                       {paper.keywords.map((kw, i) => (
@@ -290,15 +293,18 @@ const ReviewsPage: React.FC = () => {
               </Box>
             ))
           ) : (
-            <Box 
-              width="800px" 
-              p={4} 
-              textAlign="center" 
+            <Box
+              width="800px"
+              p={4}
+              textAlign="center"
               color={colors.grey[300]}
               bgcolor={colors.primary[400]}
               borderRadius="12px"
             >
-              No {"Assignments"} found {activeTrack ? `for ${activeTrack.track_name || "this track"}` : "in this conference"}
+              No {"Assignments"} found{" "}
+              {activeTrack
+                ? `for ${activeTrack.track_name || "this track"}`
+                : "in this conference"}
             </Box>
           )}
         </Box>

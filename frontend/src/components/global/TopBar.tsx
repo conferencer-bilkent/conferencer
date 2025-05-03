@@ -167,10 +167,13 @@ const Topbar: React.FC = () => {
   ) => {
     try {
       // build the full URL
-      const response = await fetch(`http://127.0.0.1:5000/notification/mark_answered/${id}/${isAccepted}`, {
-        method: "POST",
-        credentials: "include",
-      });
+      const response = await fetch(
+        `http://127.0.0.1:5000/notification/mark_answered/${id}/${isAccepted}`,
+        {
+          method: "POST",
+          credentials: "include",
+        }
+      );
       if (response.ok) {
         setNotifications((prev) =>
           prev.map((notification) =>
@@ -375,7 +378,6 @@ const Topbar: React.FC = () => {
                   boxShadow: theme.shadows[6],
                   border: `1px solid ${colors.grey[300]}`,
                   borderRadius: "8px",
-                  transition: "background-color 0.3s, box-shadow 0.3s",
                   "&::-webkit-scrollbar": { width: "6px" },
                   "&::-webkit-scrollbar-thumb": {
                     backgroundColor: colors.grey[500],
@@ -411,7 +413,6 @@ const Topbar: React.FC = () => {
                             : colors.blueAccent[400],
                           flexDirection: "column",
                           alignItems: "flex-start",
-                          transition: "background-color 0.3s ease",
                           "&:hover": { bgcolor: colors.primary[700] },
                         }}
                       >

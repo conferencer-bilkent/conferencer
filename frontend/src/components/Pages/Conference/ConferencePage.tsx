@@ -398,7 +398,10 @@ const ConferencePage: React.FC = () => {
       style={{ backgroundColor: colors.transparent, color: colors.grey[100] }}
     >
       <div className="conference-container">
-        <div className="content-container" style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+        <div
+          className="content-container"
+          style={{ display: "flex", flexDirection: "column", gap: "24px" }}
+        >
           {/* Conference title & buttons */}
           <AppTitle text={activeConference?.name || "No Conference Selected"} />
           <div className="buttons-row" style={{ marginBottom: 20 }}>
@@ -432,21 +435,21 @@ const ConferencePage: React.FC = () => {
 
           {/* Only show track name if we have an active track, otherwise show placeholder */}
           {activeConference && (
-            <AppTitle
-              text={activeTrack?.track_name || "No Track Selected"}
-            />
+            <AppTitle text={activeTrack?.track_name || "No Track Selected"} />
           )}
 
           {/* Arrows + Detail with conditional styles */}
           {activeConference && (
-            <div style={{ 
-              display: 'flex', 
-              width: '100%',
-              alignItems: 'center', 
-              gap: '8px',
-              
-              opacity: hasActiveTrack ? 1 : 0.9 // Grey out the entire section
-            }}>
+            <div
+              style={{
+                display: "flex",
+                width: "100%",
+                alignItems: "center",
+                gap: "8px",
+
+                opacity: hasActiveTrack ? 1 : 0.9, // Grey out the entire section
+              }}
+            >
               <IconButton
                 onClick={handlePrevTrack}
                 disabled={!hasPrev}
@@ -464,20 +467,55 @@ const ConferencePage: React.FC = () => {
                 texts={[
                   {
                     title: "Track Dates",
-                    content: hasActiveTrack 
-                      ? `${new Date(activeConference.createdAt || Date.now()).toLocaleDateString()} - ${new Date(activeConference.licenseExpiry || Date.now()).toLocaleDateString()}`
-                      : "-"
+                    content: hasActiveTrack
+                      ? `${new Date(
+                          activeConference.createdAt || Date.now()
+                        ).toLocaleDateString()} - ${new Date(
+                          activeConference.licenseExpiry || Date.now()
+                        ).toLocaleDateString()}`
+                      : "-",
                   },
-                  { content: "See Full Calendar", link: hasActiveTrack ? "#" : undefined },
-                  { content: `Total Submissions: ${hasActiveTrack ? 0 : '-'}` },
-                  { content: `Assigned Reviews: ${hasActiveTrack ? 0 : '-'}` },
-                  { content: `Pending Reviews: ${hasActiveTrack ? 0 : '-'}` }
+                  {
+                    content: "See Full Calendar",
+                    link: hasActiveTrack ? "#" : undefined,
+                  },
+                  { content: `Total Submissions: ${hasActiveTrack ? 0 : "-"}` },
+                  { content: `Assigned Reviews: ${hasActiveTrack ? 0 : "-"}` },
+                  { content: `Pending Reviews: ${hasActiveTrack ? 0 : "-"}` },
                 ]}
                 buttons={[
-                  { icon: <FaBookOpen size={24} />, text: "View Submissions and Paper Assignments", onClick: hasActiveTrack ? () => navigate('/review', { state: { activeTrack } }) : undefined, disabled: !hasActiveTrack },
-                  { icon: <AssignmentIcon sx={{ fontSize: 26 }} />, text: "Assign Papers", onClick: hasActiveTrack ? () => openPopup("Select Paper(s)") : undefined, disabled: !hasActiveTrack },
-                  { icon: <FaPlusCircle size={24} />, text: "Add People to Track", onClick: hasActiveTrack ? () => openPopup("Add People to Track") : undefined, disabled: !hasActiveTrack },
-                  { icon: <FaPlusCircle size={24} />, text: "Assign Trackchair(s)", onClick: hasActiveTrack ? () => openPopup("Assign Trackchair(s)") : undefined, disabled: !hasActiveTrack }
+                  {
+                    icon: <FaBookOpen size={24} />,
+                    text: "View Submissions and Paper Assignments",
+                    onClick: hasActiveTrack
+                      ? () => navigate("/review", { state: { activeTrack } })
+                      : undefined,
+                    disabled: !hasActiveTrack,
+                  },
+                  {
+                    icon: <AssignmentIcon sx={{ fontSize: 26 }} />,
+                    text: "Assign Papers",
+                    onClick: hasActiveTrack
+                      ? () => openPopup("Select Paper(s)")
+                      : undefined,
+                    disabled: !hasActiveTrack,
+                  },
+                  {
+                    icon: <FaPlusCircle size={24} />,
+                    text: "Add People to Track",
+                    onClick: hasActiveTrack
+                      ? () => openPopup("Add People to Track")
+                      : undefined,
+                    disabled: !hasActiveTrack,
+                  },
+                  {
+                    icon: <FaPlusCircle size={24} />,
+                    text: "Assign Trackchair(s)",
+                    onClick: hasActiveTrack
+                      ? () => openPopup("Assign Trackchair(s)")
+                      : undefined,
+                    disabled: !hasActiveTrack,
+                  },
                 ]}
               />
 
@@ -492,32 +530,40 @@ const ConferencePage: React.FC = () => {
           )}
 
           {/* Chairs section with improved layout */}
-          <div style={{ 
-            display: 'flex',
-            width: '100%',
-            borderTop: `1px solid ${colors.grey[400]}`,
-            paddingTop: '12px',
-            marginTop: '12px'
-          }}>
+          <div
+            style={{
+              display: "flex",
+              width: "100%",
+              borderTop: `1px solid ${colors.grey[400]}`,
+              paddingTop: "12px",
+              marginTop: "12px",
+            }}
+          >
             {/* Superchairs column - left side */}
-            <div style={{ 
-              flex: 1, 
-              paddingRight: '16px',
-              borderRight: `1px solid ${colors.grey[400]}`
-            }}>
-              <h3 style={{ 
-                color: colors.grey[100], 
-                marginBottom: 10, 
-                fontSize: '16px', 
-                fontWeight: 600 
-              }}>
+            <div
+              style={{
+                flex: 1,
+                paddingRight: "16px",
+                borderRight: `1px solid ${colors.grey[400]}`,
+              }}
+            >
+              <h3
+                style={{
+                  color: colors.grey[100],
+                  marginBottom: 10,
+                  fontSize: "16px",
+                  fontWeight: 600,
+                }}
+              >
                 Superchair(s)
               </h3>
-              <div style={{ 
-                display: "flex", 
-                flexDirection: "column", 
-                gap: 8
-              }}>
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 8,
+                }}
+              >
                 {(activeConference?.superchairs?.length ?? 0) > 0 ? (
                   activeConference?.superchairs?.map((id, idx) => (
                     <div
@@ -532,10 +578,10 @@ const ConferencePage: React.FC = () => {
                         cursor: "pointer",
                         backgroundColor: colors.primary[1000],
                         color: colors.grey[100],
-                        fontSize: '14px'
+                        fontSize: "14px",
                       }}
                     >
-                      <FaUser style={{ marginRight: 8, fontSize: '12px' }} />
+                      <FaUser style={{ marginRight: 8, fontSize: "12px" }} />
                       {loadingUsers[id]
                         ? "Loading…"
                         : superchairUsers[id]
@@ -546,11 +592,13 @@ const ConferencePage: React.FC = () => {
                     </div>
                   ))
                 ) : (
-                  <div style={{ 
-                    color: colors.grey[300], 
-                    fontStyle: 'italic', 
-                    fontSize: '14px' 
-                  }}>
+                  <div
+                    style={{
+                      color: colors.grey[300],
+                      fontStyle: "italic",
+                      fontSize: "14px",
+                    }}
+                  >
                     No superchairs added yet
                   </div>
                 )}
@@ -558,20 +606,24 @@ const ConferencePage: React.FC = () => {
             </div>
 
             {/* Trackchairs column - right side */}
-            <div style={{ flex: 1, paddingLeft: '16px' }}>
-              <h3 style={{ 
-                color: colors.grey[100], 
-                marginBottom: 10, 
-                fontSize: '16px', 
-                fontWeight: 600 
-              }}>
+            <div style={{ flex: 1, paddingLeft: "16px" }}>
+              <h3
+                style={{
+                  color: colors.grey[100],
+                  marginBottom: 10,
+                  fontSize: "16px",
+                  fontWeight: 600,
+                }}
+              >
                 Trackchair(s)
               </h3>
-              <div style={{ 
-                display: "flex", 
-                flexDirection: "column", 
-                gap: 8
-              }}>
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 8,
+                }}
+              >
                 {hasActiveTrack && activeTrack.track_chairs?.length > 0 ? (
                   activeTrack.track_chairs.map((id: string, idx: number) => (
                     <div
@@ -586,10 +638,10 @@ const ConferencePage: React.FC = () => {
                         cursor: "pointer",
                         backgroundColor: colors.primary[1000],
                         color: colors.grey[100],
-                        fontSize: '14px'
+                        fontSize: "14px",
                       }}
                     >
-                      <FaUser style={{ marginRight: 8, fontSize: '12px' }} />
+                      <FaUser style={{ marginRight: 8, fontSize: "12px" }} />
                       {loadingTrackChairs[id]
                         ? "Loading…"
                         : trackChairUsers[id]
@@ -600,11 +652,13 @@ const ConferencePage: React.FC = () => {
                     </div>
                   ))
                 ) : (
-                  <div style={{ 
-                    color: colors.grey[300], 
-                    fontStyle: 'italic', 
-                    fontSize: '14px' 
-                  }}>
+                  <div
+                    style={{
+                      color: colors.grey[300],
+                      fontStyle: "italic",
+                      fontSize: "14px",
+                    }}
+                  >
                     No track chairs added yet
                   </div>
                 )}
@@ -621,7 +675,7 @@ const ConferencePage: React.FC = () => {
           </div>
 
           {/* Popup remains unchanged */}
-          {popupAction && (
+          {popupAction && popupAction != "Select Paper(s)" && (
             <SelectPeoplePopup
               buttonText={popupAction}
               people={getFilteredUsersForPopup()}

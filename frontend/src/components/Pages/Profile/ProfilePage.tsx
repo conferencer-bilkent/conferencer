@@ -23,6 +23,8 @@ import { useUser } from "../../../context/UserContext";
 import { getUserStats, UserData, Role } from "../../../models/user";
 import { getUserById } from "../../../services/userService";
 import userService from "../../../services/userService";
+import AppButton from "../../global/AppButton";
+import { RateReview } from "@mui/icons-material";
 
 const ProfilePage: React.FC = () => {
   const theme = useTheme();
@@ -51,7 +53,6 @@ const ProfilePage: React.FC = () => {
         const userData = await getUserById(id!);
         const roleObjs: Role[] = userData.roles
           ? await Promise.all(
-            
               userData.roles.map((rid) => userService.getRoleById(rid))
             )
           : [];
@@ -276,17 +277,22 @@ const ProfilePage: React.FC = () => {
   return (
     <div style={{ flexGrow: 1, display: "flex", flexDirection: "column" }}>
       <div style={{ padding: "20px", overflowY: "auto" }}>
-        {isOwnProfile && (
-          <Button
-            variant="contained"
-            onClick={handleEditOpen}
-            style={{ alignSelf: "flex-end", marginBottom: "10px" }}
-          >
-            Edit Profile
-          </Button>
-        )}
-
-        <AppTitle text={`${profileUser.name} ${profileUser.surname}`} />
+        <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
+          <AppTitle
+            text={
+              isOwnProfile
+                ? `Welcome! ${profileUser.name} ${profileUser.surname}`
+                : `${profileUser.name} ${profileUser.surname}'s Profile Page`
+            }
+          />
+          {isOwnProfile && (
+            <AppButton
+              onClick={handleEditOpen}
+              icon={<RateReview />}
+              text="Edit Profile"
+            />
+          )}
+        </div>
 
         <div style={{ marginTop: "20px" }}>
           <p>Name: {profileUser.name}</p>

@@ -45,7 +45,17 @@ const SideMenu: React.FC<SideMenuProps> = ({ items }) => {
         navigate("/settings");
         break;
       case "LOG OUT":
-        console.log("Log out should be handled separately");
+        fetch("http://localhost:5000/auth/logout", {
+          method: "POST",
+          credentials: "include",
+        })
+          .then(() => {
+            localStorage.removeItem("user");
+            navigate("/login");
+          })
+          .catch((error) => {
+            console.error("Logout failed:", error);
+          });
         break;
       default:
         console.log("No navigation defined for:", item);
@@ -80,7 +90,6 @@ const SideMenu: React.FC<SideMenuProps> = ({ items }) => {
               cursor: "pointer",
               borderBottom: `1px solid ${colors.grey[300]}`,
               borderRadius: "5px",
-              transition: "background-color 0.3s, color 0.3s",
               textAlign: "center", // Center text for small screens
             }}
             onMouseEnter={(e) => {
