@@ -67,6 +67,8 @@ def submit_paper():
         save_path = os.path.join(save_dir, f"{paper_id}_{safe_filename}")
         file.save(save_path)
         
+        submission_date = datetime.utcnow()
+
         # Create paper document
         paper = Paper(
             paper_id=ObjectId(paper_id),
@@ -88,6 +90,7 @@ def submit_paper():
             "authors": paper.authors,
             "track": paper.track,
             "created_by": paper.created_by,
+            "submission_date": submission_date,
             "created_at": paper.created_at
         })
 
@@ -116,7 +119,7 @@ def allowed_file(filename):
 def download_paper(paper_id):
     try:
         print(f"Downloading paper with ID: {paper_id}")
-        paper = mongo.db.papers.find_one({"id":paper_id})
+        paper = mongo.db.papers.find_one({"_id":ObjectId(paper_id)})
         print(f"paper path: {paper}")
         if not paper:
             return jsonify({"error": "Paper not found"}), 404
@@ -205,6 +208,7 @@ def update_paper(paper_id):
             return jsonify({"error": "Paper not found"}), 404
 
         update_fields = {}
+        update_fields["update_date"] = datetime.utcnow()
 
         # Update text fields
         if "title" in data:

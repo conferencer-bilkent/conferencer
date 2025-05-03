@@ -5,7 +5,7 @@ from extensions import mongo
 class Paper:
     def __init__(self, paper_id, title, abstract, keywords, paper_path, authors, created_by,
                  decision=None, track=None, biddings=None, assignee=None,
-                 reviews=None, created_at=None):
+                 reviews=None, created_at=None, submission_date=None, update_date=None):
         self.id = str(paper_id) if isinstance(paper_id, ObjectId) else paper_id
         self.title = title
         self.abstract = abstract
@@ -19,6 +19,8 @@ class Paper:
         self.reviews = reviews or []
         self.created_by = created_by
         self.created_at = created_at or datetime.utcnow()
+        self.submission_date = submission_date or self.created_at
+        self.update_date = update_date or []
         self.avg_acceptance = self.calculate_avg_acceptance()
 
     def calculate_avg_acceptance(self):
@@ -53,6 +55,9 @@ class Paper:
             "reviews": self.reviews,
             "created_by": self.created_by,
             "created_at": self.created_at,
+            "submission_date": self.submission_date,
+            "update_date": self.update_date,
             "avg_acceptance": self.avg_acceptance
         }
+
 
