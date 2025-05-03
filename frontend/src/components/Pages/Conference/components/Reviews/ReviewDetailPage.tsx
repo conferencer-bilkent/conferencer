@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import AppButton from "../../../../global/AppButton";
 import { FaArrowLeft, FaDownload, FaUserPlus, FaPen } from "react-icons/fa";
@@ -14,11 +14,15 @@ import {
   TableHead,
   TableRow,
   Paper as MuiPaper,
+  CircularProgress,
 } from "@mui/material";
 import { tokens } from "../../../../../theme";
 import { Track } from "../../../../../models/conference";
 import AppTitle from "../../../../global/AppTitle";
 import { Paper } from "../../../../../models/paper";
+import { getAssignmentsByPaper } from "../../../../../services/trackService";
+import { Assignment } from "../../../../../models/assignment";
+import { getUserById } from "../../../../../services/userService"; 
 
 // Define the interface for location state
 interface LocationState {
@@ -46,16 +50,24 @@ interface Reviewer {
   feedback: boolean;
 }
 
+// New interface to track assignment data with reviewer details
+interface AssignmentWithReviewer extends Assignment {
+  reviewerName: string;
+}
+
 const ReviewDetailPage: React.FC = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const navigate = useNavigate();
   const location = useLocation();
+  const [loading, setLoading] = useState<boolean>(true);
+  const [paperAssignments, setPaperAssignments] = useState<AssignmentWithReviewer[]>([]);
 
   // Get the state passed from navigation
   const state = location.state as LocationState | undefined;
   const activeTrack = state?.activeTrack || null;
   const reviewData = state?.reviewData;
+  const selectedPaper = state?.paper;
 
   // Assign a fallback for reviewData
   const reviewDataDisplay: ReviewData = reviewData
@@ -68,13 +80,67 @@ const ReviewDetailPage: React.FC = () => {
         reviewers: [],
       };
 
-  const selectedPaper = state?.paper;
-  console.log("Selected Paper:", selectedPaper);
+  useEffect(() => {
+    const fetchAssignments = async () => {
+      if (!selectedPaper?._id) {
+        setLoading(false);
+        return;
+      }
+      
+      try {
+        setLoading(true);
+        // Fetch assignments for this paper
+        const assignments = await getAssignmentsByPaper(selectedPaper.id);
+        
+        // For each assignment, get the reviewer information
+        const assignmentsWithReviewers = await Promise.all(
+          assignments.map(async (assignment) => {
+            try {
+              const reviewer = await getUserById(assignment.reviewer_id);
+              return {
+                ...assignment,
+                reviewerName: reviewer ? `${reviewer.name} ${reviewer.surname}` : 'Unknown',
+              };
+            } catch (error) {
+              console.error(`Error fetching reviewer ${assignment.reviewer_id}:`, error);
+              return {
+                ...assignment,
+                reviewerName: 'Unknown',
+              };
+            }
+          })
+        );
+        
+        setPaperAssignments(assignmentsWithReviewers);
+      } catch (error) {
+        console.error("Error fetching assignments:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchAssignments();
+  }, [selectedPaper]);
 
   const handleBackToReviews = () => {
     navigate("/review", {
       state: { activeTrack },
     });
+  };
+
+  // Format date from MongoDB format to readable string
+  const formatDate = (dateObj: { $date: string } | undefined) => {
+    if (!dateObj) return "-";
+    try {
+      const date = new Date(dateObj.$date);
+      return date.toLocaleDateString('en-US', { 
+        year: 'numeric', 
+        month: 'short', 
+        day: 'numeric' 
+      });
+    } catch (e) {
+      return "-";
+    }
   };
 
   return (
@@ -104,7 +170,7 @@ const ReviewDetailPage: React.FC = () => {
 
           {/* Actions Row */}
           <Box
-          padding={2}
+            padding={2}
             display="flex"
             justifyContent="center"
             gap={2}
@@ -147,7 +213,8 @@ const ReviewDetailPage: React.FC = () => {
                 <TableRow>
                   <TableCell>Reviewer</TableCell>
                   <TableCell>Deadline</TableCell>
-                  <TableCell>Uploaded On</TableCell>
+                  <TableCell>Assigned On</TableCell>
+                  <TableCell>Review Uploaded On</TableCell>
                   <TableCell>Decision</TableCell>
                   <TableCell>Confidence</TableCell>
                   <TableCell>Review</TableCell>
@@ -155,23 +222,28 @@ const ReviewDetailPage: React.FC = () => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {reviewDataDisplay.reviewers && reviewDataDisplay.reviewers.length > 0 ? (
-                  reviewDataDisplay.reviewers.map((r, idx) => (
-                    <TableRow key={idx}>
-                      <TableCell sx={{ color: colors.grey[100] }}>{r.name}</TableCell>
-                      <TableCell sx={{ color: colors.grey[100] }}>{r.deadline}</TableCell>
-                      <TableCell sx={{ color: colors.grey[100] }}>{r.uploaded}</TableCell>
-                      <TableCell sx={{ color: colors.grey[100] }}>{r.decision}</TableCell>
-                      <TableCell sx={{ color: colors.grey[100] }}>{r.confidence}</TableCell>
-                      <TableCell sx={{ color: colors.grey[100] }}>{r.file}</TableCell>
+                {loading ? (
+                  <TableRow>
+                    <TableCell colSpan={8} align="center" sx={{ py: 3 }}>
+                      <CircularProgress size={40} sx={{ color: colors.blueAccent[400] }} />
+                    </TableCell>
+                  </TableRow>
+                ) : paperAssignments.length > 0 ? (
+                  paperAssignments.map((assignment, idx) => (
+                    <TableRow key={assignment._id}>
+                      <TableCell sx={{ color: colors.grey[100] }}>{assignment.reviewerName}</TableCell>
+                      <TableCell sx={{ color: colors.grey[100] }}>-</TableCell>
+                      <TableCell sx={{ color: colors.grey[100] }}>{formatDate(assignment.created_at)}</TableCell>
+                      <TableCell sx={{ color: colors.grey[100] }}>-</TableCell>
+                      <TableCell sx={{ color: colors.grey[100] }}>-</TableCell>
+                      <TableCell sx={{ color: colors.grey[100] }}>-</TableCell>
+                      <TableCell sx={{ color: colors.grey[100] }}>-</TableCell>
                       <TableCell align="center">
                         <Box display="flex" flexDirection="column" gap={1}>
                           <Button
                             variant="contained"
                             sx={{
-                              backgroundColor: r.feedback
-                                ? colors.blueAccent[500]
-                                : colors.primary[600],
+                              backgroundColor: colors.primary[600],
                               "&:hover": {
                                 backgroundColor: colors.blueAccent[400],
                               },
@@ -179,7 +251,7 @@ const ReviewDetailPage: React.FC = () => {
                               fontSize: "12px",
                             }}
                           >
-                            {r.feedback ? "View/Edit Feedback" : "Add Feedback"}
+                            Add Feedback
                           </Button>
                           <Button
                             variant="outlined"
@@ -192,6 +264,7 @@ const ReviewDetailPage: React.FC = () => {
                               borderRadius: "8px",
                               fontSize: "12px",
                             }}
+                            onClick={() => navigate(`/profile/${assignment.reviewer_id}`)}
                           >
                             Reviewer's Profile
                           </Button>
@@ -201,6 +274,7 @@ const ReviewDetailPage: React.FC = () => {
                   ))
                 ) : (
                   <TableRow>
+                    <TableCell sx={{ color: colors.grey[100] }}>-</TableCell>
                     <TableCell sx={{ color: colors.grey[100] }}>-</TableCell>
                     <TableCell sx={{ color: colors.grey[100] }}>-</TableCell>
                     <TableCell sx={{ color: colors.grey[100] }}>-</TableCell>

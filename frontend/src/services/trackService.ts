@@ -1,5 +1,6 @@
 import { Track, mapResponseToTrack } from "../models/track";
 import { Paper, mapResponseToPaper } from "../models/paper";
+import { Assignment } from "../models/assignment";
 
 // The API base URL - adjust if needed
 const API_BASE_URL = "http://127.0.0.1:5000";
@@ -113,6 +114,41 @@ export const getPapersForTrack = async (trackId: string): Promise<Paper[]> => {
     return data.papers.map((paper: any) => mapResponseToPaper(paper));
   } catch (error) {
     console.error(`Error fetching papers for track ${trackId}:`, error);
+    throw error;
+  }
+};
+
+/**
+ * Get assignments for a specific paper
+ * 
+ * @param paperId - ID of the paper to fetch assignments for
+ * @returns Promise with array of assignments
+ */
+export const getAssignmentsByPaper = async (paperId: string): Promise<Assignment[]> => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/assignment/paper/${paperId}`, {
+      credentials: "include",
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || "Failed to fetch assignments for paper");
+    }
+
+    const data = await response.json();
+    
+    // Map each raw assignment to the Assignment interface
+    return data.map((assignment: any) => ({
+      _id: assignment._id,
+      id: assignment.id,
+      reviewer_id: assignment.reviewer_id,
+      paper_id: assignment.paper_id,
+      track_id: assignment.track_id,
+      created_at: assignment.created_at,
+      is_pending: assignment.is_pending || true // Default to true if not specified
+    }));
+  } catch (error) {
+    console.error(`Error fetching assignments for paper ${paperId}:`, error);
     throw error;
   }
 };
