@@ -51,6 +51,7 @@ const ProfilePage: React.FC = () => {
         const userData = await getUserById(id!);
         const roleObjs: Role[] = userData.roles
           ? await Promise.all(
+            
               userData.roles.map((rid) => userService.getRoleById(rid))
             )
           : [];
@@ -301,9 +302,11 @@ const ProfilePage: React.FC = () => {
             <ProfileUserRoles
               activeRoles={activeRoles.map((role) => ({
                 name: role.position || "Unknown",
+                conferenceId: role.conference_id || undefined,
               }))}
               pastRoles={pastRoles.map((role) => ({
                 name: role.position || "Unknown",
+                conferenceId: role.conference_id || undefined,
               }))}
             />
           </div>
