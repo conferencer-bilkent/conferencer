@@ -30,7 +30,7 @@ interface Assignment {
 }
 
 interface Paper {
-  id: number;
+  _id: string;
   authors: string;
   title: string;
   keywords: string;
@@ -98,16 +98,49 @@ const MyTasks: React.FC = () => {
   };
 
   const handleMakeReview = (paper: Paper) => {
-    navigate(`/review/${paper.id}`, { state: { paper } });
+    navigate(`/review/${paper._id}`, { state: { paper } });
   };
 
-  const handleUpdateReview = (paper: Paper) => {
-    navigate(`/review/${paper.id}`, {
-      state: {
-        paper,
-        isUpdate: true,
-      },
-    });
+  const handleUpdateReview = async (paper: Paper) => {
+    try {
+      // 1. Get all reviews for the paper
+      const reviewsResponse = await fetch(
+        `http://127.0.0.1:5000/review/paper/${paper._id}`,
+        {
+          credentials: "include",
+        }
+      );
+      const reviewsData = await reviewsResponse.json();
+      console.log("Reviews Data:", reviewsData); // Debugging line
+      // 2. Find the review by the current user
+      const userReview = reviewsData.reviews.find(
+        (review: any) => review.reviewer_id === user?.id
+      );
+      if (!userReview) {
+        console.error("Review not found for this user");
+        return;
+      }
+
+      // 3. Get the specific review details
+      const reviewResponse = await fetch(
+        `http://127.0.0.1:5000/review/${userReview._id}`,
+        {
+          credentials: "include",
+        }
+      );
+      const reviewDetails = await reviewResponse.json();
+
+      // Navigate to review page with both paper and review data
+      navigate(`/review/${paper._id}`, {
+        state: {
+          paper,
+          isUpdate: true,
+          reviewData: reviewDetails,
+        },
+      });
+    } catch (error) {
+      console.error("Error fetching review details:", error);
+    }
   };
 
   useEffect(() => {
@@ -206,7 +239,7 @@ const MyTasks: React.FC = () => {
               </TableHead>
               <TableBody>
                 {unreviewedPapers.map((paper) => (
-                  <TableRow key={paper.id}>
+                  <TableRow key={paper._id}>
                     <TableCell>{paper.title}</TableCell>
                     <TableCell>
                       {formatAuthors(JSON.parse(paper.authors))}
@@ -249,7 +282,7 @@ const MyTasks: React.FC = () => {
               </TableHead>
               <TableBody>
                 {reviewedPapers.map((paper) => (
-                  <TableRow key={paper.id}>
+                  <TableRow key={paper._id}>
                     <TableCell>{paper.title}</TableCell>
                     <TableCell>
                       {formatAuthors(JSON.parse(paper.authors))}

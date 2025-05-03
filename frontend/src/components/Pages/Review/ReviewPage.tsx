@@ -18,6 +18,8 @@ const ReviewPage: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useUser();
   const paper = location.state?.paper;
+  const isUpdate = location.state?.isUpdate;
+  const existingReview = location.state?.reviewData;
 
   const [reviewData, setReviewData] = useState({
     evaluation: 0,
@@ -28,6 +30,20 @@ const ReviewPage: React.FC = () => {
     sub_lastname: "",
     sub_email: "",
   });
+
+  useEffect(() => {
+    if (isUpdate && existingReview) {
+      setReviewData({
+        evaluation: existingReview.evaluation || 0,
+        evaluation_text: existingReview.evaluation_text || "",
+        confidence: existingReview.confidence || 3,
+        remarks: existingReview.remarks || "",
+        sub_firstname: existingReview.subreviewer?.first_name || "",
+        sub_lastname: existingReview.subreviewer?.last_name || "",
+        sub_email: existingReview.subreviewer?.email || "",
+      });
+    }
+  }, [isUpdate, existingReview]);
 
   // Add evaluation level labels
   const evaluationLabels = {
@@ -140,19 +156,20 @@ const ReviewPage: React.FC = () => {
           : {}),
       };
       console.log("Submission Data:", submissionData); // Debugging line
-      console.log("Paper ID:", paper._id); // Debugging line
-      const response = await fetch(
-        `http://127.0.0.1:5000/review/submit/${paper._id}`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(submissionData),
-          credentials: "include",
-        }
-      );
-      console.log("Submission Response:", response); // Debugging line
+      console.log(existingReview._id); // Debugging line
+      const url = isUpdate
+        ? `http://127.0.0.1:5000/review/${existingReview._id}/update`
+        : `http://127.0.0.1:5000/review/submit/${paper._id}`;
+
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(submissionData),
+        credentials: "include",
+      });
+
       if (response.ok) {
         navigate("/my-tasks");
       } else {
