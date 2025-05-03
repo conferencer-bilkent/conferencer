@@ -19,11 +19,11 @@ import { RateReview, Edit } from "@mui/icons-material";
 import { useUser } from "../../../context/UserContext";
 import { useNavigate } from "react-router-dom";
 
-interface User {
-  id: string;
-  name: string;
-  surname: string;
-}
+// interface User {
+//   id: string;
+//   name: string;
+//   surname: string;
+// }
 
 interface Assignment {
   id: number;

@@ -22,6 +22,9 @@ const UserRoles: React.FC<UserRolesProps> = ({ activeRoles, pastRoles }) => {
     color: "white",
     height: "100%",
     width: "100%",
+    display: "flex",
+    flexDirection: "column",
+    overflow: "hidden", // Hide overflow from the main container
   };
   
   const titleStyle: React.CSSProperties = {
@@ -36,29 +39,34 @@ const UserRoles: React.FC<UserRolesProps> = ({ activeRoles, pastRoles }) => {
     flexDirection: "column",
     gap: "10px",
   };
+  
+  // Add scrollable section styles
+  const scrollableSectionStyle: React.CSSProperties = {
+    overflowY: "auto",
+    flex: 1, // Takes up available space
+    paddingRight: "8px", // Space for the scrollbar
+  };
+  
   return (
-
     <div style={containerStyle}>
-      {/* Active Roles Section */}
       <h3 style={titleStyle}>Active Roles</h3>
-      <div style={listStyle}>
-        {activeRoles.map((role, index) => (
-          <RoleItem key={index} name={role.name} />
-        ))}
-      </div>
+      <div style={scrollableSectionStyle}>
+        <div style={listStyle}>
+          {activeRoles.map((role, index) => (
+            <RoleItem key={index} name={role.name} />
+          ))}
+        </div>
 
-      {/* Past Roles Section */}
-      <h3 style={{ ...titleStyle, marginTop: "20px" }}>Past Roles</h3>
-      <div style={listStyle}>
-        {pastRoles.map((role, index) => (
-          <RoleItem key={index} name={role.name} />
-        ))}
+        {/* Past Roles Section */}
+        <h3 style={{ ...titleStyle, marginTop: "20px" }}>Past Roles</h3>
+        <div style={listStyle}>
+          {pastRoles.map((role, index) => (
+            <RoleItem key={index} name={role.name} />
+          ))}
+        </div>
       </div>
     </div>
   );
 };
-
-// Inline styles
-
 
 export default UserRoles;
