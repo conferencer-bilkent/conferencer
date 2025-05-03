@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
   Box,
@@ -20,18 +20,75 @@ const ReviewPage: React.FC = () => {
   const paper = location.state?.paper;
 
   const [reviewData, setReviewData] = useState({
-    evaluation: "",
-    confidence: 3,
+    evaluation: 0,
+    evaluation_text: "",
+    confidence: 3, // Changed default to 3
+    remarks: "",
     sub_firstname: "",
     sub_lastname: "",
     sub_email: "",
   });
 
+  // Add evaluation level labels
+  const evaluationLabels = {
+    "-2": "Rejected",
+    "-1": "Slightly Rejected",
+    "0": "Neutral",
+    "1": "Slightly Accepted",
+    "2": "Accepted",
+  };
+
+  const [trackName, setTrackName] = useState<string>("Loading...");
+
+  useEffect(() => {
+    const fetchTrackName = async () => {
+      if (!paper?.track) return;
+      try {
+        const response = await fetch(
+          `http://127.0.0.1:5000/track/${paper.track}`,
+          {
+            credentials: "include",
+          }
+        );
+        const trackData = await response.json();
+        setTrackName(trackData.track_name || "Unknown Track");
+      } catch (error) {
+        console.error("Error fetching track:", error);
+        setTrackName("Unknown Track");
+      }
+    };
+
+    fetchTrackName();
+  }, [paper?.track]);
+
+  const formatAuthors = (authors: string) => {
+    try {
+      const authorArray = JSON.parse(authors);
+      return authorArray
+        .map((author: any) => `${author.lastname}, ${author.firstname}`)
+        .join("; ");
+    } catch (e) {
+      return authors;
+    }
+  };
+
+  const formatDate = (dateObj: any) => {
+    if (!dateObj || !dateObj.$date) return "No date";
+    const date = new Date(dateObj.$date);
+    return date.toLocaleDateString("en-US", {
+      month: "2-digit",
+      day: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
+
   const handleDownloadPaper = async () => {
     try {
-      console.log("Downloading paper with ID:", paper.id); // Debugging line
+      console.log("Downloading paper with ID:", paper._id); // Debugging line
       const response = await fetch(
-        `http://localhost:5000/paper/${paper.id}/download`,
+        `http://localhost:5000/paper/${paper._id}/download`,
         {
           credentials: "include",
         }
@@ -43,7 +100,7 @@ const ReviewPage: React.FC = () => {
         const downloadUrl = window.URL.createObjectURL(blob);
         const link = document.createElement("a");
         link.href = downloadUrl;
-        link.download = `paper_${paper.id}.pdf`;
+        link.download = `paper_${paper.title}.pdf`;
         // Trigger download
         document.body.appendChild(link);
         link.click();
@@ -64,21 +121,38 @@ const ReviewPage: React.FC = () => {
     e.preventDefault();
 
     try {
+      // Prepare submission data
+      const submissionData = {
+        reviewer_name: `${user?.name} ${user?.surname}`,
+        evaluation: reviewData.evaluation,
+        evaluation_text: reviewData.evaluation_text,
+        confidence: reviewData.confidence,
+        remarks: reviewData.remarks,
+        // Only include sub-reviewer info if any field is filled
+        ...(reviewData.sub_firstname ||
+        reviewData.sub_lastname ||
+        reviewData.sub_email
+          ? {
+              sub_firstname: reviewData.sub_firstname,
+              sub_lastname: reviewData.sub_lastname,
+              sub_email: reviewData.sub_email,
+            }
+          : {}),
+      };
+      console.log("Submission Data:", submissionData); // Debugging line
+      console.log("Paper ID:", paper._id); // Debugging line
       const response = await fetch(
-        `http://localhost:5000/review/submit/${paper.id}`,
+        `http://127.0.0.1:5000/review/submit/${paper._id}`,
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({
-            ...reviewData,
-            reviewer_name: `${user?.name} ${user?.surname}`,
-          }),
+          body: JSON.stringify(submissionData),
           credentials: "include",
         }
       );
-
+      console.log("Submission Response:", response); // Debugging line
       if (response.ok) {
         navigate("/my-tasks");
       } else {
@@ -105,7 +179,7 @@ const ReviewPage: React.FC = () => {
                 <strong>Title:</strong> {paper.title}
               </Typography>
               <Typography>
-                <strong>Authors:</strong> {paper.authors}
+                <strong>Authors:</strong> {formatAuthors(paper.authors)}
               </Typography>
               <Typography>
                 <strong>Keywords:</strong> {paper.keywords}
@@ -113,10 +187,11 @@ const ReviewPage: React.FC = () => {
             </Grid>
             <Grid item xs={12} md={6}>
               <Typography>
-                <strong>Track:</strong> {paper.track}
+                <strong>Track:</strong> {trackName}
               </Typography>
               <Typography>
-                <strong>Submission Date:</strong> {paper.submission_date}
+                <strong>Submission Date:</strong>{" "}
+                {formatDate(paper.submission_date)}
               </Typography>
               <Typography>
                 <strong>Paper: </strong>
@@ -138,13 +213,46 @@ const ReviewPage: React.FC = () => {
                 fullWidth
                 multiline
                 rows={6}
-                label="Evaluation"
-                value={reviewData.evaluation}
+                label="Evaluation Text"
+                value={reviewData.evaluation_text}
                 onChange={(e) =>
-                  setReviewData({ ...reviewData, evaluation: e.target.value })
+                  setReviewData({
+                    ...reviewData,
+                    evaluation_text: e.target.value,
+                  })
                 }
                 required
               />
+            </Grid>
+
+            <Grid item xs={12}>
+              <Typography gutterBottom>Evaluation Score</Typography>
+              <Box sx={{ px: 2 }}>
+                <Slider
+                  value={reviewData.evaluation}
+                  min={-2}
+                  max={2}
+                  step={1}
+                  sx={{
+                    "& .MuiSlider-markLabel": {
+                      "&[data-index='0']": { ml: -2 },
+                      "&[data-index='4']": { mr: -2 },
+                    },
+                  }}
+                  marks={Object.entries(evaluationLabels).map(
+                    ([value, label]) => ({
+                      value: Number(value),
+                      label,
+                    })
+                  )}
+                  onChange={(_, value) =>
+                    setReviewData({
+                      ...reviewData,
+                      evaluation: value as number,
+                    })
+                  }
+                />
+              </Box>
             </Grid>
 
             <Grid item xs={12}>
@@ -154,9 +262,29 @@ const ReviewPage: React.FC = () => {
                 min={1}
                 max={5}
                 step={1}
-                marks
+                marks={[
+                  { value: 1, label: "1" },
+                  { value: 2, label: "2" },
+                  { value: 3, label: "3" },
+                  { value: 4, label: "4" },
+                  { value: 5, label: "5" },
+                ]}
                 onChange={(_, value) =>
                   setReviewData({ ...reviewData, confidence: value as number })
+                }
+              />
+            </Grid>
+
+            <Grid item xs={12}>
+              <TextField
+                fullWidth
+                multiline
+                rows={2}
+                label="Remarks"
+                placeholder="e.g., Minor revisions required before acceptance."
+                value={reviewData.remarks}
+                onChange={(e) =>
+                  setReviewData({ ...reviewData, remarks: e.target.value })
                 }
               />
             </Grid>

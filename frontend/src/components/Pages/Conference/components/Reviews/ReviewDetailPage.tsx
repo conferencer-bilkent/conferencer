@@ -22,7 +22,7 @@ import AppTitle from "../../../../global/AppTitle";
 import { Paper } from "../../../../../models/paper";
 import { getAssignmentsByPaper } from "../../../../../services/trackService";
 import { Assignment } from "../../../../../models/assignment";
-import { getUserById } from "../../../../../services/userService"; 
+import { getUserById } from "../../../../../services/userService";
 
 // Define the interface for location state
 interface LocationState {
@@ -61,7 +61,9 @@ const ReviewDetailPage: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [loading, setLoading] = useState<boolean>(true);
-  const [paperAssignments, setPaperAssignments] = useState<AssignmentWithReviewer[]>([]);
+  const [paperAssignments, setPaperAssignments] = useState<
+    AssignmentWithReviewer[]
+  >([]);
 
   // Get the state passed from navigation
   const state = location.state as LocationState | undefined;
@@ -86,12 +88,12 @@ const ReviewDetailPage: React.FC = () => {
         setLoading(false);
         return;
       }
-      
+
       try {
         setLoading(true);
         // Fetch assignments for this paper
         const assignments = await getAssignmentsByPaper(selectedPaper.id);
-        
+
         // For each assignment, get the reviewer information
         const assignmentsWithReviewers = await Promise.all(
           assignments.map(async (assignment) => {
@@ -99,18 +101,23 @@ const ReviewDetailPage: React.FC = () => {
               const reviewer = await getUserById(assignment.reviewer_id);
               return {
                 ...assignment,
-                reviewerName: reviewer ? `${reviewer.name} ${reviewer.surname}` : 'Unknown',
+                reviewerName: reviewer
+                  ? `${reviewer.name} ${reviewer.surname}`
+                  : "Unknown",
               };
             } catch (error) {
-              console.error(`Error fetching reviewer ${assignment.reviewer_id}:`, error);
+              console.error(
+                `Error fetching reviewer ${assignment.reviewer_id}:`,
+                error
+              );
               return {
                 ...assignment,
-                reviewerName: 'Unknown',
+                reviewerName: "Unknown",
               };
             }
           })
         );
-        
+
         setPaperAssignments(assignmentsWithReviewers);
       } catch (error) {
         console.error("Error fetching assignments:", error);
@@ -118,7 +125,7 @@ const ReviewDetailPage: React.FC = () => {
         setLoading(false);
       }
     };
-    
+
     fetchAssignments();
   }, [selectedPaper]);
 
@@ -133,10 +140,10 @@ const ReviewDetailPage: React.FC = () => {
     if (!dateObj) return "-";
     try {
       const date = new Date(dateObj.$date);
-      return date.toLocaleDateString('en-US', { 
-        year: 'numeric', 
-        month: 'short', 
-        day: 'numeric' 
+      return date.toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
       });
     } catch (e) {
       return "-";
@@ -156,7 +163,8 @@ const ReviewDetailPage: React.FC = () => {
             mb={2}
           >
             <Typography color={colors.grey[100]} variant="h4" fontWeight="bold">
-              Completed Reviews: {reviewDataDisplay.completed}, Pending: {reviewDataDisplay.pending}
+              Completed Reviews: {reviewDataDisplay.completed}, Pending:{" "}
+              {reviewDataDisplay.pending}
             </Typography>
             <AppButton
               onClick={handleBackToReviews}
@@ -223,17 +231,24 @@ const ReviewDetailPage: React.FC = () => {
               </TableHead>
               <TableBody>
                 {loading ? (
-                  <TableRow>
+                  <TableRow key="loading-row">
                     <TableCell colSpan={8} align="center" sx={{ py: 3 }}>
-                      <CircularProgress size={40} sx={{ color: colors.blueAccent[400] }} />
+                      <CircularProgress
+                        size={40}
+                        sx={{ color: colors.blueAccent[400] }}
+                      />
                     </TableCell>
                   </TableRow>
                 ) : paperAssignments.length > 0 ? (
-                  paperAssignments.map((assignment) => (
-                    <TableRow key={assignment._id}>
-                      <TableCell sx={{ color: colors.grey[100] }}>{assignment.reviewerName}</TableCell>
+                  paperAssignments.map((assignment, index) => (
+                    <TableRow key={`${assignment._id}-${index}`}>
+                      <TableCell sx={{ color: colors.grey[100] }}>
+                        {assignment.reviewerName}
+                      </TableCell>
                       <TableCell sx={{ color: colors.grey[100] }}>-</TableCell>
-                      <TableCell sx={{ color: colors.grey[100] }}>{formatDate(assignment.created_at)}</TableCell>
+                      <TableCell sx={{ color: colors.grey[100] }}>
+                        {formatDate(assignment.created_at)}
+                      </TableCell>
                       <TableCell sx={{ color: colors.grey[100] }}>-</TableCell>
                       <TableCell sx={{ color: colors.grey[100] }}>-</TableCell>
                       <TableCell sx={{ color: colors.grey[100] }}>-</TableCell>
@@ -264,7 +279,9 @@ const ReviewDetailPage: React.FC = () => {
                               borderRadius: "8px",
                               fontSize: "12px",
                             }}
-                            onClick={() => navigate(`/profile/${assignment.reviewer_id}`)}
+                            onClick={() =>
+                              navigate(`/profile/${assignment.reviewer_id}`)
+                            }
                           >
                             Reviewer's Profile
                           </Button>
