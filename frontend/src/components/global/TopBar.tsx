@@ -15,7 +15,7 @@ import {
   ClickAwayListener,
   Badge,
 } from "@mui/material";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useState, useEffect } from "react";
 import { ColorModeContext, tokens } from "../../theme";
 import LightModeOutlinedIcon from "@mui/icons-material/LightModeOutlined";
 import DarkModeOutlinedIcon from "@mui/icons-material/DarkModeOutlined";
@@ -24,24 +24,16 @@ import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
 import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
 import SearchIcon from "@mui/icons-material/Search";
 import { useUser } from "../../context/UserContext";
+import { useNotifications } from "../../context/NotificationsContext";
 import { useNavigate } from "react-router-dom";
-
-interface Notification {
-  id: string;
-  title: string;
-  content: string;
-  is_interactive: boolean;
-  is_answered: boolean;
-  created_at: string;
-  is_accepted: boolean;
-  is_read: boolean;
-}
 
 const Topbar: React.FC = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const colorMode = useContext(ColorModeContext);
   const { user, logout } = useUser();
+  const { notifications, setNotifications, fetchNotifications } =
+    useNotifications();
   const navigate = useNavigate();
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -51,8 +43,11 @@ const Topbar: React.FC = () => {
   const [showUsers, setShowUsers] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
 
-  const [notifications, setNotifications] = useState<Notification[]>([]);
   const [showNotifications, setShowNotifications] = useState(false);
+
+  useEffect(() => {
+    fetchNotifications();
+  }, []);
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -90,24 +85,7 @@ const Topbar: React.FC = () => {
     }
   };
 
-  const fetchNotifications = async () => {
-    try {
-      const res = await fetch("http://127.0.0.1:5000/notification", {
-        credentials: "include",
-      });
-      if (!res.ok) throw new Error("Fetch notifications failed");
-      const data = await res.json();
-      setNotifications(data.notifications);
-    } catch (err) {
-      console.error("Error fetching notifications:", err);
-    }
-  };
-
-  useEffect(() => {
-    fetchNotifications();
-  }, []);
-
-  // 3. Compute unread count
+  // Compute unread count
   const unreadCount = notifications.filter((n) => !n.is_read).length;
   const handleSearchFocus = async () => {
     if (users.length === 0) {
@@ -126,15 +104,13 @@ const Topbar: React.FC = () => {
 
   const handleNotificationsClick = async () => {
     if (!showNotifications) {
-      // 1️⃣ load notifications when bell is clicked
-
-      // 2️⃣ mark all as read on the server
+      // Mark all as read on the server
       await fetch("http://127.0.0.1:5000/notification/mark_read", {
         method: "POST",
         credentials: "include",
       });
 
-      // 3️⃣ update local state so badge clears
+      // Update local state so badge clears
       setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })));
     }
     setShowNotifications(!showNotifications);
@@ -166,7 +142,6 @@ const Topbar: React.FC = () => {
     isAccepted: boolean
   ) => {
     try {
-      // build the full URL
       const response = await fetch(
         `http://127.0.0.1:5000/notification/mark_answered/${id}/${isAccepted}`,
         {

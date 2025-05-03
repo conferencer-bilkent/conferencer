@@ -24,6 +24,7 @@ import SideMenu from "./components/global/SideMenu";
 import TopBar from "./components/global/TopBar";
 import ConferenceOverview from "./components/Pages/Conference/ConferenceOverview";
 import ReviewPage from "./components/Pages/Review/ReviewPage";
+import { NotificationsProvider } from "./context/NotificationsContext";
 
 const App: React.FC = () => {
   const [theme, colorMode] = useMode();
@@ -43,148 +44,150 @@ const App: React.FC = () => {
       <ThemeProvider theme={theme}>
         <CssBaseline />
         <UserProvider>
-          <ConferenceProvider>
-            <Router>
-              <Routes>
-                <Route
-                  path="/login"
-                  element={
-                    <div
-                      style={{
-                        display: "flex",
-                        justifyContent: "center",
-                        alignItems: "center",
-                        height: "100vh",
-                      }}
-                    >
-                      <LoginForm />
-                    </div>
-                  }
-                />
-                <Route
-                  path="/"
-                  element={
-                    <div
-                      style={{
-                        display: "flex",
-                        justifyContent: "center",
-                        alignItems: "center",
-                        height: "100vh",
-                      }}
-                    >
-                      <LoginForm />
-                    </div>
-                  }
-                />
-                <Route
-                  path="/register"
-                  element={
-                    <div
-                      style={{
-                        display: "flex",
-                        justifyContent: "center",
-                        alignItems: "center",
-                        height: "100vh",
-                      }}
-                    >
-                      <RegisterForm />
-                    </div>
-                  }
-                />
-                <Route
-                  path="*"
-                  element={
-                    <div
-                      style={{
-                        display: "flex",
-                        height: "100vh",
-                        overflow: "hidden",
-                      }}
-                    >
+          <NotificationsProvider>
+            <ConferenceProvider>
+              <Router>
+                <Routes>
+                  <Route
+                    path="/login"
+                    element={
                       <div
                         style={{
                           display: "flex",
-                          flexDirection: "column",
-                          height: "100%",
-                          overflow: "hidden",
+                          justifyContent: "center",
+                          alignItems: "center",
+                          height: "100vh",
                         }}
                       >
-                        <TopBar />
-                        <SideMenu items={menuItems} />
+                        <LoginForm />
                       </div>
+                    }
+                  />
+                  <Route
+                    path="/"
+                    element={
                       <div
                         style={{
-                          flex: 1,
                           display: "flex",
-                          flexDirection: "column",
-                          marginLeft: "240px", // Adjust based on TopBar width
+                          justifyContent: "center",
+                          alignItems: "center",
+                          height: "100vh",
+                        }}
+                      >
+                        <LoginForm />
+                      </div>
+                    }
+                  />
+                  <Route
+                    path="/register"
+                    element={
+                      <div
+                        style={{
+                          display: "flex",
+                          justifyContent: "center",
+                          alignItems: "center",
+                          height: "100vh",
+                        }}
+                      >
+                        <RegisterForm />
+                      </div>
+                    }
+                  />
+                  <Route
+                    path="*"
+                    element={
+                      <div
+                        style={{
+                          display: "flex",
+                          height: "100vh",
+                          overflow: "hidden",
                         }}
                       >
                         <div
                           style={{
-                            flex: 1,
-                            overflowY: "auto",
-                            marginTop: "64px",
+                            display: "flex",
+                            flexDirection: "column",
+                            height: "100%",
+                            overflow: "hidden",
                           }}
                         >
-                          <Routes>
-                            <Route path="/home" element={<HomePage />} />
-                            <Route
-                              path="/conference"
-                              element={<ConferencePage />}
-                            />
-                            <Route
-                              path="/conference/create"
-                              element={<CreateConference />}
-                            />
-                            <Route
-                              path="/conference/createTrack"
-                              element={<CreateTrack />}
-                            />
-                            <Route
-                              path="/conference/overview"
-                              element={<ConferenceOverview />}
-                            />
-                            <Route path="/tasks" element={<MyTasks />} />
-                            <Route
-                              path="/notifications"
-                              element={<NotificationsPage />}
-                            />
-                            <Route path="/chat" element={<ChatPage />} />
-                            <Route path="/review" element={<ReviewsPage />} />
-                            <Route
-                              path="/profile/:id"
-                              element={<ProfilePage />}
-                            />
-                            <Route
-                              path="/review/detail"
-                              element={<ReviewDetailPage />}
-                            />
-                            <Route
-                              path="/ex"
-                              element={<SubmissionsList />}
-                            ></Route>
-                            <Route
-                              path="/addSubmission"
-                              element={
-                                <SubmissionProvider>
-                                  <AddSubmissionPage />
-                                </SubmissionProvider>
-                              }
-                            />
-                            <Route
-                              path="/review/:paperId"
-                              element={<ReviewPage />}
-                            />
-                          </Routes>
+                          <TopBar />
+                          <SideMenu items={menuItems} />
+                        </div>
+                        <div
+                          style={{
+                            flex: 1,
+                            display: "flex",
+                            flexDirection: "column",
+                            marginLeft: "240px", // Adjust based on TopBar width
+                          }}
+                        >
+                          <div
+                            style={{
+                              flex: 1,
+                              overflowY: "auto",
+                              marginTop: "64px",
+                            }}
+                          >
+                            <Routes>
+                              <Route path="/home" element={<HomePage />} />
+                              <Route
+                                path="/conference"
+                                element={<ConferencePage />}
+                              />
+                              <Route
+                                path="/conference/create"
+                                element={<CreateConference />}
+                              />
+                              <Route
+                                path="/conference/createTrack"
+                                element={<CreateTrack />}
+                              />
+                              <Route
+                                path="/conference/overview"
+                                element={<ConferenceOverview />}
+                              />
+                              <Route path="/tasks" element={<MyTasks />} />
+                              <Route
+                                path="/notifications"
+                                element={<NotificationsPage />}
+                              />
+                              <Route path="/chat" element={<ChatPage />} />
+                              <Route path="/review" element={<ReviewsPage />} />
+                              <Route
+                                path="/profile/:id"
+                                element={<ProfilePage />}
+                              />
+                              <Route
+                                path="/review/detail"
+                                element={<ReviewDetailPage />}
+                              />
+                              <Route
+                                path="/ex"
+                                element={<SubmissionsList />}
+                              ></Route>
+                              <Route
+                                path="/addSubmission"
+                                element={
+                                  <SubmissionProvider>
+                                    <AddSubmissionPage />
+                                  </SubmissionProvider>
+                                }
+                              />
+                              <Route
+                                path="/review/:paperId"
+                                element={<ReviewPage />}
+                              />
+                            </Routes>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  }
-                />
-              </Routes>
-            </Router>
-          </ConferenceProvider>
+                    }
+                  />
+                </Routes>
+              </Router>
+            </ConferenceProvider>
+          </NotificationsProvider>
         </UserProvider>
       </ThemeProvider>
     </ColorModeContext.Provider>

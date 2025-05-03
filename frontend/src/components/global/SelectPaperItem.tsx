@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { FaBook, FaRegSquare, FaCheckSquare } from "react-icons/fa";
 
 export interface Paper {

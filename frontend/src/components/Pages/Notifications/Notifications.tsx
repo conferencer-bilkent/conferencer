@@ -1,42 +1,31 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { SectionTitle } from "../../global/AppTitle";
 import { tokens } from "../../../theme";
-
-interface Notification {
-  id: string;
-  title: string;
-  content: string;
-  is_interactive: boolean;
-  is_answered: boolean;
-  created_at: string;
-  is_accepted: boolean;
-  is_read: boolean;
-}
+import { useNotifications } from "../../../context/NotificationsContext";
 
 const colors = tokens("dark");
 
 const NotificationsPage: React.FC = () => {
-  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const { notifications, setNotifications, fetchNotifications } =
+    useNotifications();
 
   useEffect(() => {
-    const fetchNotifications = async () => {
+    const markNotificationsAsRead = async () => {
       try {
-        const response = await fetch("http://127.0.0.1:5000/notification", {
-          method: "GET",
+        await fetch("http://127.0.0.1:5000/notification/mark_read", {
+          method: "POST",
           credentials: "include",
         });
-        if (response.ok) {
-          const data = await response.json();
-          setNotifications(data.notifications);
-        } else {
-          console.error("Failed to fetch notifications");
-        }
+        setNotifications((prev) =>
+          prev.map((notification) => ({ ...notification, is_read: true }))
+        );
       } catch (error) {
-        console.error("Error fetching notifications:", error);
+        console.error("Error marking notifications as read:", error);
       }
     };
 
     fetchNotifications();
+    markNotificationsAsRead();
   }, []);
 
   const handleResponse = async (id: string, isAccepted: boolean) => {

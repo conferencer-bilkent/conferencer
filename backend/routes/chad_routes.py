@@ -59,14 +59,17 @@ def send_chad():
         content=content
     )
     
+    # Get sender's name
+    sender = mongo.db.users.find_one({"_id": ObjectId(from_user)})
+    sender_name = f"{sender['name']} {sender['surname']}" if sender else "Unknown User"
+    
     # send notification
     send_notification(
         to_whom=to_user,
         title=f"New message!",
-        content=f"You have a new message from {from_user} with subject: {subject}",
+        content=f"You have a new message from {sender_name} with subject: {subject}",
         is_interactive=False
     )
-
 
     try:
         # Insert to MongoDB

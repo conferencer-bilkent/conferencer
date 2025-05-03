@@ -18,7 +18,7 @@ import AppButton from "../../../components/global/AppButton";
 import { RateReview, Edit } from "@mui/icons-material";
 import { useUser } from "../../../context/UserContext";
 import { useNavigate } from "react-router-dom";
-
+import { tokens } from "../../../theme";
 interface Assignment {
   id: number;
   paper_id: number;
@@ -49,6 +49,31 @@ const MyTasks: React.FC = () => {
   const [unreviewedPapers, setUnreviewedPapers] = useState<Paper[]>([]);
   const [reviewedPapers, setReviewedPapers] = useState<Paper[]>([]);
   const [trackNames, setTrackNames] = useState<{ [key: string]: string }>({});
+
+  const colors = tokens(theme.palette.mode);
+
+  const tableCellStyle: React.CSSProperties = {
+    padding: "8px",
+    color: colors.grey[100],
+    borderBottom: `1px solid ${colors.grey[100]}`,
+    borderRight: `1px solid ${colors.grey[100]}`,
+    borderTop: `1px solid ${colors.grey[100]}`,
+    borderLeft: `1px solid ${colors.grey[100]}`,
+    backgroundColor: colors.primary[400],
+  };
+
+  const titleCellStyle: React.CSSProperties = {
+    ...tableCellStyle,
+    maxWidth: "300px", // Limit width
+    whiteSpace: "normal", // Allow text wrapping
+    wordWrap: "break-word", // Break long words if needed
+  };
+
+  const tableContainerStyle: React.CSSProperties = {
+    border: `1px solid ${colors.grey[100]}`,
+    borderRadius: "12px",
+    backgroundColor: colors.primary[500],
+  };
 
   const formatAuthors = (authors: any[]) => {
     if (!Array.isArray(authors)) return "";
@@ -226,29 +251,31 @@ const MyTasks: React.FC = () => {
           <Typography variant="h6" sx={{ mb: 2 }}>
             Unreviewed Papers
           </Typography>
-          <TableContainer component={Paper}>
+          <TableContainer component={Paper} style={tableContainerStyle}>
             <Table>
               <TableHead>
                 <TableRow>
-                  <TableCell>Title</TableCell>
-                  <TableCell>Authors</TableCell>
-                  <TableCell>Track</TableCell>
-                  <TableCell>Date</TableCell>
-                  <TableCell>Actions</TableCell>
+                  <TableCell style={titleCellStyle}>Title</TableCell>
+                  <TableCell style={tableCellStyle}>Authors</TableCell>
+                  <TableCell style={tableCellStyle}>Track</TableCell>
+                  <TableCell style={tableCellStyle}>Date</TableCell>
+                  <TableCell style={tableCellStyle}>Actions</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
                 {unreviewedPapers.map((paper) => (
                   <TableRow key={paper._id}>
-                    <TableCell>{paper.title}</TableCell>
-                    <TableCell>
+                    <TableCell style={titleCellStyle}>{paper.title}</TableCell>
+                    <TableCell style={tableCellStyle}>
                       {formatAuthors(JSON.parse(paper.authors))}
                     </TableCell>
-                    <TableCell>
+                    <TableCell style={tableCellStyle}>
                       {trackNames[paper.track] || "Loading..."}
                     </TableCell>
-                    <TableCell>{formatDate(paper.submission_date)}</TableCell>
-                    <TableCell>
+                    <TableCell style={tableCellStyle}>
+                      {formatDate(paper.submission_date)}
+                    </TableCell>
+                    <TableCell style={tableCellStyle}>
                       <AppButton
                         icon={<RateReview />}
                         text="Make Review"
@@ -269,29 +296,31 @@ const MyTasks: React.FC = () => {
           <Typography variant="h6" sx={{ mb: 2 }}>
             Reviewed Papers
           </Typography>
-          <TableContainer component={Paper}>
+          <TableContainer component={Paper} style={tableContainerStyle}>
             <Table>
               <TableHead>
                 <TableRow>
-                  <TableCell>Title</TableCell>
-                  <TableCell>Authors</TableCell>
-                  <TableCell>Track</TableCell>
-                  <TableCell>Date</TableCell>
-                  <TableCell>Actions</TableCell>
+                  <TableCell style={titleCellStyle}>Title</TableCell>
+                  <TableCell style={tableCellStyle}>Authors</TableCell>
+                  <TableCell style={tableCellStyle}>Track</TableCell>
+                  <TableCell style={tableCellStyle}>Date</TableCell>
+                  <TableCell style={tableCellStyle}>Actions</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
                 {reviewedPapers.map((paper) => (
                   <TableRow key={paper._id}>
-                    <TableCell>{paper.title}</TableCell>
-                    <TableCell>
+                    <TableCell style={titleCellStyle}>{paper.title}</TableCell>
+                    <TableCell style={tableCellStyle}>
                       {formatAuthors(JSON.parse(paper.authors))}
                     </TableCell>
-                    <TableCell>
+                    <TableCell style={tableCellStyle}>
                       {trackNames[paper.track] || "Loading..."}
                     </TableCell>
-                    <TableCell>{formatDate(paper.submission_date)}</TableCell>
-                    <TableCell>
+                    <TableCell style={tableCellStyle}>
+                      {formatDate(paper.submission_date)}
+                    </TableCell>
+                    <TableCell style={tableCellStyle}>
                       <Box sx={{ display: "flex", gap: 1 }}>
                         <AppButton
                           icon={<Edit />}

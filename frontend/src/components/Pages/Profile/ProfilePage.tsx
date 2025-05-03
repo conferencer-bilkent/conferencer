@@ -18,7 +18,7 @@ import {
 import AppTitle from "../../global/AppTitle";
 import ProfileUserRoles from "./components/ProfileUserRoles";
 import { tokens } from "../../../theme";
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { useUser } from "../../../context/UserContext";
 import { getUserStats, UserData, Role } from "../../../models/user";
 import { getUserById } from "../../../services/userService";
@@ -29,8 +29,7 @@ import { RateReview } from "@mui/icons-material";
 const ProfilePage: React.FC = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
-  const navigate = useNavigate();
-  const { user: currentUser, loading: contextLoading } = useUser();
+  const { user: currentUser } = useUser();
   const { id } = useParams<{ id: string }>();
   const [profileUser, setProfileUser] = useState<UserData | null>(null);
   const [userRoles, setUserRoles] = useState<Role[]>([]);
@@ -56,18 +55,19 @@ const ProfilePage: React.FC = () => {
               userData.roles.map((rid) => userService.getRoleById(rid))
             )
           : [];
-        // Store roles separately from userData
         setProfileUser(userData);
         setUserRoles(roleObjs);
       } catch (err) {
         console.error("Error fetching user profile:", err);
         setError("Failed to load user profile");
       } finally {
-        setLoading(contextLoading ? true : false);
+        setLoading(false);
       }
     };
-    fetchUserData();
-  }, [id, currentUser, contextLoading, navigate]);
+    if (id) {
+      fetchUserData();
+    }
+  }, [id]);
 
   const isOwnProfile = currentUser?.id === id;
 
@@ -226,6 +226,7 @@ const ProfilePage: React.FC = () => {
 
     marginTop: "10px",
   };
+
   // BUNU AL
   const statsCellStyle: React.CSSProperties = {
     padding: "8px",
@@ -360,24 +361,10 @@ const ProfilePage: React.FC = () => {
           <Table size="small" style={{ color: colors.grey[100] }}>
             <TableHead>
               <TableRow>
-                <TableCell
-                  style={{
-                    color: colors.grey[100],
-                    backgroundColor: colors.primary[400],
-
-                    borderBottom: `1px solid ${colors.grey[100]}`,
-                  }}
-                >
+                <TableCell style={statsCellStyle}>
                   <strong>Preferred Keywords</strong>
                 </TableCell>
-                <TableCell
-                  style={{
-                    color: colors.grey[100],
-                    backgroundColor: colors.primary[400],
-
-                    borderBottom: `1px solid ${colors.grey[100]}`,
-                  }}
-                >
+                <TableCell style={statsCellStyle}>
                   <strong>Unwanted Keywords</strong>
                 </TableCell>
               </TableRow>
@@ -390,20 +377,10 @@ const ProfilePage: React.FC = () => {
                 ),
               }).map((_, index) => (
                 <TableRow key={index}>
-                  <TableCell
-                    style={{
-                      color: colors.grey[400],
-                      borderBottom: `1px solid ${colors.grey[100]}`,
-                    }}
-                  >
+                  <TableCell style={statsCellStyle}>
                     {preferredKeywords[index] || "-"}
                   </TableCell>
-                  <TableCell
-                    style={{
-                      color: colors.grey[400],
-                      borderBottom: `1px solid ${colors.grey[100]}`,
-                    }}
-                  >
+                  <TableCell style={statsCellStyle}>
                     {unwantedKeywords[index] || "-"}
                   </TableCell>
                 </TableRow>
