@@ -229,7 +229,7 @@ const ReviewDetailPage: React.FC = () => {
                     </TableCell>
                   </TableRow>
                 ) : paperAssignments.length > 0 ? (
-                  paperAssignments.map((assignment, idx) => (
+                  paperAssignments.map((assignment) => (
                     <TableRow key={assignment._id}>
                       <TableCell sx={{ color: colors.grey[100] }}>{assignment.reviewerName}</TableCell>
                       <TableCell sx={{ color: colors.grey[100] }}>-</TableCell>
