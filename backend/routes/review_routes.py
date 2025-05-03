@@ -7,62 +7,93 @@ from datetime import datetime
 def get_review(review_id):
     try:
         review = mongo.db.reviews.find_one({"_id": ObjectId(review_id)})
-
         if not review:
             return jsonify({"error": "Review not found"}), 404
 
-        review_obj = Review(
-            id=review["_id"],
-            paper_id=review["paper_id"],
-            reviewer_id=review["reviewer_id"],
-            reviewer_name=review["reviewer_name"],
-            sub_firstname=review["subreviewer"]["first_name"],
-            sub_lastname=review["subreviewer"]["last_name"],
-            sub_email=review["subreviewer"]["email"],
-            evaluation=review["evaluation"],
-            confidence=review["confidence"],
-            created_at=review["created_at"]
-        )
+        review["_id"] = str(review["_id"])
+        review["created_at"] = review.get("created_at").isoformat() if review.get("created_at") else None
 
-        return jsonify({"review": review_obj.to_dict()}), 200
+        return jsonify(review), 200
 
     except Exception as e:
-        return jsonify({"error": f"Failed to retrieve review: {str(e)}"}), 500
+        return jsonify({"error": f"Failed to fetch review: {str(e)}"}), 500
 
-def submit_review(paper_id):
+def update_review(review_id):
     if "user_id" not in session:
         return jsonify({"error": "Unauthorized"}), 401
 
     data = request.get_json()
 
     try:
-        review = Review(
-            id=ObjectId(),
-            paper_id=paper_id,
-            reviewer_id=session["user_id"],
-            reviewer_name=data.get("reviewer_name"),
-            sub_firstname=data.get("sub_firstname"),
-            sub_lastname=data.get("sub_lastname"),
-            sub_email=data.get("sub_email"),
-            evaluation=data.get("evaluation"),
-            confidence=data.get("confidence"),
-            created_at=datetime.utcnow()
+        review = mongo.db.reviews.find_one({"_id": ObjectId(review_id)})
+        if not review:
+            return jsonify({"error": "Review not found"}), 404
+
+        update_fields = {}
+
+        for field in ["evaluation", "confidence", "evaluation_text", "remarks", "reviewer_name",
+                      "sub_firstname", "sub_lastname", "sub_email"]:
+            if field in data:
+                update_fields[field] = data[field]
+
+        sub_fields = ["sub_firstname", "sub_lastname", "sub_email"]
+        if any(field in data for field in sub_fields):
+            subreviewer = review.get("subreviewer", {})
+            if "sub_firstname" in data:
+                subreviewer["first_name"] = data["sub_firstname"]
+            if "sub_lastname" in data:
+                subreviewer["last_name"] = data["sub_lastname"]
+            if "sub_email" in data:
+                subreviewer["email"] = data["sub_email"]
+            update_fields["subreviewer"] = subreviewer
+
+        if not update_fields:
+            return jsonify({"error": "No valid fields provided to update"}), 400
+
+        # Perform update
+        mongo.db.reviews.update_one(
+            {"_id": ObjectId(review_id)},
+            {"$set": update_fields}
         )
 
-        # Save review separately into the reviews collection
-        mongo.db.reviews.insert_one(review.to_dict())
-
-        # Also push the review into the paper's reviews array
-        mongo.db.papers.update_one(
-            {"_id": ObjectId(paper_id)},
-            {"$push": {"reviews": review.to_dict()}}
-        )
-
-        return jsonify({"message": "Review created and linked to paper", "review_id": review.id}), 201
+        return jsonify({"message": "Review updated successfully"}), 200
 
     except Exception as e:
-        print("Review creation error:", e)
-        return jsonify({"error": "Failed to create review"}), 500
+        return jsonify({"error": f"Failed to update review: {str(e)}"}), 500
+
+def submit_review():
+    if "user_id" not in session:
+        return jsonify({"error": "Unauthorized"}), 401
+
+    data = request.get_json()
+
+    required_fields = ["paper_id", "reviewer_name", "sub_firstname", "sub_lastname", "sub_email", "evaluation", "confidence"]
+    if not all(field in data for field in required_fields):
+        return jsonify({"error": "Missing required fields"}), 400
+
+    try:
+        review = Review(
+            paper_id=data["paper_id"],
+            reviewer_id=session["user_id"],
+            reviewer_name=data["reviewer_name"],
+            sub_firstname=data["sub_firstname"],
+            sub_lastname=data["sub_lastname"],
+            sub_email=data["sub_email"],
+            evaluation=data["evaluation"],
+            confidence=data["confidence"],
+            evaluation_text=data.get("evaluation_text", ""),
+            remarks=data.get("remarks", "")
+        )
+
+        result = mongo.db.reviews.insert_one(review.to_dict())
+
+        return jsonify({
+            "message": "Review created successfully",
+            "review_id": str(result.inserted_id)
+        }), 201
+
+    except Exception as e:
+        return jsonify({"error": f"Failed to create review: {str(e)}"}), 500
 
 def get_reviews_by_paper(paper_id):
     if "user_id" not in session:
@@ -81,3 +112,69 @@ def get_reviews_by_paper(paper_id):
         return jsonify({"reviews": review_list}), 200
     except Exception as e:
         return jsonify({"error": f"Failed to fetch reviews: {str(e)}"}), 500
+
+def rate_review(review_id):
+    if "user_id" not in session:
+        return jsonify({"error": "Unauthorized"}), 401
+
+    user_id = session["user_id"]
+    data = request.get_json()
+
+    if not data or "rate" not in data:
+        return jsonify({"error": "Rate value is required"}), 400
+
+    try:
+        rate_value = int(data["rate"])
+
+        # Find the review
+        review = mongo.db.reviews.find_one({"_id": ObjectId(review_id)})
+        if not review:
+            return jsonify({"error": "Review not found"}), 404
+
+        rates = review.get("rates", [])
+        updated = False
+
+        # Update rate if already rated by this user
+        for r in rates:
+            if r["userid"] == user_id:
+                r["rate"] = rate_value
+                updated = True
+                break
+
+        if not updated:
+            # Add new rate
+            rates.append({"userid": user_id, "rate": rate_value})
+
+        # Update the review document
+        mongo.db.reviews.update_one(
+            {"_id": ObjectId(review_id)},
+            {"$set": {"rates": rates}}
+        )
+
+        return jsonify({"message": "Rate added/updated successfully"}), 200
+
+    except Exception as e:
+        return jsonify({"error": f"Failed to rate review: {str(e)}"}), 500
+    
+def avg_rate(review_id):
+    try:
+        review = mongo.db.reviews.find_one({"_id": ObjectId(review_id)})
+        if not review:
+            return jsonify({"error": "Review not found"}), 404
+
+        rates = review.get("rates", [])
+
+        if not rates:
+            return jsonify({"average_rate": 0, "count": 0}), 200
+
+        total = sum(r["rate"] for r in rates)
+        count = len(rates)
+        average = total / count if count > 0 else 0
+
+        return jsonify({
+            "average_rate": round(average, 2),
+            "count": count
+        }), 200
+
+    except Exception as e:
+        return jsonify({"error": f"Failed to calculate average rate: {str(e)}"}), 500

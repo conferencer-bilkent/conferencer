@@ -154,3 +154,91 @@ def get_all_papers():
     except Exception as e:
         return jsonify({"error": f"Failed to fetch papers: {str(e)}"}), 500
 
+def bid(paper_id):
+    if "user_id" not in session:
+        return jsonify({"error": "Unauthorized"}), 401
+
+    user_id = session["user_id"]
+
+    try:
+        paper = mongo.db.papers.find_one({"_id": ObjectId(paper_id)})
+        if not paper:
+            return jsonify({"error": "Paper not found"}), 404
+
+        biddings = paper.get("biddings", [])
+
+        if user_id not in biddings:
+            biddings.append(user_id)
+            mongo.db.papers.update_one(
+                {"_id": ObjectId(paper_id)},
+                {"$set": {"biddings": biddings}}
+            )
+
+        return jsonify({"message": "Bid added successfully", "biddings": biddings}), 200
+
+    except Exception as e:
+        return jsonify({"error": f"Failed to add bid: {str(e)}"}), 500
+
+def get_biddings(paper_id):
+    try:
+        paper = mongo.db.papers.find_one({"_id": ObjectId(paper_id)})
+        if not paper:
+            return jsonify({"error": "Paper not found"}), 404
+
+        biddings = paper.get("biddings", [])
+
+        return jsonify({"biddings": biddings}), 200
+
+    except Exception as e:
+        return jsonify({"error": f"Failed to get biddings: {str(e)}"}), 500
+    
+def update_paper(paper_id):
+    if "user_id" not in session:
+        return jsonify({"error": "Unauthorized"}), 401
+
+    data = request.form  # For text fields
+    file = request.files.get('file')  # For file upload
+
+    try:
+        paper = mongo.db.papers.find_one({"_id": ObjectId(paper_id)})
+        if not paper:
+            return jsonify({"error": "Paper not found"}), 404
+
+        update_fields = {}
+
+        # Update text fields
+        if "title" in data:
+            update_fields["title"] = data.get("title")
+        if "abstract" in data:
+            update_fields["abstract"] = data.get("abstract")
+        if "keywords" in data:
+            update_fields["keywords"] = request.form.getlist("keywords")
+        if "authors" in data:
+            update_fields["authors"] = request.form.getlist("authors")
+
+        # If a new file is uploaded
+        if file and allowed_file(file.filename):
+            old_path = paper.get("paper_path")
+            if old_path and os.path.exists(old_path.lstrip("/")):
+                os.remove(old_path.lstrip("/"))
+
+            # Save new file
+            safe_filename = secure_filename(file.filename)
+            new_path = os.path.join(UPLOAD_FOLDER, f"{paper_id}_{safe_filename}")
+            os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+            file.save(new_path)
+
+            update_fields["paper"] = f"/{new_path}"
+
+        # Apply updates
+        if update_fields:
+            mongo.db.papers.update_one(
+                {"_id": ObjectId(paper_id)},
+                {"$set": update_fields}
+            )
+
+        return jsonify({"message": "Paper updated successfully"}), 200
+
+    except Exception as e:
+        return jsonify({"error": f"Failed to update paper: {str(e)}"}), 500
+

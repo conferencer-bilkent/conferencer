@@ -1,9 +1,10 @@
 from bson import ObjectId
 from datetime import datetime
+from extensions import mongo
 
 class Paper:
-    def __init__(self, paper_id, title, abstract, keywords, paper_path, authors,created_by,
-                 decision=None, track=None, bidding=None, assignee=None,
+    def __init__(self, paper_id, title, abstract, keywords, paper_path, authors, created_by,
+                 decision=None, track=None, biddings=None, assignee=None,
                  reviews=None, created_at=None):
         self.id = str(paper_id) if isinstance(paper_id, ObjectId) else paper_id
         self.title = title
@@ -13,7 +14,7 @@ class Paper:
         self.authors = authors
         self.decision = decision
         self.track = track
-        self.bidding = bidding
+        self.biddings = biddings or []
         self.assignee = assignee
         self.reviews = reviews or []
         self.created_by = created_by
@@ -23,8 +24,20 @@ class Paper:
     def calculate_avg_acceptance(self):
         if not self.reviews:
             return 0.0
-        total_weighted = sum(r.evaluation * r.confidence for r in self.reviews)
-        total_confidence = sum(r.confidence for r in self.reviews)
+
+        from extensions import mongo  # Prevent circular import
+
+        total_weighted = 0
+        total_confidence = 0
+
+        for review_id in self.reviews:
+            review = mongo.db.reviews.find_one({"_id": ObjectId(review_id)})
+            if review:
+                eval_score = review.get("evaluation", 0)
+                confidence = review.get("confidence", 0)
+                total_weighted += eval_score * confidence
+                total_confidence += confidence
+
         return total_weighted / total_confidence if total_confidence else 0.0
 
     def to_dict(self):
@@ -37,10 +50,11 @@ class Paper:
             "authors": self.authors,
             "decision": self.decision,
             "track": self.track,
-            "bidding": self.bidding,
+            "biddings": self.biddings,
             "assignee": self.assignee,
             "reviews": self.reviews,
             "created_by": self.created_by,
             "created_at": self.created_at,
             "avg_acceptance": self.avg_acceptance
         }
+
