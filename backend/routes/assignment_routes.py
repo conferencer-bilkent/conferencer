@@ -62,3 +62,21 @@ def get_assigned_papers(reviewer_id):
     except Exception as e:
         print(f"Error fetching assigned papers: {str(e)}")
         return jsonify({"error": "Failed to retrieve assigned papers."}), 500
+    
+
+def get_assignments_by_paper(paper_id):
+    try:
+        fake_paper_id = paper_id
+        paper = mongo.db.papers.find_one({"id": fake_paper_id})
+        if not paper:
+            return jsonify({"error": "Paper not found"}), 404
+        paper_id = str(paper["_id"])
+
+        assignments = list(mongo.db.assignments.find({"paper_id": paper_id}))
+        print("Assignments found:", assignments)
+        for assignment in assignments:
+            assignment["_id"] = str(assignment["_id"])
+        return jsonify(assignments), 200
+    except Exception as e:
+        print("Get assignments error:", e)
+        return jsonify({"error": "Failed to retrieve assignments"}), 500
