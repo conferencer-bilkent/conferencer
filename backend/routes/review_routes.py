@@ -97,18 +97,8 @@ def submit_review(paper_id):
 
         user_id = session["user_id"]
 
-        print(paper_id)
-        paper = mongo.db.papers.find_one({"id": paper_id})
-        if not paper:
-            return jsonify({"error": "Paper not found"}), 405
-        real_paper_id = str(paper["_id"])
 
-        real_paper = mongo.db.papers.find_one({"_id": ObjectId(real_paper_id)})
-        if not real_paper:
-            return jsonify({"error": "Paper not found"}), 404
-        
-
-        relevant_assignment = mongo.db.assignments.find_one({"paper_id": real_paper_id, "reviewer_id": user_id})
+        relevant_assignment = mongo.db.assignments.find_one({"paper_id": paper_id, "reviewer_id": user_id})
         if not relevant_assignment:
             return jsonify({"error": "No assignment found for this paper and user"}), 404
         

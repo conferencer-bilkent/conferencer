@@ -66,12 +66,6 @@ def get_assigned_papers(reviewer_id):
 
 def get_assignments_by_paper(paper_id):
     try:
-        fake_paper_id = paper_id
-        paper = mongo.db.papers.find_one({"id": fake_paper_id})
-        if not paper:
-            return jsonify({"error": "Paper not found"}), 404
-        paper_id = str(paper["_id"])
-
         assignments = list(mongo.db.assignments.find({"paper_id": paper_id}))
         print("Assignments found:", assignments)
         for assignment in assignments:
