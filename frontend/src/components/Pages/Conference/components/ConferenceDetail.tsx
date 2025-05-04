@@ -103,8 +103,4 @@ const ConferenceDetail: React.FC<ConferenceDetailProps> = ({
   );
 };
 
-// Helper function to create text info from conference data
-
-// Example usage with props to handle popup and conference data
-
 export default ConferenceDetail;

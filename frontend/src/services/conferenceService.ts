@@ -29,7 +29,6 @@ export const mapApiResponseToConference = (apiConference: any): Conference => {
     submissionInstructions: apiConference.submission_instructions || { value: "", scope: "track" },
     additionalFieldsEnabled: apiConference.additional_fields_enabled || { value: false, scope: "track" },
     fileUploadFields: apiConference.file_upload_fields || { value: "", scope: "track" },
-    presenterSelectionRequired: apiConference.presenter_selection_required || { value: false, scope: "track" },
     submissionUpdatesAllowed: apiConference.submission_updates_allowed || { value: false, scope: "track" },
     newSubmissionAllowed: apiConference.new_submission_allowed || { value: false, scope: "conference" },
     useBiddingOrRelevance: apiConference.use_bidding_or_relevance || { value: "relevance", scope: "track" },

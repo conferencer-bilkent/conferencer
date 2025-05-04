@@ -37,6 +37,7 @@ def create_track():
         track = Track(
             track_name=data.get("track_name"),
             conference_id=data.get("conference_id"),
+            description=data.get("description"),
             track_chairs=data.get("track_chairs"),
             papers=data.get("papers"),
             reviews=data.get("reviews"),

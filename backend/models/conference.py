@@ -13,7 +13,6 @@ class Conference:
                  submission_instructions,
                  additional_fields_enabled,
                  file_upload_fields,
-                 presenter_selection_required,
                  submission_updates_allowed,
                  new_submission_allowed,
                  use_bidding_or_relevance,
@@ -65,7 +64,6 @@ class Conference:
         self.submission_instructions = submission_instructions
         self.additional_fields_enabled = additional_fields_enabled
         self.file_upload_fields = file_upload_fields
-        self.presenter_selection_required = presenter_selection_required
         self.submission_updates_allowed = submission_updates_allowed
         self.new_submission_allowed = new_submission_allowed
         self.use_bidding_or_relevance = use_bidding_or_relevance
@@ -111,7 +109,6 @@ class Conference:
             "submission_instructions": self.submission_instructions,
             "additional_fields_enabled": self.additional_fields_enabled,
             "file_upload_fields": self.file_upload_fields,
-            "presenter_selection_required": self.presenter_selection_required,
             "submission_updates_allowed": self.submission_updates_allowed,
             "new_submission_allowed": self.new_submission_allowed,
             "use_bidding_or_relevance": self.use_bidding_or_relevance,

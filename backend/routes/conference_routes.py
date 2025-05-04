@@ -37,7 +37,6 @@ def create_conference():
             submission_instructions=data.get("submission_instructions"),
             additional_fields_enabled=data.get("additional_fields_enabled"),
             file_upload_fields=data.get("file_upload_fields"),
-            presenter_selection_required=data.get("presenter_selection_required"),
             submission_updates_allowed=data.get("submission_updates_allowed"),
             new_submission_allowed=data.get("new_submission_allowed"),
             use_bidding_or_relevance=data.get("use_bidding_or_relevance"),

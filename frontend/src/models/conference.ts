@@ -43,7 +43,6 @@ export interface ReviewFlag {
     submissionInstructions: ReviewFlag & { value: string };
     additionalFieldsEnabled: ReviewFlag;
     fileUploadFields: ReviewFlag & { value: string };
-    presenterSelectionRequired: ReviewFlag;
     submissionUpdatesAllowed: ReviewFlag;
     newSubmissionAllowed: ReviewFlag;
     useBiddingOrRelevance: ReviewFlag & { value: 'relevance' | 'bidding' };
