@@ -183,6 +183,7 @@ const Topbar: React.FC = () => {
       alignItems="center"
       justifyContent="space-between"
       p={2}
+      paddingRight={"50px"}
     >
       {/* Logo */}
       <Box

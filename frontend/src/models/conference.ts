@@ -24,6 +24,7 @@ export interface ReviewFlag {
     website: string;
     city: string;
     venue: string;
+    description: string;
     state: string;
     country: string;
     submissionPage: string;
@@ -58,6 +59,6 @@ export interface ReviewFlag {
     subreviewerAnonymous: ReviewFlag;
     trackChairNotifications: ReviewFlag;
     tracks: Track[];
-
+    startDate: string;               // or Date
+    endDate: string;                 // or Date
   }
-  

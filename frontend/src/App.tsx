@@ -109,6 +109,7 @@ const App: React.FC = () => {
                             flexDirection: "column",
                             height: "100%",
                             overflow: "hidden",
+                            marginLeft: "20px",
                           }}
                         >
                           <TopBar />

@@ -33,6 +33,8 @@ class Conference:
                  authors = None,
                  created_at=None,
                  description=None,
+                 start_date=None,
+                 end_date=None,
                  ):
 
         self.conference_id = str(ObjectId())
@@ -78,6 +80,8 @@ class Conference:
         self.subreviewers_allowed = subreviewers_allowed
         self.subreviewer_anonymous = subreviewer_anonymous
         self.track_chair_notifications = track_chair_notifications
+        self.start_date = start_date
+        self.end_date = end_date
 
     def to_dict(self):
         return {
@@ -122,5 +126,7 @@ class Conference:
             "decision_range": self.decision_range,
             "subreviewers_allowed": self.subreviewers_allowed,
             "subreviewer_anonymous": self.subreviewer_anonymous,
-            "track_chair_notifications": self.track_chair_notifications
+            "track_chair_notifications": self.track_chair_notifications,
+            "start_date": self.start_date,
+            "end_date": self.end_date
         }

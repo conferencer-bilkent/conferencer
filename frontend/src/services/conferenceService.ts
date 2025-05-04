@@ -9,6 +9,7 @@ export const mapApiResponseToConference = (apiConference: any): Conference => {
     shortAcronym: apiConference.short_acronym || "",
     website: apiConference.website || "",
     city: apiConference.city || "",
+    description: apiConference.description || "",
     venue: apiConference.venue || "",
     state: apiConference.state || "",
     country: apiConference.country || "",
@@ -44,6 +45,8 @@ export const mapApiResponseToConference = (apiConference: any): Conference => {
     subreviewerAnonymous: apiConference.subreviewer_anonymous || { value: false, scope: "track" },
     trackChairNotifications: apiConference.track_chair_notifications || { value: false, scope: "track" },
     tracks: apiConference.tracks || [],
+    startDate: apiConference.start_date?.$date || apiConference.start_date || "",
+    endDate: apiConference.end_date?.$date || apiConference.end_date || "",
   };
 };
 
@@ -113,6 +116,7 @@ export const getConferenceById = async (conferenceId: string): Promise<Conferenc
     }
 
     const data = await response.json();
+    console.log("Conference data from API:", data); // Debug log
     // Transform API response to match the Conference interface
     return mapApiResponseToConference(data.conference);
   } catch (error) {
