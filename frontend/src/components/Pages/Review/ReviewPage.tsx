@@ -156,7 +156,6 @@ const ReviewPage: React.FC = () => {
           : {}),
       };
       console.log("Submission Data:", submissionData); // Debugging line
-      // console.log(existingReview._id); // Debugging line
       const url = isUpdate
         ? `http://127.0.0.1:5000/review/${existingReview._id}/update`
         : `http://127.0.0.1:5000/review/submit/${paper._id}`;

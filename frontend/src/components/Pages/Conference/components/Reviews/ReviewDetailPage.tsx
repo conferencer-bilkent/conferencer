@@ -92,7 +92,7 @@ const ReviewDetailPage: React.FC = () => {
       try {
         setLoading(true);
         // Fetch assignments for this paper
-        const assignments = await getAssignmentsByPaper(selectedPaper.id);
+        const assignments = await getAssignmentsByPaper(selectedPaper._id);
 
         // For each assignment, get the reviewer information
         const assignmentsWithReviewers = await Promise.all(

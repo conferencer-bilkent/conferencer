@@ -21,7 +21,6 @@ import {
 } from "@mui/material";
 import {
   Send as SendIcon,
-  // Edit as EditIcon,
   Inbox as InboxIcon,
   Send as SentIcon,
   Forum as ForumIcon,

@@ -1,3 +1,5 @@
+import { Person } from "../reducer/initailState";
+
 export interface Paper {
     _id: string;
     id: string;
@@ -5,7 +7,7 @@ export interface Paper {
     abstract: string;
     keywords: any[]; // parsed keywords
     paperPath: string;
-    authors: any[]; // parsed authors
+    authors: Person[]; // parsed authors
     track: string;
     createdBy: string;
     createdAt: string;
