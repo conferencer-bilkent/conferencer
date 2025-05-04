@@ -33,9 +33,6 @@ const SideMenu: React.FC<SideMenuProps> = ({ items }) => {
       case "MY TASKS":
         navigate("/tasks");
         break;
-      case "MY ROLES":
-        navigate("/roles");
-        break;
       case "NOTIFICATIONS":
         navigate("/notifications");
         break;

@@ -59,6 +59,29 @@ def get_review(review_id):
     except Exception as e:
         return jsonify({"error": f"Failed to fetch review: {str(e)}"}), 500
 
+def update_paper_avg_acceptance(paper_id):
+    paper = mongo.db.papers.find_one({"_id": ObjectId(paper_id)})
+    if not paper:
+        print("Paper not found for avg_acceptance update")
+        return
+
+    review_cursor = mongo.db.reviews.find({"paper_id": paper_id})
+    total_weighted = 0
+    total_confidence = 0
+
+    for review in review_cursor:
+        eval_score = review.get("evaluation", 0)
+        confidence = review.get("confidence", 1) or 1
+        total_weighted += eval_score * confidence
+        total_confidence += confidence
+
+    avg_acceptance = total_weighted / total_confidence if total_confidence else 0.0
+
+    mongo.db.papers.update_one(
+        {"_id": ObjectId(paper_id)},
+        {"$set": {"avg_acceptance": avg_acceptance}}
+    )
+
 def update_review(review_id):
     if "user_id" not in session:
         return jsonify({"error": "Unauthorized"}), 401
@@ -72,21 +95,16 @@ def update_review(review_id):
 
         update_fields = {}
 
-        for field in ["evaluation", "confidence", "evaluation_text", "remarks", "reviewer_name",
-                      "sub_firstname", "sub_lastname", "sub_email"]:
+        for field in ["evaluation", "confidence", "evaluation_text", "remarks", "reviewer_name"]:
             if field in data:
                 update_fields[field] = data[field]
 
-        sub_fields = ["sub_firstname", "sub_lastname", "sub_email"]
-        if any(field in data for field in sub_fields):
-            subreviewer = review.get("subreviewer", {})
-            if "sub_firstname" in data:
-                subreviewer["first_name"] = data["sub_firstname"]
-            if "sub_lastname" in data:
-                subreviewer["last_name"] = data["sub_lastname"]
-            if "sub_email" in data:
-                subreviewer["email"] = data["sub_email"]
-            update_fields["subreviewer"] = subreviewer
+        # Always update subreviewer as an object
+        subreviewer = review.get("subreviewer", {})
+        subreviewer["first_name"] = data.get("sub_firstname", subreviewer.get("first_name", ""))
+        subreviewer["last_name"] = data.get("sub_lastname", subreviewer.get("last_name", ""))
+        subreviewer["email"] = data.get("sub_email", subreviewer.get("email", ""))
+        update_fields["subreviewer"] = subreviewer
 
         if not update_fields:
             return jsonify({"error": "No valid fields provided to update"}), 400
@@ -96,6 +114,9 @@ def update_review(review_id):
             {"_id": ObjectId(review_id)},
             {"$set": update_fields}
         )
+
+        paper_id = review["paper_id"]
+        update_paper_avg_acceptance(paper_id)
 
         return jsonify({"message": "Review updated successfully"}), 200
 
@@ -189,6 +210,13 @@ def submit_review(paper_id):
         )
         
         result = mongo.db.reviews.insert_one(review.to_dict())
+
+        mongo.db.papers.update_one(
+            {"_id": ObjectId(paper_id)},
+            {"$addToSet": {"reviews": result.inserted_id}}
+        )
+        
+        update_paper_avg_acceptance(paper_id)
 
         return jsonify({
             "message": "Review created successfully",

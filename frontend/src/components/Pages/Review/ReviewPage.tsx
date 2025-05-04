@@ -10,6 +10,8 @@ import {
   Grid,
   Card,
   CardContent,
+  Snackbar,
+  Alert,
 } from "@mui/material";
 import { useUser } from "../../../context/UserContext";
 
@@ -30,6 +32,10 @@ const ReviewPage: React.FC = () => {
     sub_lastname: "",
     sub_email: "",
   });
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
 
   useEffect(() => {
     if (isUpdate && existingReview) {
@@ -135,6 +141,7 @@ const ReviewPage: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSubmitting(true);
 
     try {
       // Prepare submission data
@@ -170,12 +177,17 @@ const ReviewPage: React.FC = () => {
       });
 
       if (response.ok) {
-        navigate("/my-tasks");
+        setShowSuccess(true);
+        setTimeout(() => {
+          navigate("/tasks");
+        }, 1000);
       } else {
         console.error("Failed to submit review");
       }
     } catch (error) {
       console.error("Error submitting review:", error);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -356,14 +368,34 @@ const ReviewPage: React.FC = () => {
                 >
                   Cancel
                 </Button>
-                <Button type="submit" variant="contained" color="primary">
-                  Submit Review
+                <Button
+                  type="submit"
+                  disabled={isSubmitting}
+                  onClick={handleSubmit}
+                  variant="contained"
+                  color="primary"
+                >
+                  {isSubmitting
+                    ? "Submitting..."
+                    : isSubmitted
+                    ? "Submitted!"
+                    : "Submit Review"}
                 </Button>
               </Box>
             </Grid>
           </Grid>
         </form>
       </Paper>
+
+      <Snackbar
+        open={showSuccess}
+        anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
+        autoHideDuration={3000}
+      >
+        <Alert severity="success" sx={{ width: "100%" }}>
+          Review submitted successfully!
+        </Alert>
+      </Snackbar>
     </Box>
   );
 };

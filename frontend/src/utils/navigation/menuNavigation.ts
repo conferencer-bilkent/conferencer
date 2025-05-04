@@ -29,11 +29,11 @@ export const handleMenuItemClick = (
     case "CONFERENCES":
       navigate("/home");
       break;
-    case "PROFILE":
-      navigate("/profile");
-      break;
     case "MY TASKS":
       navigate("/tasks");
+      break;
+    case "PROFILE":
+      navigate("/profile");
       break;
     case "MY ROLES":
       navigate("/roles");
