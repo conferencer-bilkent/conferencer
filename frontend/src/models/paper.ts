@@ -11,6 +11,8 @@ export interface Paper {
     track: string;
     createdBy: string;
     createdAt: string;
+    // optional decision: true = accepted, false = rejected, null = no decision yet
+    decision?: boolean | null;
 }
 
 export const mapResponseToPaper = (data: any): Paper => {
@@ -40,6 +42,9 @@ export const mapResponseToPaper = (data: any): Paper => {
             : [],
         track: data.track,
         createdBy: data.created_by,
-        createdAt: data.created_at?.$date ? data.created_at.$date : data.created_at,
+        createdAt: data.created_at?.$date
+            ? data.created_at.$date
+            : data.created_at,
+        decision: data.decision ?? null,
     };
 };

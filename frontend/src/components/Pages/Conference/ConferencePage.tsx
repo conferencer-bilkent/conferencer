@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import AppButton from "../../global/AppButton";
 import { FaPlusCircle, FaBookOpen, FaUser } from "react-icons/fa";
 import DashboardIcon from "@mui/icons-material/Dashboard";
@@ -40,6 +40,18 @@ const ConferencePage: React.FC = () => {
   const tracks = activeConference?.tracks || [];
   console.log("activeconfessrence", activeConference);
   const [activeTrack, setActiveTrack] = useState<any>(null);
+
+  // only refresh once on first mount / load of activeConference
+  const hasRefreshed = useRef(false);
+  useEffect(() => {
+    if (!hasRefreshed.current && activeConference) {
+      hasRefreshed.current = true;
+      console.log(`Refreshing conference data on mount (ID: ${activeConference.id})`);
+      refreshConference(activeConference.id)
+        .then(() => console.log("Conference refreshed"))
+        .catch((err) => console.error("Error refreshing on mount:", err));
+    }
+  }, [activeConference, refreshConference]);
 
   useEffect(() => {
     if (!activeTrack && tracks.length > 0) {
@@ -165,7 +177,9 @@ const ConferencePage: React.FC = () => {
         if (activeConference) {
           const assignPromises = selectedUserIds.map((userId) =>
             assignSuperchair(userId, activeConference.id)
+          
           );
+          
 
           Promise.all(assignPromises)
             .then((results) => {
@@ -302,7 +316,7 @@ const ConferencePage: React.FC = () => {
           (pcMemberId) =>
             !activeConference.superchairs.includes(pcMemberId?.toString() ?? "")
         );
-        console.log(activeConference.pcMembers);
+        console.log("pc", activeConference.pcMembers);
 
         const nonSupers = allUsers.filter((user) =>
           nonSuperIds.includes(user._id?.toString() ?? "")
