@@ -1,6 +1,8 @@
 import React from "react";
 import "./ConferenceDetail.css";
 
+// import { FaBookOpen, FaPlusCircle } from "react-icons/fa";
+// import AssignmentIcon from "@mui/icons-material/Assignment";
 import { useTheme } from "@mui/material";
 import { tokens } from "../../../../theme";
 
@@ -101,9 +103,5 @@ const ConferenceDetail: React.FC<ConferenceDetailProps> = ({
     </div>
   );
 };
-
-// Helper function to create text info from conference data
-
-// Example usage with props to handle popup and conference data
 
 export default ConferenceDetail;

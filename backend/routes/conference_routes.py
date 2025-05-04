@@ -37,7 +37,6 @@ def create_conference():
             submission_instructions=data.get("submission_instructions"),
             additional_fields_enabled=data.get("additional_fields_enabled"),
             file_upload_fields=data.get("file_upload_fields"),
-            presenter_selection_required=data.get("presenter_selection_required"),
             submission_updates_allowed=data.get("submission_updates_allowed"),
             new_submission_allowed=data.get("new_submission_allowed"),
             use_bidding_or_relevance=data.get("use_bidding_or_relevance"),
@@ -51,7 +50,9 @@ def create_conference():
             decision_range=data.get("decision_range"),
             subreviewers_allowed=data.get("subreviewers_allowed"),
             subreviewer_anonymous=data.get("subreviewer_anonymous"),
-            track_chair_notifications=data.get("track_chair_notifications")
+            track_chair_notifications=data.get("track_chair_notifications"),
+            start_date=data.get("start_date"),
+            end_date=data.get("end_date")
         )
 
         mongo.db.conferences.insert_one(conference.to_dict())

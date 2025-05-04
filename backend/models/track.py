@@ -5,6 +5,7 @@ class Track:
     def __init__(self, 
                  track_name, 
                  conference_id,
+                 description=None,
                  track_chairs=None, 
                  track_members=None,
                  papers=None, 
@@ -15,6 +16,7 @@ class Track:
         self.id = ObjectId() if id is None else id
         self.track_name = track_name
         self.conference_id = str(conference_id) if isinstance(conference_id, ObjectId) else conference_id
+        self.description = description or ""
         self.track_chairs = track_chairs or []
         self.track_members = track_members or []
         self.papers = papers or []
@@ -27,6 +29,7 @@ class Track:
             "_id": self.id,
             "track_name": self.track_name,
             "conference_id": self.conference_id,
+            "description": self.description,
             "track_chairs": self.track_chairs,
             "track_members": self.track_members,
             "papers": self.papers,

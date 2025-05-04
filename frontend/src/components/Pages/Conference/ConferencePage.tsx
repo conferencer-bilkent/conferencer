@@ -40,7 +40,7 @@ const ConferencePage: React.FC = () => {
   const [popupAction, setPopupAction] = useState<string | null>(null);
 
   const tracks = activeConference?.tracks || [];
-
+  console.log("activeconfessrence", activeConference);
   // initialize to null (we’ll set it in an effect)
   const [activeTrack, setActiveTrack] = useState<any>(null);
 
@@ -468,11 +468,27 @@ const ConferencePage: React.FC = () => {
                   {
                     title: "Track Dates",
                     content: hasActiveTrack
-                      ? `${new Date(
-                          activeConference.createdAt || Date.now()
-                        ).toLocaleDateString()} - ${new Date(
-                          activeConference.licenseExpiry || Date.now()
-                        ).toLocaleDateString()}`
+                      ? `${
+                          activeConference.startDate
+                            ? new Date(
+                                activeConference.startDate
+                              ).toLocaleDateString("en-GB", {
+                                day: "2-digit",
+                                month: "2-digit",
+                                year: "numeric",
+                              })
+                            : "Start date not set"
+                        } - ${
+                          activeConference.endDate
+                            ? new Date(
+                                activeConference.endDate
+                              ).toLocaleDateString("en-GB", {
+                                day: "2-digit",
+                                month: "2-digit",
+                                year: "numeric",
+                              })
+                            : "End date not set"
+                        }`
                       : "-",
                   },
                   {

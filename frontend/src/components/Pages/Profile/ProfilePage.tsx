@@ -49,12 +49,23 @@ const ProfilePage: React.FC = () => {
   useEffect(() => {
     const fetchUserData = async () => {
       try {
+        console.log("Fetching user data for ID:", id);
         const userData = await getUserById(id!);
-        const roleObjs: Role[] = userData.roles
-          ? await Promise.all(
-              userData.roles.map((rid) => userService.getRoleById(rid))
-            )
-          : [];
+        const roleObjs: Role[] = [];
+
+        if (userData.roles) {
+          for (const rid of userData.roles) {
+            try {
+              const role = await userService.getRoleById(rid);
+              if (role) {
+                roleObjs.push(role);
+              }
+            } catch (err) {
+              console.warn(`Failed to fetch role ${rid}:`, err);
+            }
+          }
+        }
+
         setProfileUser(userData);
         setUserRoles(roleObjs);
       } catch (err) {

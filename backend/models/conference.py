@@ -13,7 +13,6 @@ class Conference:
                  submission_instructions,
                  additional_fields_enabled,
                  file_upload_fields,
-                 presenter_selection_required,
                  submission_updates_allowed,
                  new_submission_allowed,
                  use_bidding_or_relevance,
@@ -34,6 +33,8 @@ class Conference:
                  authors = None,
                  created_at=None,
                  description=None,
+                 start_date=None,
+                 end_date=None,
                  ):
 
         self.conference_id = str(ObjectId())
@@ -65,7 +66,6 @@ class Conference:
         self.submission_instructions = submission_instructions
         self.additional_fields_enabled = additional_fields_enabled
         self.file_upload_fields = file_upload_fields
-        self.presenter_selection_required = presenter_selection_required
         self.submission_updates_allowed = submission_updates_allowed
         self.new_submission_allowed = new_submission_allowed
         self.use_bidding_or_relevance = use_bidding_or_relevance
@@ -80,6 +80,8 @@ class Conference:
         self.subreviewers_allowed = subreviewers_allowed
         self.subreviewer_anonymous = subreviewer_anonymous
         self.track_chair_notifications = track_chair_notifications
+        self.start_date = start_date
+        self.end_date = end_date
 
     def to_dict(self):
         return {
@@ -111,7 +113,6 @@ class Conference:
             "submission_instructions": self.submission_instructions,
             "additional_fields_enabled": self.additional_fields_enabled,
             "file_upload_fields": self.file_upload_fields,
-            "presenter_selection_required": self.presenter_selection_required,
             "submission_updates_allowed": self.submission_updates_allowed,
             "new_submission_allowed": self.new_submission_allowed,
             "use_bidding_or_relevance": self.use_bidding_or_relevance,
@@ -125,5 +126,7 @@ class Conference:
             "decision_range": self.decision_range,
             "subreviewers_allowed": self.subreviewers_allowed,
             "subreviewer_anonymous": self.subreviewer_anonymous,
-            "track_chair_notifications": self.track_chair_notifications
+            "track_chair_notifications": self.track_chair_notifications,
+            "start_date": self.start_date,
+            "end_date": self.end_date
         }
