@@ -1,3 +1,4 @@
+import json
 from flask import Blueprint, request, jsonify, session
 from models.conference import Conference
 from bson import ObjectId
@@ -298,20 +299,20 @@ def get_all_papers_in_track(track_id):
 
         # Get all paper IDs associated with the track
         paper_ids = track.get("papers", [])
-        print(f"Paper IDs associated with track: {paper_ids}")  # Debugging
+        # print(f"Paper IDs associated with track: {paper_ids}")  # Debugging
 
         if not paper_ids:
             return jsonify({"error": "No papers associated with this track"}), 404
 
         # Convert paper IDs to ObjectId for querying papers
         paper_ids_object = [ObjectId(paper_id) for paper_id in paper_ids]
-        print(f"Converted Paper IDs to ObjectId: {paper_ids_object}")  # Debugging
+        # print(f"Converted Paper IDs to ObjectId: {paper_ids_object}")  # Debugging
 
         # Fetch the papers using the ObjectId list
         papers_cursor = mongo.db.papers.find({"_id": {"$in": paper_ids_object}})
         papers = list(papers_cursor)  # Convert cursor to list to inspect the documents
 
-        print(f"Papers fetched from DB: {papers}")  # Debugging
+        # print(f"Papers fetched from DB: {papers}")  # Debugging
 
         # Convert papers to a list and return the results
         paper_list = []
@@ -344,5 +345,172 @@ def get_track_members(track_id):
                 member_details.append(user)
 
         return jsonify({"track_members": member_details}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+def get_track_authors_by_papers_in_the_track(track_id):
+    if "user_id" not in session:
+        return jsonify({"error": "Unauthorized"}), 401
+
+    try:
+        # Get all papers in the track
+        papers_response = get_all_papers_in_track(track_id)
+        if papers_response[1] != 200:
+            return papers_response
+
+        papers = papers_response[0].get_json().get("papers", [])
+        
+        # Collect all unique author emails from papers
+        author_emails = set()
+        for paper in papers:
+            # Handle both string-encoded JSON and proper lists
+            authors_data = paper.get("authors", [])
+            
+            # If authors is a string, parse it as JSON
+            if isinstance(authors_data, str):
+                try:
+                    authors = json.loads(authors_data)
+                except json.JSONDecodeError:
+                    continue  # Skip invalid JSON
+            # If it's already a list, use directly
+            elif isinstance(authors_data, list):
+                authors = authors_data
+            else:
+                continue  # Skip invalid format
+            
+            # Process authors
+            for author in authors:
+                # If author is a string, try to parse it as JSON
+                if isinstance(author, str):
+                    try:
+                        author_data = json.loads(author)
+                    except json.JSONDecodeError:
+                        continue
+                else:
+                    author_data = author
+
+                if isinstance(author_data, list):
+                    for single_author_data in author_data:
+
+                        if single_author_data and isinstance(single_author_data, str):
+                            normalized_email = single_author_data.strip().lower()
+                            author_emails.add(normalized_email)
+                        elif single_author_data and isinstance(single_author_data, dict):
+                            email = single_author_data.get("email")
+                            if email:
+                                normalized_email = email.strip().lower()
+                                author_emails.add(normalized_email)
+
+                else:
+                    if isinstance(author_data, str):
+                        normalized_email = author_data.strip().lower()
+                        author_emails.add(normalized_email)
+                    elif isinstance(author_data, dict):
+                        email = author_data.get("email")
+                        if email:
+                            normalized_email = email.strip().lower()
+                            author_emails.add(normalized_email)
+
+        # Retrieve user details for collected emails
+        # print(f"Author emails found: {author_emails}")
+        
+        authors = []
+        if author_emails:
+            authors = list(mongo.db.users.find({"email": {"$in": list(author_emails)}}))
+            # Convert ObjectId to string
+            for author in authors:
+                author["_id"] = str(author["_id"])
+
+        return jsonify({"authors": authors}), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    
+
+# def conflict_of_interest(track_id):
+    # using the get_track_authors_by_papers_in_the_track and get_track_members, we have the profiles of both sides
+    # now, we need to check if the authors and members to see if they have similar affiliations.
+    # we need to return the conflicting pairs, who have the same affiliations 
+def conflict_of_interest(track_id):
+    if "user_id" not in session:
+        return jsonify({"error": "Unauthorized"}), 401
+    
+    try:
+        # Get track members
+        members_response = get_track_members(track_id)
+        if members_response[1] != 200:
+            return members_response
+        members = members_response[0].get_json().get("track_members", [])
+        # Get authors
+        authors_response = get_track_authors_by_papers_in_the_track(track_id)
+        if authors_response[1] != 200:
+            return authors_response
+        authors = authors_response[0].get_json().get("authors", [])
+        
+        # Check for conflicts based on affiliation
+        conflicts = []
+        for member in members:
+            member_affiliation = member.get("affiliation", "").lower().strip()
+            if not member_affiliation:
+                continue
+                
+            for author in authors:
+                author_affiliation = author.get("affiliation", "").lower().strip()
+                if not author_affiliation:
+                    continue
+                
+                # Skip if member and author are the same person
+                if member.get("_id") == author.get("_id"):
+                    continue
+                    
+                # Check if affiliations match or are similar
+                if (member_affiliation == author_affiliation or 
+                    member_affiliation in author_affiliation or 
+                    author_affiliation in member_affiliation):
+                    conflicts.append({
+                        "member": {
+                            "id": member.get("_id"),
+                            "name": member.get("name", ""),
+                            "email": member.get("email", ""),
+                            "affiliation": member.get("affiliation", "")
+                        },
+                        "author": {
+                            "id": author.get("_id"),
+                            "name": author.get("name", ""),
+                            "email": author.get("email", ""),
+                            "affiliation": author.get("affiliation", "")
+                        }
+                    })
+        
+        # After conflicts are identified
+        # Get all papers in the track
+        paper_response = get_all_papers_in_track(track_id)
+        if paper_response[1] != 200:
+            return paper_response
+            
+        all_papers = paper_response[0].get_json().get("papers", [])
+
+        # For each conflict, find the author's papers
+        for conflict in conflicts:
+            author_email = conflict["author"]["email"].lower().strip()
+            author_papers = []
+            
+            for paper in all_papers:
+                # Check if this paper has the conflicting author
+                authors_data = str(paper.get("authors", ""))  # Convert to string for simple search
+                
+                # Simple string search - if the email is found anywhere in the authors data
+                if author_email in authors_data.lower():
+                    author_papers.append({
+                        "id": paper.get("_id"),
+                        "title": paper.get("title", "Untitled Paper")
+                    })
+            
+            # Add the papers to the conflict information
+            conflict["reason"] = f"Affiliation conflict with {len(author_papers)} paper(s)"
+            conflict["papers"] = author_papers
+        return jsonify({"conflicts": conflicts}), 200
+        
     except Exception as e:
         return jsonify({"error": str(e)}), 500
