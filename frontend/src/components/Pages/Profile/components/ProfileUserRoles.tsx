@@ -142,7 +142,7 @@ const UserRoles: React.FC<UserRolesProps> = ({ activeRoles, pastRoles }) => {
       }
       
       // Check for Track Chair
-      const trackchair = conferenceRoles.find(r => r.name.toLowerCase().includes('track chair'));
+      const trackchair = conferenceRoles.find(r => r.name.toLowerCase().includes('track_chair'));
       if (trackchair) {
         filteredRoles.push({
           ...trackchair,
@@ -152,7 +152,7 @@ const UserRoles: React.FC<UserRolesProps> = ({ activeRoles, pastRoles }) => {
       }
       
       // Check for PC Member
-      const pcMember = conferenceRoles.find(r => r.name.toLowerCase().includes('pc member'));
+      const pcMember = conferenceRoles.find(r => r.name.toLowerCase().includes('pc_member'));
       if (pcMember) {
         filteredRoles.push({
           ...pcMember,
