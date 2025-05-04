@@ -10,6 +10,7 @@ import { Action, reducer } from "../reducer/reducer";
 import { initialState, State } from "../reducer/initailState";
 import submitPaper, { PaperSubmission } from "../services/submissionService";
 import { useConference } from "./ConferenceContext";
+import { useNavigate } from "react-router-dom";
 
 interface MyContextType {
   state: State;
@@ -32,6 +33,7 @@ const SubmissionContext = createContext<MyContextType | undefined>(undefined);
 const SubmissionProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
+  const navigate = useNavigate();
   const [state, dispatch] = useReducer(reducer, initialState);
   const [authorIndex, setAuthorIndex] = useState(0);
   const [file, setFile] = useState<File | null>(null);
@@ -165,6 +167,10 @@ const SubmissionProvider: React.FC<{ children: ReactNode }> = ({
       console.log("authors:", authors);
 
       await submitPaper(submissionData, file);
+      alert("Submission successful!"); // Show success message
+      setTimeout(() => {
+        navigate("/conference"); // Navigate after 1 second
+      }, 1000);
     } catch (error) {
       console.error("Error submitting paper:", error);
     }
