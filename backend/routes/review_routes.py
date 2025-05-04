@@ -18,6 +18,29 @@ def get_review(review_id):
     except Exception as e:
         return jsonify({"error": f"Failed to fetch review: {str(e)}"}), 500
 
+def update_paper_avg_acceptance(paper_id):
+    paper = mongo.db.papers.find_one({"_id": ObjectId(paper_id)})
+    if not paper:
+        print("Paper not found for avg_acceptance update")
+        return
+
+    review_cursor = mongo.db.reviews.find({"paper_id": paper_id})
+    total_weighted = 0
+    total_confidence = 0
+
+    for review in review_cursor:
+        eval_score = review.get("evaluation", 0)
+        confidence = review.get("confidence", 1) or 1
+        total_weighted += eval_score * confidence
+        total_confidence += confidence
+
+    avg_acceptance = total_weighted / total_confidence if total_confidence else 0.0
+
+    mongo.db.papers.update_one(
+        {"_id": ObjectId(paper_id)},
+        {"$set": {"avg_acceptance": avg_acceptance}}
+    )
+
 def update_review(review_id):
     if "user_id" not in session:
         return jsonify({"error": "Unauthorized"}), 401
@@ -55,6 +78,9 @@ def update_review(review_id):
             {"_id": ObjectId(review_id)},
             {"$set": update_fields}
         )
+
+        paper_id = review["paper_id"]
+        update_paper_avg_acceptance(paper_id)
 
         return jsonify({"message": "Review updated successfully"}), 200
 
@@ -148,6 +174,13 @@ def submit_review(paper_id):
         )
         
         result = mongo.db.reviews.insert_one(review.to_dict())
+
+        mongo.db.papers.update_one(
+            {"_id": ObjectId(paper_id)},
+            {"$addToSet": {"reviews": result.inserted_id}}
+        )
+        
+        update_paper_avg_acceptance(paper_id)
 
         return jsonify({
             "message": "Review created successfully",
