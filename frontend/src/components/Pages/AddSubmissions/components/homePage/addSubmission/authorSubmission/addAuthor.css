@@ -1,51 +1,63 @@
 .authorPartContainer {
-    margin-top: 40px;
+    margin-top: 20px; /* reduced from 40px */
     display: flex;
-    width: 480px; 
+    width: 480px;
     flex-direction: column;
-    background-color: white;
+    background-color: var(--background, blue);
+    border: 1px solid var(--grey-border, #ccc);
+    padding: 10px; /* reduced from 20px */
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 .authorTitle {
     display: flex;
-    padding: 6px 0 6px 10px;   
+    padding: 1px 2px; /* reduced padding */
     flex-direction: row;
-    background-color: blue;
+    background-color: var(--background, blue);
     align-items: center;
-    justify-content:start;
+    justify-content: space-between;
+    color: var(--textPrimary, white); /* updated text color */
+    border-radius: 4px;
 }
-
 .fillAsYourself {
     width: 120px;
     height: 36px;
     border: 1px solid white;
     border-radius: 16px;
-    margin:0 10px 0 10px;
+    margin: 0 5px; /* reduced horizontal margin */
     font-size: 12px;
-    background-color: inherit;
-    color: white;
+    background-color: transparent;
+    color: var(--textPrimary, white); /* updated text color */
     cursor: pointer;
+    transition: all 0.3s ease;
 }
-
+.fillAsYourself:hover {
+    background-color: white;
+    color: var(--background, blue);
+}
 .authorLabel {
-    margin: 1px 0 1px 0;
-    padding: 1px 0 1px 0;
+    margin: 3px 0; /* reduced margin */
+    padding: 2px 0; /* reduced padding */
     display: flex;
     flex-direction: row;
     align-items: center;
-    height: 24px;
-    background-color: rgb(161, 166, 164);
-   
+    height: 28px; /* reduced height */
+    background-color: var(--greyBg, #a1a6a4);
+    border-radius: 4px;
 }
-.authorLabel input, select {
-    width:248px;
+.authorLabel input,
+.authorLabel select {
+    width: 248px;
     border-radius: 2px;
-    border: none;
+    border: 1px solid var(--grey-border, #ccc);
+    padding: 2px; /* reduced padding */
+    outline: none;
+    transition: border-color 0.2s ease;
 }
-
 .authorLabel p {
     width: 100px;
-    padding: 3px;
+    padding: 2px; /* reduced padding */
     font-size: 12px;
-    color: black;
+    color: var(--textPrimary, black); /* updated text color */
     text-align: end;
 }

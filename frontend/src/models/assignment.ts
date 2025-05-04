@@ -1,4 +1,6 @@
 export interface Assignment {
+    review: string | undefined;
+    decision: string | undefined;
     _id: string;
     id: string;
     reviewer_id: string;

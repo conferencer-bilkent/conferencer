@@ -161,8 +161,10 @@ const SubmissionProvider: React.FC<{ children: ReactNode }> = ({
         conference_id: activeConference?.id,
         authors: authors,
       };
+      console.log("Submission data:", submissionData);
+      console.log("authors:", authors);
 
-      await submitPaper(submissionData, file);
+      //await submitPaper(submissionData, file);
     } catch (error) {
       console.error("Error submitting paper:", error);
     }

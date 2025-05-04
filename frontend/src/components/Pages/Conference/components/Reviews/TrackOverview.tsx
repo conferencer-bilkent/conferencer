@@ -16,13 +16,10 @@ import {
 import { tokens } from "../../../../../theme";
 import { useConference } from "../../../../../context/ConferenceContext";
 import { Track } from "../../../../../models/conference";
-import {
-  getTrackById,
-  getPapersForTrack,
-} from "../../../../../services/trackService";
+import { getTrackById, getPapersForTrack } from "../../../../../services/trackService";
 import { Paper } from "../../../../../models/paper";
-// Import the parseAuthorsInfo function
 import { parseAuthorsInfo } from "../../../../../utils/parseAuthors";
+import App from "../../../../../App";
 
 // Define a type for the location state
 interface LocationState {
@@ -35,25 +32,25 @@ const ReviewsPage: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { activeConference } = useConference();
-
+  
   // Get the track and view type from location state
   const state = location.state as LocationState;
   const activeTrack = state?.activeTrack || null;
 
   // State for fetched papers
   const [papers, setPapers] = useState<Paper[]>([]);
-
+  
   useEffect(() => {
     const fetchTrack = async () => {
       if (activeTrack) {
-        const actualActiveTrack = await getTrackById(activeTrack._id);
+        const actualActiveTrack = await getTrackById(activeTrack._id)
         console.log("actualActiveTrack", actualActiveTrack);
       }
     };
 
     fetchTrack();
   }, [activeTrack]);
-
+  
   useEffect(() => {
     const fetchPapers = async () => {
       if (activeTrack) {
@@ -77,9 +74,9 @@ const ReviewsPage: React.FC = () => {
   const getPageTitle = () => {
     console.log("activeTrack", activeTrack);
     if (activeTrack) {
-      return `${activeTrack.track_name || "Track"}: ${"Assignments"}`;
+      return `${activeTrack.track_name || "Track"}: ${'Assignments'}`;
     }
-    return `${activeConference?.name || "Conference"}: ${"All Assignments"}`;
+    return `${activeConference?.name || "Conference"}: ${'All Assignments'}`;
   };
 
   // Toggle expanded state for a paper
@@ -103,7 +100,51 @@ const ReviewsPage: React.FC = () => {
 
   // Handler to navigate back to the conference page
   const handleBackToTrackView = () => {
-    navigate("/conference");
+    navigate('/conference');
+  };
+
+  // Helper to format keywords with proper parsing for JSON strings in arrays
+  const formatKeywords = (keywords: any) => {
+    try {
+      // Handle case where keywords is an array with a single JSON string element
+      if (Array.isArray(keywords) && keywords.length > 0 && typeof keywords[0] === 'string') {
+        try {
+          // Parse the JSON string inside the array
+          const parsedKeywords = JSON.parse(keywords[0]);
+          
+          // If parsedKeywords is an array, return it joined
+          if (Array.isArray(parsedKeywords)) {
+            return parsedKeywords.join(", ");
+          }
+          
+          // If it's a string, return it as is
+          if (typeof parsedKeywords === 'string') {
+            return parsedKeywords;
+          }
+          
+          // If it's an object with a name property (like {name: "keyword"}), return the name
+          if (typeof parsedKeywords === 'object' && parsedKeywords.name) {
+            return parsedKeywords.name;
+          }
+        } catch (e) {
+          // If parsing fails, return the raw string
+          return keywords[0];
+        }
+      }
+      
+      // If keywords is already an array (not containing JSON strings)
+      if (Array.isArray(keywords)) {
+        return keywords
+          .map((kw) => (typeof kw === 'object' && kw.name ? kw.name : String(kw)))
+          .join(", ");
+      }
+      
+      // Default fallback
+      return "No keywords";
+    } catch (error) {
+      console.error("Error formatting keywords:", error);
+      return "No keywords";
+    }
   };
 
   const getReviewColor = () => {
@@ -132,10 +173,10 @@ const ReviewsPage: React.FC = () => {
             my={3}
             width="800px"
           >
-            <AppButton
-              icon={<FaFilter />}
-              text="Switch Back to Track View"
-              onClick={handleBackToTrackView}
+            <AppButton 
+              icon={<FaFilter />} 
+              text="Switch Back to Track View" 
+              onClick={handleBackToTrackView} 
             />
             <TextField
               placeholder="Search by Title or Author Name"
@@ -162,16 +203,15 @@ const ReviewsPage: React.FC = () => {
 
           {/* Display info about which track/view we're looking at */}
           {activeTrack && (
-            <Box
-              width="800px"
-              mb={3}
-              p={2}
+            <Box 
+              width="800px" 
+              mb={3} 
+              p={2} 
               bgcolor={colors.primary[600]}
               borderRadius="8px"
             >
               <Typography variant="body1">
-                Currently viewing: <strong>{"Assignments"}</strong> for track{" "}
-                <strong>{activeTrack.track_name || "Unnamed Track"}</strong>
+                Currently viewing: <strong>{ 'Assignments'}</strong> for track <strong>{activeTrack.track_name || "Unnamed Track"}</strong>
               </Typography>
             </Box>
           )}
@@ -188,6 +228,7 @@ const ReviewsPage: React.FC = () => {
                 bgcolor={colors.primary[400]}
                 boxShadow={4}
                 sx={{
+                  transition: "all 0.3s ease-in-out",
                   cursor: "pointer",
                 }}
                 onClick={() => handleToggleExpand(index)}
@@ -204,7 +245,7 @@ const ReviewsPage: React.FC = () => {
                       {paper.title}
                     </Typography>
                     <Typography variant="body2" color={colors.grey[300]}>
-                      By {parseAuthorsInfo(paper.authors)}
+                      By annen {parseAuthorsInfo(paper.authors)}
                     </Typography>
                     <Typography
                       variant="body2"
@@ -212,28 +253,16 @@ const ReviewsPage: React.FC = () => {
                       mt={1}
                       color={getReviewColor()}
                     >
-                      Created At:{" "}
-                      {new Date(paper.createdAt).toLocaleDateString()}
+                      Created At: {new Date(paper.createdAt).toLocaleDateString()}
                     </Typography>
                   </Box>
 
-                  <Button
-                    variant="contained"
-                    onClick={(e) => {
-                      e.stopPropagation(); // Prevent expand toggle
+                  <AppButton
+                    onClick={() => {
                       handleNavigateToDetail(paper);
                     }}
-                    sx={{
-                      borderRadius: "8px",
-                      fontWeight: "bold",
-                      backgroundColor: colors.blueAccent[500],
-                      "&:hover": {
-                        backgroundColor: colors.blueAccent[400],
-                      },
-                    }}
-                  >
-                    Viewx Reviews
-                  </Button>
+                    text="View Details"
+                  />
                 </Box>
 
                 <Collapse in={isExpanded(index)} timeout="auto" unmountOnExit>
@@ -248,14 +277,15 @@ const ReviewsPage: React.FC = () => {
                         pr: 1,
                         color: colors.grey[100],
                       }}
-                    ></Box>
+                    >
+                    </Box>
                     <Typography variant="body2" color={colors.grey[300]} mt={2}>
                       <strong>Keywords:</strong>{" "}
-                      {paper.keywords.map((kw, i) => (
+                        {formatKeywords(paper.keywords).split(", ").map((kw: string, i: number) => (
                         <Box key={i} component="span" mr={1}>
                           #{kw}
                         </Box>
-                      ))}
+                        ))}
                     </Typography>
 
                     {/* Close Button */}
@@ -283,18 +313,15 @@ const ReviewsPage: React.FC = () => {
               </Box>
             ))
           ) : (
-            <Box
-              width="800px"
-              p={4}
-              textAlign="center"
+            <Box 
+              width="800px" 
+              p={4} 
+              textAlign="center" 
               color={colors.grey[300]}
               bgcolor={colors.primary[400]}
               borderRadius="12px"
             >
-              No {"Assignments"} found{" "}
-              {activeTrack
-                ? `for ${activeTrack.track_name || "this track"}`
-                : "in this conference"}
+              No {"Assignments"} found {activeTrack ? `for ${activeTrack.track_name || "this track"}` : "in this conference"}
             </Box>
           )}
         </Box>

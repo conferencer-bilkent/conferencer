@@ -2,8 +2,9 @@
     display: flex;
     flex-direction: row;
     height: 100%;
-    width: 100vw ;
-
+    width: 100vw;
+    border-radius: 12px;
+    overflow: hidden;
 }
 
 .addSubmissionContainer {
@@ -12,7 +13,9 @@
     align-items: flex-start;
     margin-left: 10px;
     width: 42vw;
-
+    border: 1px solid #ccc;
+    border-radius: 12px;
+    padding: 20px;
 }
 
 .addPersonContainer {
@@ -20,12 +23,15 @@
 }
 
 .submissionDetailContainer {
-    margin: 180px 0 0 0;
+    padding: 140px 0 0 0;
     width: 45vw;
     display: flex;
     flex-direction: column;
-    align-items:st;
-    justify-content: start;
+    align-items: flex-start;  /* Fixed typo */
+    justify-content: flex-start;
+    border: 1px solid #ccc;
+    border-radius: 16px;
+    padding: 20px;
 }
 
 .lastButtons {
@@ -48,14 +54,12 @@
     }
     .submissionDetailContainer {
         margin: 30px 0 30px 8px;
-        align-items: start;
+        align-items: flex-start;
     }
-
     .lastButtons {
         flex-direction: column;
         align-items: center;
     }
-
     .lastButtons input {
         margin-bottom: 10px;
     }
