@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import AppButton from "../../../../global/AppButton";
+import SelectPeoplePopup from "../../../../global/SelectPeoplePopUp";
 import { FaArrowLeft, FaDownload, FaUserPlus, FaPen, FaTimes, FaCheck } from "react-icons/fa";
 import {
   Box,
@@ -19,14 +20,17 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
+  Slider,
 } from "@mui/material";
 import { tokens } from "../../../../../theme";
 import { Track } from "../../../../../models/conference";
 import AppTitle from "../../../../global/AppTitle";
 import { Paper } from "../../../../../models/paper";
-import { getAssignmentsByPaper, getReviewByAssignment, Review, updatePaperDecision } from "../../../../../services/trackService";
+import { getAssignmentsByPaper, getReviewByAssignment, Review, updatePaperDecision, rateReview } from "../../../../../services/trackService";
+import { getPaperById, downloadPaper } from "../../../../../services/paperService";
 import { Assignment } from "../../../../../models/assignment";
 import { getUserById } from "../../../../../services/userService";
+import { UserData } from "../../../../../models/user";
 
 // Updated LocationState interface to use only the Track interface
 interface LocationState {
@@ -51,11 +55,16 @@ const ReviewDetailPage: React.FC = () => {
   const [selectedEvaluation, setSelectedEvaluation] = useState<string>("");
   const [decisionPopupOpen, setDecisionPopupOpen] = useState<boolean>(false);
   const [decisionLoading, setDecisionLoading] = useState<boolean>(false);
+  const [assignPopupOpen, setAssignPopupOpen] = useState<boolean>(false);
+  const [trackMembers, setTrackMembers] = useState<UserData[]>([]);
+  const [feedbackPopupOpen, setFeedbackPopupOpen] = useState(false);
+  const [selectedFeedbackReviewId, setSelectedFeedbackReviewId] = useState<string | null>(null);
+  const [selectedFeedbackValue, setSelectedFeedbackValue] = useState<number>(5);
 
   // Get the state passed from navigation
   const state = location.state as LocationState | undefined;
   const activeTrack = state?.activeTrack || null;
-  const selectedPaper = state?.paper;
+  const [selectedPaper, setSelectedPaper] = useState<Paper | undefined>(state?.paper);
 
   // Compute statistics based on activeTrack data
   const completedReviews = activeTrack?.reviews?.length || 0;
@@ -97,7 +106,9 @@ const ReviewDetailPage: React.FC = () => {
     try {
       setDecisionLoading(true);
       await updatePaperDecision(selectedPaper._id, accept);
-      // optional: show a toast / reload data
+      // reload updated paper
+      const updated = await getPaperById(selectedPaper._id);
+      if (updated) setSelectedPaper(updated);
     } catch (e) {
       console.error("Decision update failed", e);
     } finally {
@@ -106,72 +117,163 @@ const ReviewDetailPage: React.FC = () => {
     }
   };
 
-  useEffect(() => {
-    const fetchAssignments = async () => {
-      if (!selectedPaper?._id) {
-        setLoading(false);
-        return;
-      }
+  const handleDownloadPaper = async () => {
+    if (!selectedPaper?._id) return;
+    try {
+      const blob = await downloadPaper(selectedPaper._id);
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${selectedPaper.title}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (e) {
+      console.error("Error downloading paper:", e);
+    }
+  };
 
-      try {
-        setLoading(true);
-        // Fetch assignments for this paper
-        const assignments = await getAssignmentsByPaper(selectedPaper._id);
-
-        // For each assignment, force is_pending to false for debugging and get the reviewer info and review details if available
-        const assignmentsWithReviewers = await Promise.all(
-          assignments.map(async (assignment) => {
-            // Force is_pending to false for debugging
-            assignment.is_pending = false;
-            let reviewData = undefined;
-            console.log("assignment", assignment);
-            if (assignment.is_pending === false) {
-              try {
-                reviewData = await getReviewByAssignment(assignment._id);
-                console.log("reviewData", reviewData);
-              } catch (error) {
-                console.error(`Error fetching review for assignment ${assignment._id}:`, error);
-              }
-            }
+  const fetchAssignments = async () => {
+    if (!selectedPaper?._id) return;
+    setLoading(true);
+    try {
+      const assignments = await getAssignmentsByPaper(selectedPaper._id);
+      
+      
+      // For each assignment, force is_pending to false for debugging and get the reviewer info and review details if available
+      const assignmentsWithReviewers = await Promise.all(
+        assignments.map(async (assignment) => {
+          let reviewData = undefined;
+          console.log("assignment", assignment);
+          if (assignment.is_pending === false) {
             try {
-              const reviewer = await getUserById(assignment.reviewer_id);
-              return {
-                ...assignment,
-                reviewerName: reviewer
-                  ? `${reviewer.name} ${reviewer.surname}`
-                  : "Unknown",
-                reviewData,
-              };
+              reviewData = await getReviewByAssignment(assignment._id);
+              console.log("reviewData", reviewData);
             } catch (error) {
-              console.error(
-                `Error fetching reviewer ${assignment.reviewer_id}:`,
-                error
-              );
-              return {
-                ...assignment,
-                reviewerName: "Unknown",
-                reviewData,
-              };
+              console.error(`Error fetching review for assignment ${assignment._id}:`, error);
             }
-          })
-        );
+          }
+          try {
+            const reviewer = await getUserById(assignment.reviewer_id);
+            return {
+              ...assignment,
+              reviewerName: reviewer
+                ? `${reviewer.name} ${reviewer.surname}`
+                : "Unknown",
+              reviewData,
+            };
+          } catch (error) {
+            console.error(
+              `Error fetching reviewer ${assignment.reviewer_id}:`,
+              error
+            );
+            return {
+              ...assignment,
+              reviewerName: "Unknown",
+              reviewData,
+            };
+          }
+        })
+      );
 
-        setPaperAssignments(assignmentsWithReviewers);
-      } catch (error) {
-        console.error("Error fetching assignments:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
+      setPaperAssignments(assignmentsWithReviewers);
+    } catch (error) {
+      console.error("Error fetching assignments:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchAssignments();
   }, [selectedPaper]);
+
+  useEffect(() => {
+    if (assignPopupOpen && activeTrack?._id) {
+      fetch(`http://127.0.0.1:5000/track/${activeTrack._id}/members`, {
+        credentials: "include",
+      })
+        .then((r) => r.json())
+        .then((data) => setTrackMembers(data.track_members || []))
+        .catch(console.error);
+    }
+  }, [assignPopupOpen, activeTrack]);
+
+  const handleOpenAssignPopup = () => setAssignPopupOpen(true);
+  const handleCloseAssignPopup = () => setAssignPopupOpen(false);
+
+  const handleAssignReviewers = async (selectedUserIds: string[]) => {
+    if (!activeTrack?._id || !selectedPaper?._id) return;
+    try {
+      for (const reviewerId of selectedUserIds) {
+        await fetch(
+          `http://127.0.0.1:5000/track/${activeTrack._id}/assign`,
+          {
+            method: "POST",
+            credentials: "include",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              paper_id: selectedPaper._id,
+              reviewer_id: reviewerId,
+            }),
+          }
+        );
+      }
+      // refresh the table
+      await fetchAssignments();
+    } catch (error) {
+      console.error("Error assigning reviewers:", error);
+    } finally {
+      handleCloseAssignPopup();
+    }
+  };
 
   const handleBackToReviews = () => {
     navigate("/review", {
       state: { activeTrack },
     });
   };
+
+  const openFeedbackPopup = (reviewId: string) => {
+    setSelectedFeedbackReviewId(reviewId);
+    setFeedbackPopupOpen(true);
+  };
+
+  const closeFeedbackPopup = () => {
+    setFeedbackPopupOpen(false);
+    setSelectedFeedbackValue(5);
+    setSelectedFeedbackReviewId(null);
+  };
+
+  const handleSubmitFeedback = async () => {
+    if (!selectedFeedbackReviewId) return;
+    try {
+      await rateReview(selectedFeedbackReviewId, selectedFeedbackValue);
+      console.log("Rating submitted");
+      await fetchAssignments();
+    } catch (e) {
+      console.error("Failed to submit rating", e);
+    } finally {
+      closeFeedbackPopup();
+    }
+  };
+
+  // derive the current decision display string
+  const currentDecision =
+    selectedPaper?.decision != null
+      ? selectedPaper.decision
+        ? "Accepted"
+        : "Rejected"
+      : "N/A";
+
+  // choose badge color: green for accept, red for reject, grey if N/A
+  const badgeBg =
+    selectedPaper?.decision === true
+      ? colors.greenAccent[400]
+      : selectedPaper?.decision === false
+      ? colors.redAccent[400]
+      : colors.grey[700];
 
   // reuse your MyTasks styles via sx
   const tableContainerSx = {
@@ -231,8 +333,16 @@ const ReviewDetailPage: React.FC = () => {
               text="Edit Decision"
               onClick={handleOpenDecisionPopup}
             />
-            <AppButton icon={<FaDownload />} text="Download Paper" />
-            <AppButton icon={<FaUserPlus />} text="Assign More Reviewers" />
+            <AppButton
+              icon={<FaDownload />}
+              text="Download Paper"
+              onClick={handleDownloadPaper}
+            />
+            <AppButton
+              icon={<FaUserPlus />}
+              text="Assign More Reviewers"
+              onClick={handleOpenAssignPopup}
+            />
           </Box>
 
           {/* Current Decision */}
@@ -244,15 +354,15 @@ const ReviewDetailPage: React.FC = () => {
           >
             Current decision:{" "}
             <Box
-              display="inline"
+              component="span"
               px={1.5}
               py={0.5}
-              bgcolor={colors.redAccent[900]}
+              bgcolor={badgeBg}
               borderRadius="8px"
               color={colors.grey[100]}
               ml={1}
             >
-              N/A
+              {currentDecision}
             </Box>
           </Typography>
 
@@ -332,6 +442,11 @@ const ReviewDetailPage: React.FC = () => {
                               borderRadius: "8px",
                               fontSize: "12px",
                             }}
+                            disabled={!assignment.reviewData}
+                            onClick={() =>
+                              assignment.reviewData &&
+                              openFeedbackPopup(assignment.reviewData._id)
+                            }
                           >
                             Add Feedback
                           </Button>
@@ -421,6 +536,47 @@ const ReviewDetailPage: React.FC = () => {
             disabled={decisionLoading}
             onClick={() => handleSubmitDecision(true)}
           />
+        </DialogActions>
+      </Dialog>
+
+      {/* Assign Reviewers Popup */}
+      {assignPopupOpen && (
+        <SelectPeoplePopup
+          buttonText="Assign Reviewers"
+          people={trackMembers}
+          onClose={handleCloseAssignPopup}
+          onSelect={handleAssignReviewers}
+        />
+      )}
+
+      {/* Feedback Rating Dialog */}
+      <Dialog
+        open={feedbackPopupOpen}
+        onClose={closeFeedbackPopup}
+        fullWidth
+        maxWidth="sm"
+      >
+        <DialogTitle>Rate this Review</DialogTitle>
+        <DialogContent sx={{ width: "100%", px: 3 }}>
+          <Box sx={{ width: "100%", mt: 2 }}>
+            <Slider
+              value={selectedFeedbackValue}
+              onChange={(_, v) => setSelectedFeedbackValue(v as number)}
+              aria-labelledby="feedback-slider"
+              valueLabelDisplay="on"
+              step={1}
+              marks={Array.from({ length: 11 }, (_, i) => ({
+                value: i,
+                label: `${i}`,
+              }))}
+              min={0}
+              max={10}
+            />
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <AppButton text="Cancel" onClick={closeFeedbackPopup} />
+          <AppButton text="Submit" onClick={handleSubmitFeedback} />
         </DialogActions>
       </Dialog>
     </>
