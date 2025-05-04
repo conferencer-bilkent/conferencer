@@ -4,16 +4,24 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
 }
 
+.main-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  padding: 2rem;
+}
 
 .form-card {
-  background: white;
-  border-radius: 1rem;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+  min-width: 600px;
+  max-width: 800px;
   width: 100%;
-  max-width: 1000px;
+  background: white;
   padding: 2rem;
-  margin: 1rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
+
 .content-container {
   display: flex;
   flex-direction: column;
@@ -73,7 +81,6 @@ body {
 .step-line.active {
   background-color: #3b82f6;
 }
-
 
 .form-title {
   font-size: 1.5rem;
