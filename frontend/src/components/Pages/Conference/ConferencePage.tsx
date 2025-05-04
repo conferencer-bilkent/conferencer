@@ -380,6 +380,11 @@ const ConferencePage: React.FC = () => {
     return activeConference.superchairs.includes(user.id);
   }, [user, activeConference]);
 
+  const isCurrentUserTrackchair = React.useMemo(() => {
+    if (!user || !activeTrack?.track_chairs) return false;
+    return activeTrack.track_chairs.includes(user.id);
+  }, [user, activeTrack]);
+
   const hasActiveTrack = Boolean(activeTrack);
 
   const handleConferenceOverviewClick = () => {
@@ -497,10 +502,10 @@ const ConferencePage: React.FC = () => {
                   {
                     icon: <FaBookOpen size={24} />,
                     text: "View Submissions and Paper Assignments",
-                    onClick: hasActiveTrack
+                    onClick: hasActiveTrack && (isCurrentUserTrackchair || isCurrentUserSuperchair)
                       ? () => navigate("/review", { state: { activeTrack } })
                       : undefined,
-                    disabled: !hasActiveTrack,
+                    disabled: !hasActiveTrack || (!isCurrentUserTrackchair && !isCurrentUserSuperchair),
                   },
                   ...(isPastDue
                     ? []
@@ -508,26 +513,41 @@ const ConferencePage: React.FC = () => {
                         {
                           icon: <AssignmentIcon sx={{ fontSize: 26 }} />,
                           text: "Assign Papers",
-                          onClick: hasActiveTrack
-                            ? () => openPopup("Select Paper(s)")
-                            : undefined,
-                          disabled: !hasActiveTrack,
+                          onClick:
+                            hasActiveTrack &&
+                            (isCurrentUserTrackchair || isCurrentUserSuperchair)
+                              ? () => openPopup("Select Paper(s)")
+                              : undefined,
+                          disabled:
+                            !hasActiveTrack ||
+                            (!isCurrentUserTrackchair &&
+                              !isCurrentUserSuperchair),
                         },
                         {
                           icon: <FaPlusCircle size={24} />,
                           text: "Add People to Track",
-                          onClick: hasActiveTrack
-                            ? () => openPopup("Add People to Track")
-                            : undefined,
-                          disabled: !hasActiveTrack,
+                          onClick:
+                            hasActiveTrack &&
+                            (isCurrentUserTrackchair || isCurrentUserSuperchair)
+                              ? () => openPopup("Add People to Track")
+                              : undefined,
+                          disabled:
+                            !hasActiveTrack ||
+                            (!isCurrentUserTrackchair &&
+                              !isCurrentUserSuperchair),
                         },
                         {
                           icon: <FaPlusCircle size={24} />,
                           text: "Assign Trackchair(s)",
-                          onClick: hasActiveTrack
-                            ? () => openPopup("Assign Trackchair(s)")
-                            : undefined,
-                          disabled: !hasActiveTrack,
+                          onClick:
+                            hasActiveTrack &&
+                            (isCurrentUserTrackchair || isCurrentUserSuperchair)
+                              ? () => openPopup("Assign Trackchair(s)")
+                              : undefined,
+                          disabled:
+                            !hasActiveTrack ||
+                            (!isCurrentUserTrackchair &&
+                              !isCurrentUserSuperchair),
                         },
                       ]),
                 ]}
