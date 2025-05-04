@@ -153,33 +153,29 @@ const ReviewsPage: React.FC = () => {
   };
 
   return (
-    <>
-      <Box display="flex">
-        <Box
-          flex="1"
-          p={3}
-          display="flex"
-          flexDirection="column"
-          alignItems="center"
+    <div className="conference-page" style={{ backgroundColor: colors.transparent, color: colors.grey[100] }}>
+      <div className="conference-container">
+        <div 
+          className="content-container" 
+          style={{ 
+            display: "flex", 
+            flexDirection: "column", 
+            gap: "24px",
+            width: "800px", 
+            margin: "0 auto" 
+          }}
         >
           <AppTitle text={getPageTitle()} />
-
-          <Box
-            display="flex"
-            justifyContent="space-between"
-            alignItems="center"
-            flexWrap="wrap"
-            gap={2}
-            my={3}
-            width="800px"
-          >
+          
+          <div className="buttons-row" style={{ marginBottom: 20 }}>
             <AppButton 
               icon={<FaFilter />} 
               text="Switch Back to Track View" 
               onClick={handleBackToTrackView} 
             />
+            
             <TextField
-              placeholder="Search by Title or Author Name"
+              placeholder="Search by Title"
               variant="outlined"
               size="small"
               value={searchTerm}
@@ -192,26 +188,25 @@ const ReviewsPage: React.FC = () => {
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
-                    <IconButton>
-                      <FaSearch />
-                    </IconButton>
+                    <FaSearch />
                   </InputAdornment>
                 ),
               }}
             />
-          </Box>
+          </div>
 
           {/* Display info about which track/view we're looking at */}
           {activeTrack && (
             <Box 
-              width="800px" 
+              width="100%" 
               mb={3} 
               p={2} 
-              bgcolor={colors.primary[600]}
+              bgcolor={colors.primary[400]}
               borderRadius="8px"
+              border={`1px solid ${colors.grey[700]}`}
             >
               <Typography variant="body1">
-                Currently viewing: <strong>{ 'Assignments'}</strong> for track <strong>{activeTrack.track_name || "Unnamed Track"}</strong>
+                Currently viewing: <strong>{'Assignments'}</strong> for track <strong>{activeTrack.track_name || "Unnamed Track"}</strong>
               </Typography>
             </Box>
           )}
@@ -221,15 +216,19 @@ const ReviewsPage: React.FC = () => {
             papers.map((paper, index) => (
               <Box
                 key={index}
-                width="800px"
+                width="100%"
                 p={2}
                 mb={3}
                 borderRadius="12px"
                 bgcolor={colors.primary[400]}
-                boxShadow={4}
+                border={`1px solid ${colors.grey[700]}`}
+                boxShadow={2}
                 sx={{
                   transition: "all 0.3s ease-in-out",
                   cursor: "pointer",
+                  '&:hover': {
+                    backgroundColor: colors.primary[500],
+                  },
                 }}
                 onClick={() => handleToggleExpand(index)}
               >
@@ -245,7 +244,7 @@ const ReviewsPage: React.FC = () => {
                       {paper.title}
                     </Typography>
                     <Typography variant="body2" color={colors.grey[300]}>
-                      By annen {parseAuthorsInfo(paper.authors)}
+                      {parseAuthorsInfo(paper.authors)}
                     </Typography>
                     <Typography
                       variant="body2"
@@ -255,6 +254,24 @@ const ReviewsPage: React.FC = () => {
                     >
                       Created At: {new Date(paper.createdAt).toLocaleDateString()}
                     </Typography>
+                    
+                    {paper.decision !== undefined && (
+                      <Typography 
+                        variant="body2" 
+                        fontWeight="bold"
+                        color={paper.decision === true 
+                          ? colors.greenAccent[500] 
+                          : paper.decision === false 
+                            ? colors.redAccent[500] 
+                            : colors.grey[300]}
+                      >
+                        Status: {paper.decision === true 
+                          ? "Accepted" 
+                          : paper.decision === false 
+                            ? "Rejected" 
+                            : "Pending Decision"}
+                      </Typography>
+                    )}
                   </Box>
 
                   <AppButton
@@ -290,23 +307,12 @@ const ReviewsPage: React.FC = () => {
 
                     {/* Close Button */}
                     <Box mt={2} display="flex" justifyContent="flex-end">
-                      <Button
-                        onClick={(e) => {
-                          e.stopPropagation();
+                      <AppButton
+                        onClick={() => {
                           handleToggleExpand(index);
                         }}
-                        variant="outlined"
-                        sx={{
-                          borderRadius: "8px",
-                          color: colors.grey[100],
-                          borderColor: colors.grey[300],
-                          "&:hover": {
-                            backgroundColor: colors.primary[500],
-                          },
-                        }}
-                      >
-                        Close
-                      </Button>
+                        text="Close"
+                      />
                     </Box>
                   </Box>
                 </Collapse>
@@ -314,19 +320,20 @@ const ReviewsPage: React.FC = () => {
             ))
           ) : (
             <Box 
-              width="800px" 
+              width="100%" 
               p={4} 
               textAlign="center" 
               color={colors.grey[300]}
               bgcolor={colors.primary[400]}
               borderRadius="12px"
+              border={`1px solid ${colors.grey[700]}`}
             >
               No {"Assignments"} found {activeTrack ? `for ${activeTrack.track_name || "this track"}` : "in this conference"}
             </Box>
           )}
-        </Box>
-      </Box>
-    </>
+        </div>
+      </div>
+    </div>
   );
 };
 
