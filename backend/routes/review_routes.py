@@ -95,21 +95,16 @@ def update_review(review_id):
 
         update_fields = {}
 
-        for field in ["evaluation", "confidence", "evaluation_text", "remarks", "reviewer_name",
-                      "sub_firstname", "sub_lastname", "sub_email"]:
+        for field in ["evaluation", "confidence", "evaluation_text", "remarks", "reviewer_name"]:
             if field in data:
                 update_fields[field] = data[field]
 
-        sub_fields = ["sub_firstname", "sub_lastname", "sub_email"]
-        if any(field in data for field in sub_fields):
-            subreviewer = review.get("subreviewer", {})
-            if "sub_firstname" in data:
-                subreviewer["first_name"] = data["sub_firstname"]
-            if "sub_lastname" in data:
-                subreviewer["last_name"] = data["sub_lastname"]
-            if "sub_email" in data:
-                subreviewer["email"] = data["sub_email"]
-            update_fields["subreviewer"] = subreviewer
+        # Always update subreviewer as an object
+        subreviewer = review.get("subreviewer", {})
+        subreviewer["first_name"] = data.get("sub_firstname", subreviewer.get("first_name", ""))
+        subreviewer["last_name"] = data.get("sub_lastname", subreviewer.get("last_name", ""))
+        subreviewer["email"] = data.get("sub_email", subreviewer.get("email", ""))
+        update_fields["subreviewer"] = subreviewer
 
         if not update_fields:
             return jsonify({"error": "No valid fields provided to update"}), 400
