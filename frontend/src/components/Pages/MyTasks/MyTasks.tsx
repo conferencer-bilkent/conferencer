@@ -321,16 +321,11 @@ const MyTasks: React.FC = () => {
                       {formatDate(paper.submission_date)}
                     </TableCell>
                     <TableCell style={tableCellStyle}>
-                      <Box sx={{ display: "flex", gap: 1 }}>
-                        <AppButton
-                          icon={<Edit />}
-                          text="Update Review"
-                          onClick={() => handleUpdateReview(paper)}
-                        />
-                        <Button variant="contained" color="error">
-                          Delete Review
-                        </Button>
-                      </Box>
+                      <AppButton
+                        icon={<Edit />}
+                        text="Update Review"
+                        onClick={() => handleUpdateReview(paper)}
+                      />
                     </TableCell>
                   </TableRow>
                 ))}
