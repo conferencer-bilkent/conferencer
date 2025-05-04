@@ -25,6 +25,7 @@ import TopBar from "./components/global/TopBar";
 import ConferenceOverview from "./components/Pages/Conference/ConferenceOverview";
 import ReviewPage from "./components/Pages/Review/ReviewPage";
 import { NotificationsProvider } from "./context/NotificationsContext";
+import MySubmissions from "./components/Pages/MySubmissions/MySubmissions";
 
 const App: React.FC = () => {
   const [theme, colorMode] = useMode();
@@ -34,6 +35,7 @@ const App: React.FC = () => {
     "MY TASKS",
     "MY ROLES",
     "NOTIFICATIONS",
+    "MY SUBMISSIONS",
     "CHATS",
     "SETTINGS",
     "LOG OUT",
@@ -132,6 +134,10 @@ const App: React.FC = () => {
                           >
                             <Routes>
                               <Route path="/home" element={<HomePage />} />
+                              <Route
+                                path="/submissions"
+                                element={<MySubmissions />}
+                              />
                               <Route
                                 path="/conference"
                                 element={<ConferencePage />}

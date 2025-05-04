@@ -36,6 +36,9 @@ const SideMenu: React.FC<SideMenuProps> = ({ items }) => {
       case "NOTIFICATIONS":
         navigate("/notifications");
         break;
+      case "MY SUBMISSIONS":
+        navigate("/submissions");
+        break;
       case "CHATS":
         navigate("/chat");
         break;

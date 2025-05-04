@@ -29,6 +29,9 @@ export const handleMenuItemClick = (
     case "CONFERENCES":
       navigate("/home");
       break;
+    case "MY SUBMISSIONS":
+      navigate("/submissions");
+      break;
     case "MY TASKS":
       navigate("/tasks");
       break;
