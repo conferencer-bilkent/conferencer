@@ -14,6 +14,7 @@ const SideMenu: React.FC<SideMenuProps> = ({ items }) => {
   const colors = tokens(theme.palette.mode);
   const navigate = useNavigate();
   const { user } = useUser(); // ✅ use user context
+  const [hoveredItem, setHoveredItem] = React.useState<number | null>(null);
 
   const handleItemClick = (item: string) => {
     console.log("Clicked:", item);
@@ -45,7 +46,17 @@ const SideMenu: React.FC<SideMenuProps> = ({ items }) => {
         navigate("/settings");
         break;
       case "LOG OUT":
-        console.log("Log out should be handled separately");
+        fetch("http://localhost:5000/auth/logout", {
+          method: "POST",
+          credentials: "include",
+        })
+          .then(() => {
+            localStorage.removeItem("user");
+            navigate("/login");
+          })
+          .catch((error) => {
+            console.error("Logout failed:", error);
+          });
         break;
       default:
         console.log("No navigation defined for:", item);
@@ -72,23 +83,19 @@ const SideMenu: React.FC<SideMenuProps> = ({ items }) => {
             key={index}
             onClick={() => handleItemClick(item)}
             style={{
+              backgroundColor:
+                hoveredItem === index ? colors.grey[600] : "transparent",
               padding: "10px 20px",
-              color: colors.grey[100],
               fontFamily: theme.typography.fontFamily,
               fontSize: theme.typography.h5.fontSize,
               fontWeight: "bold",
               cursor: "pointer",
               borderBottom: `1px solid ${colors.grey[300]}`,
               borderRadius: "5px",
-              transition: "background-color 0.3s, color 0.3s",
               textAlign: "center", // Center text for small screens
             }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.color = colors.grey[900];
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.color = colors.grey[100];
-            }}
+            onMouseEnter={() => setHoveredItem(index)}
+            onMouseLeave={() => setHoveredItem(null)}
           >
             {item}
           </li>

@@ -3,32 +3,36 @@
     flex-direction: column;   
     margin-top: 0px;
     margin-left: 0px;
+    border: 1px solid #ccc;
+    border-radius: 12px;
+    background-color: var(--background, blue);
+    padding: 10px;
 }
 
 .titleContainer {
     display: flex;
     flex-direction: row;
-    align-items: flex-start;
-    background-color: rgb(161, 166, 164);
-    border: 1px solid white;
+    align-items: center;
+    background-color: var(--background, blue);
+    border: 1px solid #ccc;    /* add border similar to addSubmission */
+    border-radius: 8px;        /* add border-radius */
+    padding: 2px 4px;
+    margin-bottom: 4px; /* spacing between rows */
 }
 
 .titleContainer label {
     width: 100px;
     font-size: 12px;
-    color: black;
+    color: var(--textPrimary, black); /* retains theme-based text color */
     text-align: right;
-    height: 100%;
+    margin-right: 4px;
 }
 
-.titleContainer input {
-    height: 18px;
-}
-
-.titleContainer input, 
+.titleContainer input,
 .titleContainer textarea {
-    width:248px;
+    width: 248px;
     border-radius: 6px;
     border: none;
-    margin: 2px 0 1px 0;
+    margin: 2px 0;
+    padding: 2px;
 }

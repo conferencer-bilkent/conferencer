@@ -9,14 +9,13 @@ export const mapApiResponseToConference = (apiConference: any): Conference => {
     shortAcronym: apiConference.short_acronym || "",
     website: apiConference.website || "",
     city: apiConference.city || "",
+    description: apiConference.description || "",
     venue: apiConference.venue || "",
     state: apiConference.state || "",
     country: apiConference.country || "",
     submissionPage: apiConference.submission_page || "",
     licenseExpiry: apiConference.license_expiry || "",
     contactEmails: apiConference.contact_emails || [],
-    forwardingEmailsConference: apiConference.forwarding_emails_conference || [],
-    forwardingEmailsTracks: apiConference.forwarding_emails_tracks || [],
     createdBy: apiConference.created_by || "",
     createdAt: apiConference.created_at?.$date || apiConference.created_at || "",
     superchairs: apiConference.superchairs || [],
@@ -27,19 +26,15 @@ export const mapApiResponseToConference = (apiConference: any): Conference => {
     canPcSeeUnassignedSubmissions: apiConference.can_pc_see_unassigned_submissions || { value: false, scope: "conference" },
     abstractBeforeFull: apiConference.abstract_before_full || { value: false, scope: "conference" },
     abstractSectionHidden: apiConference.abstract_section_hidden || { value: false, scope: "track" },
-    multipleAuthorsAllowed: apiConference.multiple_authors_allowed || { value: false, scope: "track" },
     maxAbstractLength: apiConference.max_abstract_length || { value: 0, scope: "track" },
     submissionInstructions: apiConference.submission_instructions || { value: "", scope: "track" },
     additionalFieldsEnabled: apiConference.additional_fields_enabled || { value: false, scope: "track" },
     fileUploadFields: apiConference.file_upload_fields || { value: "", scope: "track" },
-    presenterSelectionRequired: apiConference.presenter_selection_required || { value: false, scope: "track" },
     submissionUpdatesAllowed: apiConference.submission_updates_allowed || { value: false, scope: "track" },
     newSubmissionAllowed: apiConference.new_submission_allowed || { value: false, scope: "conference" },
-    autoUpdateSubmissionDates: apiConference.auto_update_submission_dates || "",
     useBiddingOrRelevance: apiConference.use_bidding_or_relevance || { value: "relevance", scope: "track" },
     biddingEnabled: apiConference.bidding_enabled || { value: false, scope: "track" },
     chairsCanViewBids: apiConference.chairs_can_view_bids || { value: false, scope: "track" },
-    llmFraudDetection: apiConference.llm_fraud_detection || { value: false, scope: "track" },
     reviewersPerPaper: apiConference.reviewers_per_paper || { value: 0, scope: "track" },
     canPcSeeReviewerNames: apiConference.can_pc_see_reviewer_names || { value: false, scope: "track" },
     statusMenuEnabled: apiConference.status_menu_enabled || { value: false, scope: "track" },
@@ -50,6 +45,8 @@ export const mapApiResponseToConference = (apiConference: any): Conference => {
     subreviewerAnonymous: apiConference.subreviewer_anonymous || { value: false, scope: "track" },
     trackChairNotifications: apiConference.track_chair_notifications || { value: false, scope: "track" },
     tracks: apiConference.tracks || [],
+    startDate: apiConference.start_date?.$date || apiConference.start_date || "",
+    endDate: apiConference.end_date?.$date || apiConference.end_date || "",
   };
 };
 
@@ -119,6 +116,7 @@ export const getConferenceById = async (conferenceId: string): Promise<Conferenc
     }
 
     const data = await response.json();
+    console.log("Conference data from API:", data); // Debug log
     // Transform API response to match the Conference interface
     return mapApiResponseToConference(data.conference);
   } catch (error) {

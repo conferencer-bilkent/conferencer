@@ -21,7 +21,6 @@ const AppTitle: React.FC<AppTitleProps> = ({ text, onClick }) => {
         borderRadius: "20px",
         color: colors.grey[100],
         backgroundColor: colors.primary[1000],
-        transition: "background-color 0.5s ease", // add transition for background color
         padding: "10px",
         width: "100%",
         boxSizing: "border-box",
@@ -52,7 +51,7 @@ export const SectionTitle: React.FC<{ text: string }> = ({ text }) => {
         variant="h2"
         sx={{
           color: colors.grey[100],
-          transition: "color 0.5s ease", // add transition for color
+
           fontFamily: theme.typography.fontFamily,
           fontSize: theme.typography.h2.fontSize,
           fontWeight: "bold",

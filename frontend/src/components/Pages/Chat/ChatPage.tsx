@@ -21,7 +21,6 @@ import {
 } from "@mui/material";
 import {
   Send as SendIcon,
-  Edit as EditIcon,
   Inbox as InboxIcon,
   Send as SentIcon,
   Forum as ForumIcon,
@@ -30,6 +29,7 @@ import {
   Reply as ReplyIcon,
 } from "@mui/icons-material";
 import { useUser } from "../../../context/UserContext";
+import AppButton from "../../global/AppButton";
 
 interface Message {
   id: string;
@@ -201,11 +201,11 @@ const ChatPage: React.FC = () => {
     justifyContent: "flex-start",
     textTransform: "none",
     padding: "12px 16px",
-    backgroundColor: active ? colors.blueAccent[700] : "transparent",
+    backgroundColor: active ? colors.grey[700] : "transparent",
   });
 
   const contactItemStyle = (selected: boolean): React.CSSProperties => ({
-    backgroundColor: selected ? colors.blueAccent[700] : "transparent",
+    backgroundColor: selected ? colors.grey[700] : "transparent",
     cursor: "pointer",
   });
 
@@ -347,27 +347,15 @@ const ChatPage: React.FC = () => {
             flexDirection: "column",
             backgroundColor: "transparent",
             flexShrink: 0,
+            marginTop: 20,
           }}
           elevation={0}
         >
-          <Button
-            variant="contained"
-            color="primary"
-            startIcon={<EditIcon />}
-            style={{
-              margin: 16,
-              padding: 12,
-              textTransform: "none",
-              borderRadius: 24,
-              boxShadow: "none",
-              backgroundColor: colors.blueAccent[700],
-            }}
-            onClick={() => {
-              setComposeOpen(true);
-            }}
-          >
-            New Message
-          </Button>
+          <AppButton
+            text="New Message"
+            icon={<SendIcon />}
+            onClick={() => setComposeOpen(true)}
+          />
           <Box>
             <Button
               fullWidth

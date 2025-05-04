@@ -1,7 +1,10 @@
+import React from "react";
 import { useSubmissionContext } from "../../../../../../../context/addSubmissionContext";
 import { Person } from "../../../../../../../reducer/initailState";
 import { countries } from "../../../../../../../utils/countries/countries";
 import { useUser } from "../../../../../../../context/UserContext";
+import { useTheme } from "@mui/material";
+import { tokens } from "../../../../../../../theme";
 import "./addAuthor.css";
 
 interface AuthorProps {
@@ -13,14 +16,18 @@ const AddAuthor: React.FC<AuthorProps> = ({ person, index }) => {
   const { handleInput, authorIndex, state, showValidation } =
     useSubmissionContext();
   const { user } = useUser();
+  const theme = useTheme();
+  const colors = tokens(theme.palette.mode);
 
   const getInputStyle = (value: string | boolean) => {
     if (!showValidation) return {};
 
     return {
-      borderColor: !value ? "#ff0000" : undefined,
+      borderColor: !value ? colors.redAccent[500] : undefined, // use redAccent for validation errors
       borderStyle: !value ? "solid" : undefined,
       borderWidth: !value ? "1px" : undefined,
+      borderRadius: "4px",
+      padding: "4px",
     };
   };
 
@@ -73,7 +80,15 @@ const AddAuthor: React.FC<AuthorProps> = ({ person, index }) => {
   };
 
   return (
-    <div>
+    <div
+      style={{
+        "--redAccent": colors.redAccent[500],
+        "--background": colors.primary[500],
+        "--greyBg": colors.grey[400],
+        "--grey-border": colors.grey[100],
+        "--textPrimary": theme.palette.mode === "dark" ? "#ffffff" : "#000000",
+      } as React.CSSProperties}
+    >
       <div
         className="authorPartContainer"
         style={{
@@ -153,13 +168,12 @@ const AddAuthor: React.FC<AuthorProps> = ({ person, index }) => {
           }}
         ></input>
       </label>
-
       {index === authorIndex && index > 0 && (
         <div
           style={{
             marginTop: "20px",
             padding: "10px",
-            backgroundColor: "rgb(161, 166, 164)",
+            backgroundColor: colors.grey[400],
             borderRadius: "4px",
           }}
         >
@@ -170,7 +184,7 @@ const AddAuthor: React.FC<AuthorProps> = ({ person, index }) => {
               style={{
                 marginBottom: "8px",
                 padding: "8px",
-                backgroundColor: "white",
+                backgroundColor: colors.grey[100],
                 borderRadius: "4px",
               }}
             >

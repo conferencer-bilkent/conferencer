@@ -27,7 +27,9 @@ const styles = {
     background: "#2b3c47",
     padding: "1rem 1.5rem",
     borderRadius: "8px",
-    width: "300px",
+    width: "600px", // Increased from 300px
+    maxHeight: "80vh",
+    overflowY: "auto" as const,
     position: "relative" as const,
   },
   close: {

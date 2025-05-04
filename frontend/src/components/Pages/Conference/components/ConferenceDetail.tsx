@@ -1,14 +1,10 @@
 import React from "react";
 import "./ConferenceDetail.css";
-import { FaBookOpen, FaPlusCircle } from "react-icons/fa";
-import AssignmentIcon from "@mui/icons-material/Assignment";
+
+// import { FaBookOpen, FaPlusCircle } from "react-icons/fa";
+// import AssignmentIcon from "@mui/icons-material/Assignment";
 import { useTheme } from "@mui/material";
 import { tokens } from "../../../../theme";
-import {
-  ConferenceData,
-  conference1,
-  conference2,
-} from "../../../../utils/dummyData/dummyConferenceData";
 
 interface TextInfo {
   title?: string;
@@ -104,113 +100,6 @@ const ConferenceDetail: React.FC<ConferenceDetailProps> = ({
           </div>
         ))}
       </div>
-    </div>
-  );
-};
-
-// Helper function to create text info from conference data
-const createTextInfoFromConference = (
-  conference: ConferenceData
-): TextInfo[] => {
-  return [
-    {
-      title: "Track Dates",
-      content: `${conference.track_dates.start} - ${conference.track_dates.end}`,
-    },
-    {
-      content: "See Full Calendar",
-      link: "#",
-    },
-    {
-      content: `Total Submissions: ${conference.stats.total_submissions}`,
-      link: "#",
-    },
-    {
-      content: `Assigned Reviews: ${conference.stats.assigned_reviews}`,
-      link: "#",
-    },
-    {
-      content: `Pending Reviews: ${conference.stats.pending_reviews}`,
-      link: "#",
-    },
-  ];
-};
-
-// Default buttons
-const defaultButtons: ButtonInfo[] = [
-  {
-    icon: <FaBookOpen size={24} />,
-    text: "View Submissions and Paper Assignments",
-  },
-  { icon: <AssignmentIcon sx={{ fontSize: 26 }} />, text: "Assign Papers" },
-  { icon: <FaPlusCircle size={24} />, text: "Add People to Track" },
-  { icon: <FaPlusCircle size={24} />, text: "Assign Trackchair(s)" },
-];
-
-// Example usage with props to handle popup and conference data
-interface ConferenceDetailExampleProps {
-  openPopup?: (action: string) => void;
-  conference?: ConferenceData;
-}
-
-export const ConferenceDetailExample: React.FC<
-  ConferenceDetailExampleProps
-> = ({
-  openPopup,
-  conference = conference1, // Default to first conference if none provided
-}) => {
-  // Create buttons with onClick handlers where needed
-  const buttonsWithHandlers = defaultButtons.map((button) => {
-    // Handle multiple buttons that should open popups
-    if (openPopup) {
-      switch (button.text) {
-        case "Assign Papers":
-          return {
-            ...button,
-            onClick: () => openPopup("Select Paper(s)"),
-          };
-        case "Add People to Track":
-          return {
-            ...button,
-            onClick: () => openPopup("Add People to Track"),
-          };
-        case "Assign Trackchair(s)":
-          return {
-            ...button,
-            onClick: () => openPopup("Assign Trackchair(s)"),
-          };
-        default:
-          return button;
-      }
-    }
-    return button;
-  });
-
-  // Generate text info from conference data
-  const textsFromConference = createTextInfoFromConference(conference);
-
-  return (
-    <ConferenceDetail
-      texts={textsFromConference}
-      buttons={buttonsWithHandlers}
-      description={conference.description}
-    />
-  );
-};
-
-// Export a component that displays both conferences for demo purposes
-export const ConferenceDetailDemoWithBothConferences: React.FC = () => {
-  return (
-    <div>
-      <h2>
-        {conference1.name} ({conference1.acronym})
-      </h2>
-      <ConferenceDetailExample conference={conference1} />
-
-      <h2 style={{ marginTop: "30px" }}>
-        {conference2.name} ({conference2.acronym})
-      </h2>
-      <ConferenceDetailExample conference={conference2} />
     </div>
   );
 };
