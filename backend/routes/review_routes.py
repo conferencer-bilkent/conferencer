@@ -13,6 +13,21 @@ def get_review(review_id):
         review["_id"] = str(review["_id"])
         review["created_at"] = review.get("created_at").isoformat() if review.get("created_at") else None
 
+        # Find the assignments with the same reviewer_id and paper_id as the review
+        assignments = mongo.db.assignments.find({
+            "reviewer_id": review.get("reviewer_id"),
+            "paper_id": review.get("paper_id")
+        })
+
+        # Convert assignments to a list of dictionaries
+        assignment_list = []
+        for assignment in assignments:
+            assignment["_id"] = str(assignment["_id"])  # Convert ObjectId to string
+            assignment_list.append(assignment)
+
+        # Add assignments to the review response
+        review["assignments"] = assignment_list
+
         return jsonify(review), 200
 
     except Exception as e:
