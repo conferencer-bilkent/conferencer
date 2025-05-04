@@ -3,13 +3,13 @@ from routes.auth_routes import login, signup, logout, check_session, login_googl
 from routes.conference_routes import create_conference, get_conferences, get_conference, invite_pc_member, appoint_superchair
 from routes.ping_routes import ping
 from routes.profile_routes import get_profile, update_profile, get_all_users, get_affiliations, add_affiliations
-from routes.role_routes import assign_role, get_roles, get_role
+from routes.role_routes import assign_role, get_roles, get_role, get_role_status
 from routes.chad_routes import send_chad, get_received_chad, get_sent_chad
 from routes.paper_routes import  get_paper, get_all_papers, submit_paper, download_paper, get_biddings, bid, update_paper, decide, get_papers_of_user
 from routes.review_routes import get_review, update_review, submit_review, get_reviews_by_paper, rate_review, avg_rate, get_review_by_assignment_id 
 from routes.notification_routes import get_notification, mark_notification_as_answered, mark_all_read
 from routes.keywords_routes import get_keywords, add_keyword, set_keywords
-from routes.track_routes import create_track, get_tracks_by_conference, appoint_track_chair, get_track_by_people, get_track_by_author, get_track_by_reviewer, get_track, get_all_tracks, get_all_relevant_people, get_all_papers_in_track, appoint_track_member, get_track_members, get_track_authors_by_papers_in_the_track, conflict_of_interest
+from routes.track_routes import create_track, get_tracks_by_conference, appoint_track_chair, get_track_by_people, get_track_by_author, get_track_by_reviewer, get_track, get_all_tracks, get_all_relevant_people, get_all_papers_in_track, appoint_track_member, get_track_members
 from routes.assignment_routes import create_assignment_for_track, get_assignments_for_reviewer, get_assigned_papers, get_assignments_by_paper
 
 
@@ -52,6 +52,7 @@ profile_bp.route("affiliations", methods=["POST"])(add_affiliations)
 
 role_bp.route("/", methods=["POST"])(assign_role)
 role_bp.route("/", methods=["GET"])(get_roles)
+role_bp.route("/profile/my_roles", methods=["GET"])(get_role_status)
 role_bp.route("/<role_id>", methods=["GET"])(get_role)
 
 chad_bp.route("/send", methods=["POST"])(send_chad)
@@ -97,9 +98,6 @@ track_bp.route("/<track_id>/assign", methods=["POST"])(create_assignment_for_tra
 track_bp.route("/<track_id>/papers", methods=["GET"])(get_all_papers_in_track)
 track_bp.route("/appoint_track_members", methods=["POST"])(appoint_track_member)
 track_bp.route("/<track_id>/members", methods=["GET"])(get_track_members)
-track_bp.route("/<track_id>/authors", methods=["GET"])(get_track_authors_by_papers_in_the_track)
-track_bp.route("/<track_id>/conflict", methods=["GET"])(conflict_of_interest)
-
 
 assignment_bp.route("/reviewer/<reviewer_id>", methods=["GET"])(get_assignments_for_reviewer)
 assignment_bp.route("/reviewer/<reviewer_id>/papers", methods=["GET"])(get_assigned_papers)
