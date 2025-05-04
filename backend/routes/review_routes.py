@@ -4,6 +4,32 @@ from extensions import mongo
 from bson import ObjectId
 from datetime import datetime
 
+def get_review_by_assignment_id(assignment_id):
+    try:
+        # Find the assignment
+        assignment = mongo.db.assignments.find_one({"_id": ObjectId(assignment_id)})
+        if not assignment:
+            return jsonify({"error": "Assignment not found"}), 404
+
+        # Find reviews matching the assignment's reviewer_id and paper_id
+        review = mongo.db.reviews.find_one({
+            "reviewer_id": assignment["reviewer_id"],
+            "paper_id": assignment["paper_id"]
+        })
+
+        if not review:
+            return jsonify({"error": "Review not found"}), 404
+
+        # Convert ObjectId to string
+        review["_id"] = str(review["_id"])
+        if "created_at" in review:
+            review["created_at"] = review["created_at"].isoformat()
+
+        return jsonify(review), 200
+
+    except Exception as e:
+        return jsonify({"error": f"Failed to fetch review: {str(e)}"}), 500
+
 def get_review(review_id):
     try:
         review = mongo.db.reviews.find_one({"_id": ObjectId(review_id)})
