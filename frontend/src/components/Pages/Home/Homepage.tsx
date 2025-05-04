@@ -6,15 +6,38 @@ import { getAllConferences } from "../../../services/conferenceService";
 import { Conference } from "../../../models/conference";
 import "./Homepage.css";
 
+export const isConferencePastDue = (conference: Conference): boolean => {
+  const endDate = conference.endDate ? new Date(conference.endDate) : null;
+  return endDate ? endDate < new Date() : false;
+};
+
 const Homepage: React.FC = () => {
   const { setActiveConference } = useConference();
-  const [conferences, setConferences] = useState<Conference[]>([]);
+  const [upcomingConferences, setUpcomingConferences] = useState<Conference[]>(
+    []
+  );
+  const [pastConferences, setPastConferences] = useState<Conference[]>([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
     getAllConferences()
-      .then(setConferences)
+      .then((conferences) => {
+        const now = new Date();
+        const upcoming: Conference[] = [];
+        const past: Conference[] = [];
+
+        conferences.forEach((conf) => {
+          if (isConferencePastDue(conf)) {
+            past.push(conf);
+          } else {
+            upcoming.push(conf);
+          }
+        });
+
+        setUpcomingConferences(upcoming);
+        setPastConferences(past);
+      })
       .finally(() => setLoading(false));
   }, []);
 
@@ -30,9 +53,9 @@ const Homepage: React.FC = () => {
           <SectionTitle text="Upcoming Conferences" />
           {loading ? (
             <div>Loading…</div>
-          ) : conferences.length > 0 ? (
+          ) : upcomingConferences.length > 0 ? (
             <div className="conference-list">
-              {conferences.map((conf) => (
+              {upcomingConferences.map((conf) => (
                 <AppTitle
                   key={conf.id}
                   text={conf.name}
@@ -41,14 +64,27 @@ const Homepage: React.FC = () => {
               ))}
             </div>
           ) : (
-            <div>No conferences found</div>
+            <div>No upcoming conferences found</div>
           )}
         </div>
 
         <div className="section">
           <SectionTitle text="Past Conferences" />
-          <AppTitle text="BILKENT CONFERENCE 2023" />
-          <AppTitle text="CS FAIR 2023" />
+          {loading ? (
+            <div>Loading…</div>
+          ) : pastConferences.length > 0 ? (
+            <div className="conference-list">
+              {pastConferences.map((conf) => (
+                <AppTitle
+                  key={conf.id}
+                  text={conf.name}
+                  onClick={() => handleConferenceClick(conf)}
+                />
+              ))}
+            </div>
+          ) : (
+            <div>No past conferences found</div>
+          )}
         </div>
       </div>
     </div>
