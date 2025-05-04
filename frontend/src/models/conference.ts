@@ -29,8 +29,6 @@ export interface ReviewFlag {
     submissionPage: string;
     licenseExpiry: string;           // or Date, if you map it
     contactEmails: string[];
-    forwardingEmailsConference: string[];
-    forwardingEmailsTracks: string[];
     createdBy: string;
     createdAt: string;               // or Date
     superchairs: string[];
@@ -41,7 +39,6 @@ export interface ReviewFlag {
     canPcSeeUnassignedSubmissions: ReviewFlag;
     abstractBeforeFull: ReviewFlag;
     abstractSectionHidden: ReviewFlag;
-    multipleAuthorsAllowed: ReviewFlag;
     maxAbstractLength: ReviewFlag & { value: number };
     submissionInstructions: ReviewFlag & { value: string };
     additionalFieldsEnabled: ReviewFlag;
@@ -49,11 +46,9 @@ export interface ReviewFlag {
     presenterSelectionRequired: ReviewFlag;
     submissionUpdatesAllowed: ReviewFlag;
     newSubmissionAllowed: ReviewFlag;
-    autoUpdateSubmissionDates: string;
     useBiddingOrRelevance: ReviewFlag & { value: 'relevance' | 'bidding' };
     biddingEnabled: ReviewFlag;
     chairsCanViewBids: ReviewFlag;
-    llmFraudDetection: ReviewFlag;
     reviewersPerPaper: ReviewFlag & { value: number };
     canPcSeeReviewerNames: ReviewFlag;
     statusMenuEnabled: ReviewFlag;

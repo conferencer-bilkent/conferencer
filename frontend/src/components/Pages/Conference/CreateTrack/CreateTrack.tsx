@@ -18,7 +18,6 @@ const steps = [
     title: "Submission Settings",
     fields: [
       "abstract_before_full",
-      "multiple_authors_allowed",
       "max_abstract_length",
       "file_upload_fields",
       "presenter_selection_required",
@@ -48,7 +47,6 @@ const defaultForm = {
   short_name: "",
   description: "",
   abstract_before_full: { value: true, scope: defaultScope },
-  multiple_authors_allowed: { value: true, scope: defaultScope },
   max_abstract_length: { value: 300, scope: defaultScope },
   file_upload_fields: { value: "paper, supplementary", scope: defaultScope },
   presenter_selection_required: { value: false, scope: defaultScope },

@@ -17,7 +17,6 @@ export interface Track {
   // Submission Information
   abstractBeforeFull?: boolean;
   abstractSectionHidden?: boolean;
-  multipleAuthorsAllowed?: boolean;
   maxAbstractLength?: number;
   submissionInstructions?: string;
   additionalFieldsEnabled?: boolean;
@@ -29,7 +28,6 @@ export interface Track {
   useBiddingOrRelevance?: string;
   biddingEnabled?: boolean;
   chairsCanViewBids?: boolean;
-  llmFraudDetection?: boolean;
   reviewersPerPaper?: number;
   
   // Reviewing Information
@@ -64,7 +62,6 @@ export const createDefaultTrack = (): Track => {
     // Default settings for a new track
     abstractBeforeFull: false,
     abstractSectionHidden: false,
-    multipleAuthorsAllowed: true,
     maxAbstractLength: undefined,
     submissionInstructions: '',
     additionalFieldsEnabled: false,
@@ -75,7 +72,6 @@ export const createDefaultTrack = (): Track => {
     useBiddingOrRelevance: 'relevance',
     biddingEnabled: false,
     chairsCanViewBids: true,
-    llmFraudDetection: false,
     reviewersPerPaper: 3,
     
     canPcSeeReviewerNames: false,
@@ -110,7 +106,6 @@ export const mapResponseToTrack = (data: any): Track => {
     // Map all additional fields if they exist in the response
     abstractBeforeFull: data.abstract_before_full,
     abstractSectionHidden: data.abstract_section_hidden,
-    multipleAuthorsAllowed: data.multiple_authors_allowed,
     maxAbstractLength: data.max_abstract_length,
     submissionInstructions: data.submission_instructions,
     additionalFieldsEnabled: data.additional_fields_enabled,
@@ -121,7 +116,6 @@ export const mapResponseToTrack = (data: any): Track => {
     useBiddingOrRelevance: data.use_bidding_or_relevance,
     biddingEnabled: data.bidding_enabled,
     chairsCanViewBids: data.chairs_can_view_bids,
-    llmFraudDetection: data.llm_fraud_detection,
     reviewersPerPaper: data.reviewers_per_paper,
     
     canPcSeeReviewerNames: data.can_pc_see_reviewer_names,

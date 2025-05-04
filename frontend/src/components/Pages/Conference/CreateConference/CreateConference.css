@@ -27,6 +27,10 @@ body {
   justify-content: center;   
   padding: 1rem 0;
   margin-bottom: 2rem;
+  width: 100%;
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .progress-steps-container {
@@ -34,7 +38,7 @@ body {
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  max-width: 600px;           
+  padding: 0 2rem;
 }
 .step-container {
   display: flex;
@@ -83,7 +87,22 @@ body {
   grid-template-columns: 1fr 2fr;
   gap: 1.5rem;
   align-items: center;
-  margin-bottom: 1.5rem;
+  margin-top: 1.0rem;
+}
+
+.form-field.invalid input {
+  border-color: #dc2626;
+}
+
+.error-message {
+  color: #dc2626;
+  font-size: 0.875rem;
+  text-align: right;
+}
+
+.form-field-container {
+  display: flex;
+  flex-direction: column;
 }
 
 .form-label {
