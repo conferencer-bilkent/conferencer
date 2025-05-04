@@ -1,7 +1,7 @@
 import React from "react";
 import "./ConferenceDetail.css";
-import { FaBookOpen, FaPlusCircle } from "react-icons/fa";
-import AssignmentIcon from "@mui/icons-material/Assignment";
+// import { FaBookOpen, FaPlusCircle } from "react-icons/fa";
+// import AssignmentIcon from "@mui/icons-material/Assignment";
 import { useTheme } from "@mui/material";
 import { tokens } from "../../../../theme";
 
