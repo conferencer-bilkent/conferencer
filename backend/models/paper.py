@@ -4,7 +4,7 @@ from extensions import mongo
 
 class Paper:
     def __init__(self, paper_id, title, abstract, keywords, paper_path, authors, created_by,
-                 decision=None, track=None, biddings=None, assignee=None,
+                 decision=None, decision_made_by = None, track=None, biddings=None, assignee=None,
                  reviews=None, created_at=None, submission_date=None, update_date=None):
         self.id = str(paper_id) if isinstance(paper_id, ObjectId) else paper_id
         self.title = title
@@ -13,6 +13,7 @@ class Paper:
         self.paper_path = paper_path
         self.authors = authors
         self.decision = decision
+        self.decision_made_by = decision_made_by
         self.track = track
         self.biddings = biddings or []
         self.assignee = assignee
@@ -49,6 +50,7 @@ class Paper:
             "paper_path": self.paper_path,
             "authors": self.authors,
             "decision": self.decision,
+            "decision_made_by": self.decision_made_by,
             "track": self.track,
             "biddings": self.biddings,
             "assignee": self.assignee,

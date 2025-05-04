@@ -246,3 +246,36 @@ def update_paper(paper_id):
     except Exception as e:
         return jsonify({"error": f"Failed to update paper: {str(e)}"}), 500
 
+def decide(paper_id):
+    if "user_id" not in session:
+        return jsonify({"error": "Unauthorized"}), 401
+
+    data = request.get_json()
+    decision_value = data.get("decision")
+
+    if decision_value not in [True, False]:
+        return jsonify({"error": "Decision must be true or false"}), 400
+
+    try:
+        # Fetch the user who is making the decision
+        user = mongo.db.users.find_one({"_id": ObjectId(session["user_id"])})
+        if not user:
+            return jsonify({"error": "User not found"}), 404
+        
+        name = user.get("name", "")
+        surname = user.get("surname", "")
+        decision_made_by = f"{name} {surname}".strip()
+
+        # Update or set the decision
+        mongo.db.papers.update_one(
+            {"_id": ObjectId(paper_id)},
+            {"$set": {
+                "decision": decision_value,
+                "decision_made_by": decision_made_by
+            }}
+        )
+
+        return jsonify({"message": "Decision updated successfully"}), 200
+
+    except Exception as e:
+        return jsonify({"error": f"Failed to update decision: {str(e)}"}), 500
