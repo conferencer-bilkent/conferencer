@@ -5,7 +5,7 @@ from routes.ping_routes import ping
 from routes.profile_routes import get_profile, update_profile, get_all_users, get_affiliations, add_affiliations
 from routes.role_routes import assign_role, get_roles, get_role
 from routes.chad_routes import send_chad, get_received_chad, get_sent_chad
-from routes.paper_routes import  get_paper, get_all_papers, submit_paper, download_paper, get_biddings, bid, update_paper, decide
+from routes.paper_routes import  get_paper, get_all_papers, submit_paper, download_paper, get_biddings, bid, update_paper, decide, get_papers_of_user
 from routes.review_routes import get_review, update_review, submit_review, get_reviews_by_paper, rate_review, avg_rate, get_review_by_assignment_id 
 from routes.notification_routes import get_notification, mark_notification_as_answered, mark_all_read
 from routes.keywords_routes import get_keywords, add_keyword, set_keywords
@@ -66,6 +66,7 @@ paper_bp.route("/<paper_id>/bid", methods=["POST"])(bid)
 paper_bp.route("/<paper_id>/biddings", methods=["GET"])(get_biddings)
 paper_bp.route("/<paper_id>/update", methods=["POST"])(update_paper)
 paper_bp.route("/<paper_id>/decide", methods=["POST"])(decide)
+paper_bp.route("/my_papers", methods=["GET"])(get_papers_of_user)
 
 review_bp.route("/<review_id>", methods=["GET"])(get_review)
 review_bp.route("/submit/<paper_id>", methods=["POST"])(submit_review)
