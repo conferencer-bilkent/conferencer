@@ -1,6 +1,7 @@
 from flask import request, jsonify, session, send_file
 from models.paper import Paper
 from models.review import Review
+from models.role import Role
 from extensions import mongo
 from bson import ObjectId
 from datetime import datetime
@@ -99,6 +100,28 @@ def submit_paper():
             {"_id": ObjectId(track_id)},
             {"$push": {"papers": inserted_id}}
         )
+        # After saving paper and updating track, assign author role
+        author_role = Role(
+            conference_id=conference_id,
+            track_id=track_id,
+            position="author"
+        )
+
+        existing_role = mongo.db.roles.find_one({
+            "conference_id": conference_id,
+            "track_id": track_id,
+            "position": "author",
+            "_id": {"$in": [ObjectId(role_id) for role_id in mongo.db.users.find_one({"_id": ObjectId(session["user_id"])}).get("roles", [])]}
+        })
+
+        if not existing_role:
+            result = mongo.db.roles.insert_one(author_role.to_dict())
+            real_role_id = result.inserted_id  # This is the ObjectId MongoDB really saved
+
+            mongo.db.users.update_one(
+                {'_id': ObjectId(session["user_id"])},
+                {'$addToSet': {'roles': real_role_id}}  # Save the ObjectId, NOT string
+            )
 
         return jsonify({
             "message": "Paper created successfully!",
