@@ -3,6 +3,7 @@ import { FaSearch } from "react-icons/fa";
 import SelectPaperItem, { Paper } from "./SelectPaperItem";
 import SelectPeopleItem from "./SelectPeopleItem";
 import { UserData } from "../../models/user";
+import { getBiddingsForPaper } from "../../services/trackService";
 
 interface Props {
   buttonText: string;
@@ -94,6 +95,7 @@ const SelectPaperPopup: React.FC<Props> = ({
   const [selectedPaper, setSelectedPaper] = useState<Paper | null>(null);
   const [reviewers, setReviewers] = useState<UserData[]>([]);
   const [selectedReviewers, setSelectedReviewers] = useState<string[]>([]);
+  const [biddingReviewers, setBiddingReviewers] = useState<string[]>([]);
 
   useEffect(() => {
     // Fetch papers for this track
@@ -122,9 +124,9 @@ const SelectPaperPopup: React.FC<Props> = ({
   }, [trackId]);
 
   useEffect(() => {
-    // Only fetch track members when a paper is selected
+    // Only fetch track members and bidding reviewers when a paper is selected
     if (selectedPaper) {
-      const fetchTrackMembers = async () => {
+      const fetchReviewers = async () => {
         try {
           const response = await fetch(
             `http://127.0.0.1:5000/track/${trackId}/members`,
@@ -142,7 +144,18 @@ const SelectPaperPopup: React.FC<Props> = ({
         }
       };
 
-      fetchTrackMembers();
+      const fetchBiddingReviewers = async () => {
+        try {
+          const bids = await getBiddingsForPaper(String(selectedPaper.id));
+          setBiddingReviewers(bids);
+        } catch (error) {
+          console.error("Error fetching bidding reviewers:", error);
+          setBiddingReviewers([]);
+        }
+      };
+
+      fetchReviewers();
+      fetchBiddingReviewers();
       setStep("reviewers");
     }
   }, [selectedPaper, trackId]);
@@ -152,8 +165,8 @@ const SelectPaperPopup: React.FC<Props> = ({
     setSelectedPaper(paper || null);
   };
 
-  const handleReviewerToggle = (reviewerId: number) => {
-    const reviewer = reviewers[reviewerId];
+  const handleReviewerToggle = (reviewerIndex: number) => {
+    const reviewer = reviewers[reviewerIndex];
     const actualUserId =
       typeof reviewer._id === "string" ? reviewer._id : reviewer._id?.$oid;
 
@@ -249,7 +262,10 @@ const SelectPaperPopup: React.FC<Props> = ({
               id: idx,
               name: `${r.name} ${r.surname}`,
               email: r.email || "",
-              userId: typeof r._id === "string" ? r._id : r._id?.$oid || "",
+              userId:
+                typeof r._id === "string"
+                  ? r._id
+                  : r._id?.$oid || "",
             }))}
             selectedIds={selectedReviewers.map((id) =>
               reviewers.findIndex(
@@ -257,6 +273,7 @@ const SelectPaperPopup: React.FC<Props> = ({
               )
             )}
             onToggle={handleReviewerToggle}
+            highlightUserIds={biddingReviewers}
           />
         )}
 

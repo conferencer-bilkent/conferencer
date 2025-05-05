@@ -179,6 +179,52 @@ export const updatePaperDecision = async (
 };
 
 /**
+ * Submit a bidding for a paper
+ * 
+ * @param paperId - ID of the paper to bid on
+ * @param bid - Bid value (e.g., interest level 1-5)
+ * @returns Promise resolving when bidding is successful
+ */
+export const submitPaperBid = async (
+  paperId: string, 
+  bid: number
+): Promise<void> => {
+  const response = await fetch(
+    `${API_BASE_URL}/paper/${paperId}/bid`,
+    {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ bid }),
+    }
+  );
+  if (!response.ok) {
+    const err = await response.json();
+    throw new Error(err.error || "Failed to submit bidding");
+  }
+};
+
+// Handle submitting a bid
+
+/**
+ * Get biddings for a specific paper
+ * 
+ * @param paperId - ID of the paper
+ * @returns Promise with array of bidding user IDs
+ */
+export const getBiddingsForPaper = async (paperId: string): Promise<string[]> => {
+  const response = await fetch(`${API_BASE_URL}/paper/${paperId}/biddings`, {
+    credentials: "include",
+  });
+  if (!response.ok) {
+    const err = await response.json();
+    throw new Error(err.error || "Failed to get biddings");
+  }
+  const data = await response.json();
+  return data.biddings;
+};
+
+/**
  * Maps API response to Track model
  * 
  * @param data - API response data

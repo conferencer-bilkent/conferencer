@@ -17,21 +17,52 @@ interface ButtonInfo {
   text: string;
   onClick?: () => void;
   disabled?: boolean; // Added disabled property
+  visibleTo?: 'all' | 'trackchairs' | 'superchairs' | 'members'; // Role-based visibility
 }
 
 interface ConferenceDetailProps {
   texts: TextInfo[];
   buttons: ButtonInfo[];
   description?: string;
+  userRoles?: {
+    isTrackchair?: boolean;
+    isSuperchair?: boolean;
+    isTrackMember?: boolean;
+  };
 }
 
 const ConferenceDetail: React.FC<ConferenceDetailProps> = ({
   texts,
   buttons,
   description,
+  userRoles = {},
 }) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
+  
+  // Default role values if not provided
+  const { isTrackchair = false, isSuperchair = false, isTrackMember = false } = userRoles;
+
+  // Helper function to determine if a button should be enabled for the current user
+  const isButtonEnabledForUser = (button: ButtonInfo): boolean => {
+    // If button has explicit disabled state, respect that
+    if (button.disabled === true) {
+      return false;
+    }
+    
+    // Check role-based visibility
+    switch (button.visibleTo) {
+      case 'trackchairs':
+        return isTrackchair || isSuperchair;
+      case 'superchairs':
+        return isSuperchair;
+      case 'members':
+        return isTrackMember || isTrackchair || isSuperchair;
+      case 'all':
+      default:
+        return true;
+    }
+  };
 
   return (
     <div
@@ -66,39 +97,39 @@ const ConferenceDetail: React.FC<ConferenceDetailProps> = ({
         </div>
       </div>
       <div className="buttons-container">
-        {buttons.map((button, index) => (
-          <div
-            key={index}
-            className="button"
-            onClick={button.disabled ? undefined : button.onClick}
-            style={{
-              cursor: button.disabled
-                ? "not-allowed"
-                : button.onClick
-                ? "pointer"
-                : "default",
-              borderRight:
-                index !== buttons.length - 1
-                  ? `1px solid ${colors.grey[100]}`
-                  : "none",
-              backgroundColor: colors.primary[1000],
-              color: button.disabled ? colors.grey[400] : colors.grey[100],
-              opacity: button.disabled ? 0.8 : 1,
-            }}
-          >
-            <div style={{ opacity: button.disabled ? 0.8 : 1 }}>
-              {button.icon}
-            </div>
-            <p
+        {buttons.map((button, index) => {
+          const isEnabled = isButtonEnabledForUser(button);
+          
+          return (
+            <div
+              key={index}
+              className="button"
+              onClick={isEnabled ? button.onClick : undefined}
               style={{
-                color: button.disabled ? colors.grey[400] : colors.grey[100],
-                opacity: button.disabled ? 0.8 : 1,
+                cursor: isEnabled && button.onClick ? "pointer" : "not-allowed",
+                borderRight:
+                  index !== buttons.length - 1
+                    ? `1px solid ${colors.grey[100]}`
+                    : "none",
+                backgroundColor: colors.primary[1000],
+                color: isEnabled ? colors.grey[100] : colors.grey[400],
+                opacity: isEnabled ? 1 : 0.8,
               }}
             >
-              {button.text}
-            </p>
-          </div>
-        ))}
+              <div style={{ opacity: isEnabled ? 1 : 0.8 }}>
+                {button.icon}
+              </div>
+              <p
+                style={{
+                  color: isEnabled ? colors.grey[100] : colors.grey[400],
+                  opacity: isEnabled ? 1 : 0.8,
+                }}
+              >
+                {button.text}
+              </p>
+            </div>
+          );
+        })}
       </div>
     </div>
   );
