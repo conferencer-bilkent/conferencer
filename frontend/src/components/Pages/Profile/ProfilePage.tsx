@@ -506,6 +506,9 @@ const ProfilePage: React.FC = () => {
             onInputChange={(_, newValue) => setAffiliationInput(newValue)}
             inputValue={affiliationInput}
             options={affiliations}
+            ListboxProps={{
+              style: { maxHeight: "200px" }, // Makes the dropdown scrollable after ~5 items
+            }}
             renderInput={(params) => (
               <TextField
                 {...params}
@@ -514,6 +517,11 @@ const ProfilePage: React.FC = () => {
                 fullWidth
               />
             )}
+            slotProps={{
+              popper: {
+                style: { maxHeight: "300px", overflow: "auto" },
+              },
+            }}
           />
         </DialogContent>
         <DialogActions>
