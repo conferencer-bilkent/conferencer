@@ -95,6 +95,28 @@ export const createConference = async (
   }
 };
 
+export const createConferenceFromSeries = async (
+  payload: Record<string, any>
+): Promise<number> => {
+  try {
+    const res = await fetch("http://127.0.0.1:5000/conference/create_from_series", {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    
+    const data = await res.json();
+    if (!res.ok) {
+      throw new Error(data.error || res.statusText);
+    }
+    return data.conference_id as number;
+  } catch (err) {
+    console.error("Failed to create conference from series:", err);
+    throw err;
+  }
+};
+
 /**
  * Fetches a specific conference by its ID
  * 
