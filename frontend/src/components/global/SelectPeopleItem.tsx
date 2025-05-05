@@ -12,6 +12,8 @@ interface SelectPeopleItemProps {
   people: Person[];
   selectedIds: number[];
   onToggle: (id: number) => void;
+  // New prop: list of userIds that should be highlighted (e.g. those who bid on a paper)
+  highlightUserIds?: string[];
 }
 
 const styles = {
@@ -34,6 +36,9 @@ const styles = {
     border: "2px solid #00aaff",
     color: "#00aaff",
   } as React.CSSProperties,
+  highlighted: {
+    border: "2px solid yellow",
+  } as React.CSSProperties,
   left: {
     display: "flex",
     alignItems: "center",
@@ -47,28 +52,47 @@ const SelectPeopleItem: React.FC<SelectPeopleItemProps> = ({
   people,
   selectedIds,
   onToggle,
-}) => (
-  <div style={styles.container}>
-    {people.map((person) => {
-      const isSelected = selectedIds.includes(person.id); // Changed from _id to id
-      return (
-        <div
-          key={person.id} // Changed from _id to id
-          style={{
-            ...styles.item,
-            ...(isSelected ? styles.selected : {}),
-          }}
-          onClick={() => onToggle(person.id)} // Changed from _id to id
-        >
-          <div style={styles.left}>
-            <FaUser style={styles.icon} />
-            <span>{person.name}</span>
+  highlightUserIds,
+}) => {
+  // If highlighting is enabled, sort people so that highlighted items come first
+  const sortedPeople = React.useMemo(() => {
+    if (!highlightUserIds) return people;
+    return [...people].sort((a, b) => {
+      const aHighlight =
+        a.userId && highlightUserIds.includes(a.userId) ? 0 : 1;
+      const bHighlight =
+        b.userId && highlightUserIds.includes(b.userId) ? 0 : 1;
+      return aHighlight - bHighlight;
+    });
+  }, [people, highlightUserIds]);
+
+  return (
+    <div style={styles.container}>
+      {sortedPeople.map((person) => {
+        const isSelected = selectedIds.includes(person.id);
+        const isHighlighted =
+          person.userId && highlightUserIds?.includes(person.userId);
+
+        return (
+          <div
+            key={person.id}
+            style={{
+              ...styles.item,
+              ...(isSelected ? styles.selected : {}),
+              ...(isHighlighted ? styles.highlighted : {}),
+            }}
+            onClick={() => onToggle(person.id)}
+          >
+            <div style={styles.left}>
+              <FaUser style={styles.icon} />
+              <span>{person.name}</span>
+            </div>
+            {isSelected ? <FaCheckSquare /> : <FaRegSquare />}
           </div>
-          {isSelected ? <FaCheckSquare /> : <FaRegSquare />}
-        </div>
-      );
-    })}
-  </div>
-);
+        );
+      })}
+    </div>
+  );
+};
 
 export default SelectPeopleItem;

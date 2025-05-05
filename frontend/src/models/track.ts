@@ -1,4 +1,3 @@
-
 /**
  * Interface for the Track model
  */
@@ -9,6 +8,7 @@ export interface Track {
   acronym?: string;               // track_acronym in backend
   description?: string;
   trackChairs: string[];          // track_chairs in backend
+  trackMembers: string[];         // track_members in backend (fixed typo)
   papers: string[];               // papers in backend
   reviews: string[];              // reviews in backend
   assignments: any[];             // assignments in backend
@@ -54,6 +54,7 @@ export const createDefaultTrack = (): Track => {
     acronym: '',
     description: '',
     trackChairs: [],
+    trackMembers: [], // Fixed typo
     papers: [],
     reviews: [],
     assignments: [],
@@ -97,7 +98,9 @@ export const mapResponseToTrack = (data: any): Track => {
     name: data.track_name || '',
     conferenceId: data.conference_id || '',
     acronym: data.track_acronym || '',
+    description: data.description || '',
     trackChairs: data.track_chairs || [],
+    trackMembers: data.track_members || [], // Added mapping from track_members
     papers: data.papers || [],
     reviews: data.reviews || [],
     assignments: data.assignments || [],

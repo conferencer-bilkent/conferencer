@@ -77,6 +77,24 @@ const ConferencePage: React.FC = () => {
     return activeConference.pcMembers.includes(user.id);
   }, [user, activeConference]);
 
+  const isCurrentUserSuperchair = React.useMemo(() => {
+    if (!user || !activeConference?.superchairs) return false;
+    return activeConference.superchairs.includes(user.id);
+  }, [user, activeConference]);
+
+  const isCurrentUserTrackchair = React.useMemo(() => {
+    if (!user || !activeTrack?.track_chairs) return false;
+    return activeTrack.track_chairs.includes(user.id);
+  }, [user, activeTrack]);
+
+  const isCurrentUserTrackMember = React.useMemo(() => {
+    if (!user || !activeTrack?.track_members) return false;
+    console.log("activeTrack", activeTrack);
+    console.log("user", user);
+    return activeTrack.track_members.includes(user.id);
+    
+  }, [user, activeTrack]);
+
   // only refresh once on first mount / load of activeConference
   const hasRefreshed = useRef(false);
   useEffect(() => {
@@ -411,16 +429,6 @@ const ConferencePage: React.FC = () => {
     });
   }, [activeTrack]);
 
-  const isCurrentUserSuperchair = React.useMemo(() => {
-    if (!user || !activeConference?.superchairs) return false;
-    return activeConference.superchairs.includes(user.id);
-  }, [user, activeConference]);
-
-  const isCurrentUserTrackchair = React.useMemo(() => {
-    if (!user || !activeTrack?.track_chairs) return false;
-    return activeTrack.track_chairs.includes(user.id);
-  }, [user, activeTrack]);
-
   const hasActiveTrack = Boolean(activeTrack);
 
   const handleConferenceOverviewClick = () => {
@@ -539,13 +547,11 @@ const ConferencePage: React.FC = () => {
                     icon: <FaBookOpen size={24} />,
                     text: "View Submissions and Paper Assignments",
                     onClick:
-                      hasActiveTrack &&
-                      (isCurrentUserTrackchair || isCurrentUserSuperchair)
+                      hasActiveTrack
                         ? () => navigate("/review", { state: { activeTrack } })
                         : undefined,
-                    disabled:
-                      !hasActiveTrack ||
-                      (!isCurrentUserTrackchair && !isCurrentUserSuperchair),
+                    disabled: !hasActiveTrack,
+                    visibleTo: "members" as "members",
                   },
                   ...(isPastDue
                     ? []
@@ -558,10 +564,8 @@ const ConferencePage: React.FC = () => {
                             (isCurrentUserTrackchair || isCurrentUserSuperchair)
                               ? () => openPopup("Select Paper(s)")
                               : undefined,
-                          disabled:
-                            !hasActiveTrack ||
-                            (!isCurrentUserTrackchair &&
-                              !isCurrentUserSuperchair),
+                          disabled: !hasActiveTrack,
+                          visibleTo: "trackchairs" as "trackchairs",
                         },
                         {
                           icon: <FaPlusCircle size={24} />,
@@ -571,10 +575,8 @@ const ConferencePage: React.FC = () => {
                             (isCurrentUserTrackchair || isCurrentUserSuperchair)
                               ? () => openPopup("Add People to Track")
                               : undefined,
-                          disabled:
-                            !hasActiveTrack ||
-                            (!isCurrentUserTrackchair &&
-                              !isCurrentUserSuperchair),
+                          disabled: !hasActiveTrack,
+                          visibleTo: "trackchairs" as "trackchairs",
                         },
                         {
                           icon: <FaPlusCircle size={24} />,
@@ -584,13 +586,16 @@ const ConferencePage: React.FC = () => {
                             (isCurrentUserTrackchair || isCurrentUserSuperchair)
                               ? () => openPopup("Assign Trackchair(s)")
                               : undefined,
-                          disabled:
-                            !hasActiveTrack ||
-                            (!isCurrentUserTrackchair &&
-                              !isCurrentUserSuperchair),
+                          disabled: !hasActiveTrack,
+                          visibleTo: "trackchairs" as "trackchairs",
                         },
                       ]),
                 ]}
+                userRoles={{
+                  isTrackchair: isCurrentUserTrackchair,
+                  isSuperchair: isCurrentUserSuperchair,
+                  isTrackMember: isCurrentUserTrackMember,
+                }}
               />
 
               <IconButton
