@@ -41,12 +41,50 @@ const ConferencePage: React.FC = () => {
   console.log("activeconfessrence", activeConference);
   const [activeTrack, setActiveTrack] = useState<any>(null);
 
+  const [papers, setPapers] = useState<any[]>([]);
+  const [loadingPapers, setLoadingPapers] = useState(false);
+
+  const fetchTrackPapers = async (trackId: string) => {
+    setLoadingPapers(true);
+    try {
+      const response = await fetch(
+        `http://127.0.0.1:5000/track/${trackId}/papers`,
+        {
+          credentials: "include",
+        }
+      );
+      if (!response.ok) throw new Error("Failed to fetch papers");
+      const data = await response.json();
+      setPapers(data.papers || []);
+    } catch (error) {
+      console.error("Error fetching papers:", error);
+      setPapers([]);
+    } finally {
+      setLoadingPapers(false);
+    }
+  };
+
+  useEffect(() => {
+    if (activeTrack?._id) {
+      fetchTrackPapers(activeTrack._id);
+    } else {
+      setPapers([]);
+    }
+  }, [activeTrack]);
+
+  const isCurrentUserPCMember = React.useMemo(() => {
+    if (!user || !activeConference?.pcMembers) return false;
+    return activeConference.pcMembers.includes(user.id);
+  }, [user, activeConference]);
+
   // only refresh once on first mount / load of activeConference
   const hasRefreshed = useRef(false);
   useEffect(() => {
     if (!hasRefreshed.current && activeConference) {
       hasRefreshed.current = true;
-      console.log(`Refreshing conference data on mount (ID: ${activeConference.id})`);
+      console.log(
+        `Refreshing conference data on mount (ID: ${activeConference.id})`
+      );
       refreshConference(activeConference.id)
         .then(() => console.log("Conference refreshed"))
         .catch((err) => console.error("Error refreshing on mount:", err));
@@ -177,9 +215,7 @@ const ConferencePage: React.FC = () => {
         if (activeConference) {
           const assignPromises = selectedUserIds.map((userId) =>
             assignSuperchair(userId, activeConference.id)
-          
           );
-          
 
           Promise.all(assignPromises)
             .then((results) => {
@@ -502,10 +538,14 @@ const ConferencePage: React.FC = () => {
                   {
                     icon: <FaBookOpen size={24} />,
                     text: "View Submissions and Paper Assignments",
-                    onClick: hasActiveTrack && (isCurrentUserTrackchair || isCurrentUserSuperchair)
-                      ? () => navigate("/review", { state: { activeTrack } })
-                      : undefined,
-                    disabled: !hasActiveTrack || (!isCurrentUserTrackchair && !isCurrentUserSuperchair),
+                    onClick:
+                      hasActiveTrack &&
+                      (isCurrentUserTrackchair || isCurrentUserSuperchair)
+                        ? () => navigate("/review", { state: { activeTrack } })
+                        : undefined,
+                    disabled:
+                      !hasActiveTrack ||
+                      (!isCurrentUserTrackchair && !isCurrentUserSuperchair),
                   },
                   ...(isPastDue
                     ? []
@@ -704,6 +744,78 @@ const ConferencePage: React.FC = () => {
                 text="Add Submission"
                 onClick={() => navigate("/addSubmission")}
               />
+            </div>
+          )}
+
+          {isCurrentUserPCMember && activeTrack && (
+            <div
+              style={{
+                marginTop: 20,
+                padding: "20px",
+                backgroundColor: colors.primary[1000],
+                borderRadius: "8px",
+                border: `1px solid ${colors.grey[800]}`,
+              }}
+            >
+              <h3
+                style={{
+                  color: colors.grey[100],
+                  marginBottom: 15,
+                  fontSize: "18px",
+                  fontWeight: 600,
+                }}
+              >
+                Submitted Papers
+              </h3>
+              {loadingPapers ? (
+                <div style={{ color: colors.grey[300] }}>Loading papers...</div>
+              ) : papers.length > 0 ? (
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "10px",
+                  }}
+                >
+                  {papers.map((paper) => (
+                    <div
+                      key={paper._id}
+                      onClick={() => navigate(`/paper/${paper._id}`)}
+                      style={{
+                        padding: "12px",
+                        backgroundColor: colors.primary[900],
+                        border: `1px solid ${colors.grey[700]}`,
+                        borderRadius: "6px",
+                        cursor: "pointer",
+                        transition: "background-color 0.2s",
+                      }}
+                    >
+                      <div
+                        style={{
+                          fontSize: "16px",
+                          fontWeight: 500,
+                          marginBottom: "4px",
+                        }}
+                      >
+                        {paper.title}
+                      </div>
+                      <div
+                        style={{
+                          fontSize: "14px",
+                          color: colors.grey[300],
+                        }}
+                      >
+                        Submitted:{" "}
+                        {new Date(paper.submission_date).toLocaleDateString()}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div style={{ color: colors.grey[300] }}>
+                  No papers submitted yet
+                </div>
+              )}
             </div>
           )}
 

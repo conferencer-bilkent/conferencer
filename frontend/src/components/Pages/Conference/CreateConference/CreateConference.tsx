@@ -7,16 +7,6 @@ import {
   mapApiResponseToConference,
 } from "../../../../services/conferenceService";
 import { useConference } from "../../../../context/ConferenceContext";
-import {
-  FormControl,
-  FormLabel,
-  RadioGroup,
-  FormControlLabel,
-  Radio,
-  TextField,
-} from "@mui/material";
-import { colors } from "@mui/material";
-
 const steps = [
   {
     title: "Conference Type",
