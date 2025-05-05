@@ -12,6 +12,7 @@ class Track:
                  reviews=None, 
                  assignments=None, 
                  created_at=None,
+                 settings=None,
                  id=None):
         self.id = ObjectId() if id is None else id
         self.track_name = track_name
@@ -22,6 +23,7 @@ class Track:
         self.papers = papers or []
         self.reviews = reviews or []
         self.assignments = assignments or []  
+        self.settings = settings or []
         self.created_at = created_at or datetime.utcnow()
 
     def to_dict(self):
@@ -35,5 +37,6 @@ class Track:
             "papers": self.papers,
             "reviews": self.reviews,
             "assignments": self.assignments,
+            "settings": self.settings,
             "created_at": self.created_at.isoformat() if self.created_at else None
         }

@@ -221,17 +221,24 @@ def bid(paper_id):
 
         biddings = paper.get("biddings", [])
 
-        if user_id not in biddings:
+        if user_id in biddings:
+            # Remove the bid if it already exists
+            biddings.remove(user_id)
+            action = "removed"
+        else:
+            # Add the bid
             biddings.append(user_id)
-            mongo.db.papers.update_one(
-                {"_id": ObjectId(paper_id)},
-                {"$set": {"biddings": biddings}}
-            )
+            action = "added"
 
-        return jsonify({"message": "Bid added successfully", "biddings": biddings}), 200
+        mongo.db.papers.update_one(
+            {"_id": ObjectId(paper_id)},
+            {"$set": {"biddings": biddings}}
+        )
+
+        return jsonify({"message": f"Bid {action} successfully", "biddings": biddings}), 200
 
     except Exception as e:
-        return jsonify({"error": f"Failed to add bid: {str(e)}"}), 500
+        return jsonify({"error": f"Failed to toggle bid: {str(e)}"}), 500
 
 def get_biddings(paper_id):
     try:

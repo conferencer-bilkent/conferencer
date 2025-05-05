@@ -35,6 +35,8 @@ class Conference:
                  description=None,
                  start_date=None,
                  end_date=None,
+                 conference_series_name=None,
+                 conference_series_id=None
                  ):
 
         self.conference_id = str(ObjectId())
@@ -52,7 +54,8 @@ class Conference:
         self.created_by = created_by
         self.created_at = created_at or datetime.utcnow()
         self.description = description or ""
-
+        self.conference_series_name = conference_series_name or ""
+        self.conference_series_id = conference_series_id
         self.superchairs = superchairs if superchairs is not None else [created_by]
         self.track_chairs = track_chairs
         self.pc_members = pc_members if pc_members is not None else [created_by]
@@ -104,7 +107,8 @@ class Conference:
             "track_chairs": self.track_chairs,
             "pc_members": self.pc_members,
             "authors": self.authors,
-            
+            "conference_series_name": self.conference_series_name,
+            "conference_series_id": self.conference_series_id,
             "double_blind_review": self.double_blind_review,
             "can_pc_see_unassigned_submissions": self.can_pc_see_unassigned_submissions,
             "abstract_before_full": self.abstract_before_full,

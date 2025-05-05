@@ -1,15 +1,15 @@
 from flask import Blueprint
 from routes.auth_routes import login, signup, logout, check_session, login_google, google_callback
-from routes.conference_routes import create_conference, get_conferences, get_conference, invite_pc_member, appoint_superchair
+from routes.conference_routes import create_conference, create_conference_from_series, get_conferences, get_my_conference_series, get_conference, invite_pc_member, update_conference, appoint_superchair
 from routes.ping_routes import ping
 from routes.profile_routes import get_profile, update_profile, get_all_users, get_affiliations, add_affiliations
 from routes.role_routes import assign_role, get_roles, get_role, get_role_status
 from routes.chad_routes import send_chad, get_received_chad, get_sent_chad
 from routes.paper_routes import  get_paper, get_all_papers, submit_paper, download_paper, get_biddings, bid, update_paper, decide, get_papers_of_user
-from routes.review_routes import get_review, update_review, submit_review, get_reviews_by_paper, rate_review, avg_rate, get_review_by_assignment_id 
+from routes.review_routes import get_review, update_review, submit_review, get_reviews_by_paper, rate_review, avg_rate, get_review_by_assignment_id, avg_rate_of_user 
 from routes.notification_routes import get_notification, mark_notification_as_answered, mark_all_read
 from routes.keywords_routes import get_keywords, add_keyword, set_keywords
-from routes.track_routes import create_track, get_tracks_by_conference, appoint_track_chair, get_track_by_people, get_track_by_author, get_track_by_reviewer, get_track, get_all_tracks, get_all_relevant_people, get_all_papers_in_track, appoint_track_member, get_track_members
+from routes.track_routes import create_track, get_tracks_by_conference, appoint_track_chair, get_track_by_people, get_track_by_author, get_track_by_reviewer, get_track, get_all_tracks, get_all_relevant_people, get_all_papers_in_track, appoint_track_member, get_track_members, get_effective_track_settings, update_track
 from routes.assignment_routes import create_assignment_for_track, get_assignments_for_reviewer, get_assigned_papers, get_assignments_by_paper
 
 
@@ -38,9 +38,12 @@ auth_bp.route("/login/google/callback")(google_callback)
 
 conference_bp.route("/<conference_id>/invite_pc_member", methods=["POST"])(invite_pc_member)
 conference_bp.route("/create", methods=["POST"])(create_conference)
+conference_bp.route("/create_from_series", methods=["POST"])(create_conference_from_series)
 conference_bp.route("/", methods=["GET"])(get_conferences)
+conference_bp.route("/series/my_series", methods=["GET"])(get_my_conference_series)
 conference_bp.route("/<conference_id>", methods=["GET"])(get_conference)
 conference_bp.route("/<conference_id>/superchair", methods=["POST"])(appoint_superchair)
+conference_bp.route("/update_conference/<conference_id>", methods=["POST"])(update_conference)
 
 ping_bp.route("/", methods=["GET"])(ping)
 
@@ -76,6 +79,7 @@ review_bp.route("/<review_id>/rate", methods=["POST"])(rate_review)         # re
 review_bp.route("/<review_id>/avg_rate", methods=["GET"])(avg_rate)         # reviewin kendi ratelerinin ortalamasi
 review_bp.route("/<review_id>/update", methods=["POST"])(update_review)     # update atiyo
 review_bp.route("/<assignment_id>/assignment",  methods=["GET"])(get_review_by_assignment_id)
+review_bp.route("/avg_rate_of_user", methods=["GET"])(avg_rate_of_user)
 
 notification_bp.route("/", methods=["GET"])(get_notification)
 notification_bp.route("/mark_answered/<notification_id>/<is_accepted>", methods=["POST"])(mark_notification_as_answered)
@@ -98,6 +102,8 @@ track_bp.route("/<track_id>/assign", methods=["POST"])(create_assignment_for_tra
 track_bp.route("/<track_id>/papers", methods=["GET"])(get_all_papers_in_track)
 track_bp.route("/appoint_track_members", methods=["POST"])(appoint_track_member)
 track_bp.route("/<track_id>/members", methods=["GET"])(get_track_members)
+track_bp.route('/<track_id>/effective_settings', methods=['GET'])(get_effective_track_settings)
+track_bp.route('/update_track/<track_id>', methods=['post'])(update_track)
 
 assignment_bp.route("/reviewer/<reviewer_id>", methods=["GET"])(get_assignments_for_reviewer)
 assignment_bp.route("/reviewer/<reviewer_id>/papers", methods=["GET"])(get_assigned_papers)

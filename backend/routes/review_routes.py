@@ -309,3 +309,61 @@ def avg_rate(review_id):
 
     except Exception as e:
         return jsonify({"error": f"Failed to calculate average rate: {str(e)}"}), 500
+
+def avg_rate_of_user():
+    data = request.get_json()
+
+    conference_id = data.get("conference_id")
+    user_id = data.get("user_id")
+
+    if not conference_id or not user_id:
+        return jsonify({"error": "conference_id and user_id are required"}), 400
+
+    try:
+        # find all tracks in the conference
+        tracks = list(mongo.db.tracks.find({"conference_id": conference_id}))
+        if not tracks:
+            return jsonify({"error": "No tracks found for this conference"}), 404
+
+        # collect all paper ObjectIds from those tracks
+        paper_ids = []
+        for track in tracks:
+            paper_ids.extend(track.get("papers", []))  # Already ObjectIds
+
+        if not paper_ids:
+            return jsonify({"error": "No papers found in these tracks"}), 404
+
+        # find all reviews by this user for those papers
+        reviews = list(mongo.db.reviews.find({
+            "reviewer_id": user_id,
+            "paper_id": {"$in": [str(pid) for pid in paper_ids]}  # Paper ids in DB are strings
+        }))
+
+        if not reviews:
+            return jsonify({
+                "average_rate": 0,
+                "review_count": 0,
+                "rate_count": 0
+            }), 200
+
+        all_rates = []
+        for review in reviews:
+            all_rates.extend([r["rate"] for r in review.get("rates", [])])
+
+        if not all_rates:
+            return jsonify({
+                "average_rate": 0,
+                "review_count": len(reviews),
+                "rate_count": 0
+            }), 200
+
+        avg = sum(all_rates) / len(all_rates)
+
+        return jsonify({
+            "average_rate": round(avg, 2),
+            "review_count": len(reviews),
+            "rate_count": len(all_rates)
+        }), 200
+
+    except Exception as e:
+        return jsonify({"error": f"Failed to calculate user average rate: {str(e)}"}), 500
