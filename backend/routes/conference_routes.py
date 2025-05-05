@@ -123,72 +123,124 @@ def create_conference_from_series():
     data = request.get_json()
 
     try:
+        # ----------------------------
+        # Step 1: Get provided fields
+        # ----------------------------
         series_id = data.get("conference_series_id")
-        series_name = data.get("conference_series_name")
+        if not series_id:
+            return jsonify({"error": "conference_series_id is required"}), 400
 
-        if not series_id or not series_name:
-            return jsonify({"error": "conference_series_id and conference_series_name are required"}), 400
+        name = data.get("name")
+        acronym = data.get("acronym")
+        short_acronym = data.get("short_acronym")
+        website = data.get("website")
+        city = data.get("city")
+        venue = data.get("venue")
+        state = data.get("state")
+        country = data.get("country")
+        license_expiry = data.get("license_expiry")
+        contact_emails = data.get("contact_emails")
+        start_date = data.get("start_date")
+        end_date = data.get("end_date")
+        submission_page = data.get("submission_page")
 
-        # Check that the provided series exists
+        # Validate required fields
+        if not name or not acronym or not short_acronym:
+            return jsonify({"error": "name, acronym, and short_acronym are required"}), 400
+
+        # ----------------------------
+        # Step 2: Get the series
+        # ----------------------------
         series = mongo.db.conference_series.find_one({"_id": ObjectId(series_id)})
         if not series:
             return jsonify({"error": "Conference series not found"}), 404
 
+        # ----------------------------
+        # Step 3: Get last conference in the series
+        # ----------------------------
+        conference_ids = series.get("conferences", [])
+        if not conference_ids:
+            return jsonify({"error": "No previous conferences found in this series to copy settings"}), 400
+
+        last_conference_id = conference_ids[-1]
+        last_conf = mongo.db.conferences.find_one({"_id": ObjectId(last_conference_id)})
+
+        if not last_conf:
+            return jsonify({"error": "Last conference in the series not found"}), 404
+
+        # ----------------------------
+        # Step 4: Copy all settings from last conference
+        # ----------------------------
+        settings_to_copy = {}
+        for key, value in last_conf.items():
+            if isinstance(value, dict) and "value" in value and "scope" in value:
+                settings_to_copy[key] = value
+
+        # ----------------------------
+        # Step 5: Create new conference
+        # ----------------------------
         conference = Conference(
-            name=data.get("name"),
-            acronym=data.get("acronym"),
-            short_acronym=data.get("short_acronym"),
-            website=data.get("website"),
-            city=data.get("city"),
-            venue=data.get("venue"),
-            state=data.get("state"),
-            country=data.get("country"),
-            description=data.get("description"),
-            submission_page=data.get("submission_page"),
-            license_expiry=data.get("license_expiry"),
-            contact_emails=data.get("contact_emails"),
+            name=name,
+            acronym=acronym,
+            short_acronym=short_acronym,
+            website=website,
+            city=city,
+            venue=venue,
+            state=state,
+            country=country,
+            description="",
+            submission_page=submission_page,
+            license_expiry=license_expiry,
+            contact_emails=contact_emails,
             created_by=session["user_id"],
-            conference_series_name=series_name,
+            conference_series_name=series.get("series_name"),
             conference_series_id=str(series_id),
 
-            double_blind_review=data.get("double_blind_review"),
-            can_pc_see_unassigned_submissions=data.get("can_pc_see_unassigned_submissions"),
-            abstract_before_full=data.get("abstract_before_full"),
-            abstract_section_hidden=data.get("abstract_section_hidden"),
-            max_abstract_length=data.get("max_abstract_length"),
-            submission_instructions=data.get("submission_instructions"),
-            additional_fields_enabled=data.get("additional_fields_enabled"),
-            file_upload_fields=data.get("file_upload_fields"),
-            submission_updates_allowed=data.get("submission_updates_allowed"),
-            new_submission_allowed=data.get("new_submission_allowed"),
-            use_bidding_or_relevance=data.get("use_bidding_or_relevance"),
-            bidding_enabled=data.get("bidding_enabled"),
-            chairs_can_view_bids=data.get("chairs_can_view_bids"),
-            reviewers_per_paper=data.get("reviewers_per_paper"),
-            can_pc_see_reviewer_names=data.get("can_pc_see_reviewer_names"),
-            status_menu_enabled=data.get("status_menu_enabled"),
-            pc_can_enter_review=data.get("pc_can_enter_review"),
-            pc_can_access_reviews=data.get("pc_can_access_reviews"),
-            decision_range=data.get("decision_range"),
-            subreviewers_allowed=data.get("subreviewers_allowed"),
-            subreviewer_anonymous=data.get("subreviewer_anonymous"),
-            track_chair_notifications=data.get("track_chair_notifications"),
-            start_date=data.get("start_date"),
-            end_date=data.get("end_date")
+            double_blind_review=settings_to_copy.get("double_blind_review"),
+            can_pc_see_unassigned_submissions=settings_to_copy.get("can_pc_see_unassigned_submissions"),
+            abstract_before_full=settings_to_copy.get("abstract_before_full"),
+            abstract_section_hidden=settings_to_copy.get("abstract_section_hidden"),
+            max_abstract_length=settings_to_copy.get("max_abstract_length"),
+            submission_instructions=settings_to_copy.get("submission_instructions"),
+            additional_fields_enabled=settings_to_copy.get("additional_fields_enabled"),
+            file_upload_fields=settings_to_copy.get("file_upload_fields"),
+            submission_updates_allowed=settings_to_copy.get("submission_updates_allowed"),
+            new_submission_allowed=settings_to_copy.get("new_submission_allowed"),
+            use_bidding_or_relevance=settings_to_copy.get("use_bidding_or_relevance"),
+            bidding_enabled=settings_to_copy.get("bidding_enabled"),
+            chairs_can_view_bids=settings_to_copy.get("chairs_can_view_bids"),
+            reviewers_per_paper=settings_to_copy.get("reviewers_per_paper"),
+            can_pc_see_reviewer_names=settings_to_copy.get("can_pc_see_reviewer_names"),
+            status_menu_enabled=settings_to_copy.get("status_menu_enabled"),
+            pc_can_enter_review=settings_to_copy.get("pc_can_enter_review"),
+            pc_can_access_reviews=settings_to_copy.get("pc_can_access_reviews"),
+            decision_range=settings_to_copy.get("decision_range"),
+            subreviewers_allowed=settings_to_copy.get("subreviewers_allowed"),
+            subreviewer_anonymous=settings_to_copy.get("subreviewer_anonymous"),
+            track_chair_notifications=settings_to_copy.get("track_chair_notifications"),
+            start_date=start_date,
+            end_date=end_date
         )
 
-        # Prepare and insert the conference
         conference_dict = conference.to_dict()
+
+        # ----------------------------
+        # Step 6: Save conference
+        # ----------------------------
         insert_result = mongo.db.conferences.insert_one(conference_dict)
         inserted_conference_id = insert_result.inserted_id
 
-        # Update the existing series to add this new conference _id
+        # ----------------------------
+        # Step 7: Update series
+        # ----------------------------
         mongo.db.conference_series.update_one(
             {"_id": ObjectId(series_id)},
             {"$addToSet": {"conferences": inserted_conference_id}}
         )
 
-        # Assign superchair role
+        # ----------------------------
+        # Step 8: Assign superchair role
+        # ----------------------------
         new_role = Role(
             conference_id=conference.conference_id,
             position="superchair",
@@ -206,23 +258,20 @@ def create_conference_from_series():
         mongo.db.roles.insert_one(role_dict)
 
         user_id = session["user_id"]
-        result = mongo.db.users.update_one(
+        mongo.db.users.update_one(
             {'_id': ObjectId(user_id)},
             {'$addToSet': {'roles': str(new_role.id)}}
         )
 
-        if result.modified_count > 0:
-            return jsonify({
-                "message": "Conference created successfully under the provided series",
-                "conference_id": str(inserted_conference_id),
-                "role_id": str(new_role.id)
-            }), 201
-        else:
-            return jsonify({'error': 'User not found or role not updated'}), 404
+        return jsonify({
+            "message": "Conference created successfully under the provided series, copying previous settings.",
+            "conference_id": str(inserted_conference_id),
+            "role_id": str(new_role.id)
+        }), 201
 
     except Exception as e:
         print("Conference creation (from series) error:", e)
-        return jsonify({"error": "Failed to create conference from series"}), 500
+        return jsonify({"error": f"Failed to create conference from series: {str(e)}"}), 500
 
 
 def get_conferences():
