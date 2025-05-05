@@ -460,6 +460,55 @@ def get_conference(conference_id):
 
     except Exception as e:
         return jsonify({"error": f"Failed to retrieve conference: {str(e)}"}), 500
+    
+def get_conference_by_id(conference_id):
+    try:
+        conference = mongo.db.conferences.find_one({"_id": ObjectId(conference_id)})
+        
+        if not conference:
+            return jsonify({"error": "Conference not found"}), 404
+
+        # return the conference details
+
+        conf_dict = dict(conference)
+        conf_dict['_id'] = str(conf_dict['_id'])
+
+        # Get roles in the conference 
+        roles = mongo.db.roles.find({"conference_id": conference_id})
+        role_list = []
+        for role in roles:
+            role_dict = dict(role)
+            role_dict['_id'] = str(role_dict['_id'])
+            role_list.append(role_dict)
+        conf_dict['roles'] = role_list
+        # Get users models having the array roles which have these role ids in them
+        role_ids = [str(role['_id']) for role in role_list]
+        users = mongo.db.users.find({"roles": {"$in": role_ids}})
+        user_list = []
+        for user in users:
+            user_dict = dict(user)
+            user_dict['_id'] = str(user_dict['_id'])
+            user_dict['positions_in_this_conference'] = [role['position'] for role in role_list if str(role['_id']) in user_dict['roles']]
+            user_list.append(user_dict)
+        conf_dict['users'] = user_list
+
+        # Get tracks for the conference
+        tracks = mongo.db.tracks.find({"conference_id": conference_id})
+        track_list = []
+
+        for track in tracks:
+            track_dict = dict(track)
+            track_dict['_id'] = str(track_dict['_id'])
+            track_list.append(track_dict)
+        conf_dict['tracks'] = track_list
+
+
+        return jsonify({
+            "conference": conf_dict
+        }), 200        
+
+    except Exception as e:
+        return jsonify({"error": f"Failed to retrieve conference: {str(e)}"}), 500
 
 def invite_pc_member(conference_id):
     if "user_id" not in session:
