@@ -256,7 +256,8 @@ def create_conference_from_series():
         }
 
         mongo.db.roles.insert_one(role_dict)
-
+        
+        # Update user roles
         user_id = session["user_id"]
         mongo.db.users.update_one(
             {'_id': ObjectId(user_id)},

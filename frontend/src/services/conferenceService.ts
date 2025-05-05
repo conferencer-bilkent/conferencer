@@ -273,3 +273,31 @@ export const assignSuperchair = async (
     throw error;
   }
 };
+
+/**
+ * Fetches the user's conference series
+ * 
+ * @returns Promise with the list of conference series
+ */
+export const getMyConferenceSeries = async (): Promise<any[]> => {
+  try {
+    const response = await fetch("http://127.0.0.1:5000/conference/series/my_series", {
+      method: "GET",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Error fetching conference series: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    console.log("Conference series data from API:", data); // Debug log
+    return data.conference_series_list || [];
+  } catch (error) {
+    console.error("Failed to fetch conference series:", error);
+    throw error;
+  }
+};
