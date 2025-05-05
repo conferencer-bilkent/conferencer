@@ -138,8 +138,6 @@ export const getConferenceById = async (conferenceId: string): Promise<Conferenc
     }
 
     const data = await response.json();
-    console.log("Conference data from API:", data); // Debug log
-    // Transform API response to match the Conference interface
     return mapApiResponseToConference(data.conference);
   } catch (error) {
     console.error(`Failed to fetch conference with ID ${conferenceId}:`, error);
