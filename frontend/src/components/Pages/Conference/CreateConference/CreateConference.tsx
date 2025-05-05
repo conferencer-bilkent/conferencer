@@ -5,6 +5,7 @@ import "./CreateConference.css";
 import {
   createConference,
   mapApiResponseToConference,
+  getMyConferenceSeries,
 } from "../../../../services/conferenceService";
 import { useConference } from "../../../../context/ConferenceContext";
 const steps = [
@@ -77,10 +78,7 @@ const seriesSteps = [
     title: "Conference Type",
     fields: ["conference_type", "conference_series_name"],
   },
-  {
-    title: "Memduh",
-    fields: [], // Empty fields as this is just a display step
-  },
+  ...steps.slice(1),
 ];
 
 const defaultScope = "conference";
@@ -137,6 +135,13 @@ const CreateConference: React.FC = () => {
   const [invalidFields, setInvalidFields] = useState<Set<string>>(new Set());
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const { setActiveConference } = useConference();
+  const [loading, setLoading] = useState(false);
+  const [matchingSeries, setMatchingSeries] = useState<any>(null);
+  const [selectedConference, setSelectedConference] = useState<string>("");
+  const [newSeriesDate, setNewSeriesDate] = useState({
+    start_date: null as Date | null,
+    end_date: null as Date | null,
+  });
 
   useEffect(() => {
     setInvalidFields(new Set());
@@ -202,6 +207,20 @@ const CreateConference: React.FC = () => {
     }
 
     if (currentStep === 0 && form.conference_type === "series") {
+      // Check if series exists
+      const seriesList = await getMyConferenceSeries();
+      const foundSeries = seriesList.find(
+        (s) =>
+          s.series_name.toLowerCase() ===
+          form.conference_series_name.toLowerCase()
+      );
+
+      if (foundSeries) {
+        setMatchingSeries(foundSeries);
+        return;
+      }
+
+      // If no matching series, continue with regular flow
       setCurrentStep(1);
       return;
     }
@@ -222,16 +241,18 @@ const CreateConference: React.FC = () => {
       form.conference_type === "series" ? seriesSteps : steps;
     if (currentStep === currentSteps.length - 1) {
       try {
-        const conferenceId = await createConference(payload);
+        // Keep series_name in payload if it's a series type
+        if (form.conference_type === "series") {
+          payload.conference_series_name = form.conference_series_name;
+        }
 
-        // build a Conference object and mark it active
+        const conferenceId = await createConference(payload);
         const newConf = mapApiResponseToConference({
           conference_id: conferenceId,
           ...payload,
           created_at: new Date().toISOString(),
         });
         setActiveConference(newConf);
-
         alert("Conference created!");
       } catch (err: any) {
         alert(`Error: ${err.message || "Network error"}`);
@@ -247,6 +268,36 @@ const CreateConference: React.FC = () => {
       .replace(/\b\w/g, (char) => char.toUpperCase());
   };
 
+  const renderConferences = () => {
+    console.log("Matching series:", matchingSeries);
+    if (!matchingSeries?.conferences) {
+      console.log("No conferences found in series");
+      return null;
+    }
+
+    return matchingSeries.conferences.map((confId: string) => {
+      console.log("Processing conference ID:", confId);
+      return (
+        <div key={confId} className="conference-item">
+          <input
+            type="radio"
+            id={confId}
+            name="conference"
+            value={confId}
+            checked={selectedConference === confId}
+            onChange={(e) => {
+              console.log("Selected conference ID:", e.target.value);
+              setSelectedConference(e.target.value);
+            }}
+          />
+          <label htmlFor={confId}>
+            <p>Conference ID: {confId}</p>
+          </label>
+        </div>
+      );
+    });
+  };
+
   const currentSteps = form.conference_type === "series" ? seriesSteps : steps;
   const step = currentSteps[currentStep];
 
@@ -254,193 +305,296 @@ const CreateConference: React.FC = () => {
     <div className="content-container">
       <div className="main-container">
         <div className="form-card">
-          <div className="progress-container">
-            <div className="progress-steps-container">
-              {currentSteps.map((_, index) => (
-                <div key={index} className="step-container">
-                  <div
-                    className={`step-circle ${
-                      index <= currentStep ? "active" : ""
-                    }`}
-                  >
-                    {index + 1}
-                  </div>
-                  {index < currentSteps.length - 1 && (
-                    <div
-                      className={`step-line ${
-                        index < currentStep ? "active" : ""
-                      }`}
+          {matchingSeries ? (
+            <div className="matching-series">
+              <h3>Existing Conference Series Found</h3>
+
+              <div className="new-conference-dates">
+                <h4>Set Dates for New Conference</h4>
+                <div className="date-picker-container">
+                  <div className="date-field">
+                    <label>Start Date:</label>
+                    <DatePicker
+                      selected={newSeriesDate.start_date}
+                      onChange={(date: Date | null) =>
+                        setNewSeriesDate((prev) => ({
+                          ...prev,
+                          start_date: date,
+                        }))
+                      }
+                      dateFormat="yyyy-MM-dd"
+                      className="form-input"
+                      placeholderText="Select start date"
                     />
-                  )}
+                  </div>
+                  <div className="date-field">
+                    <label>End Date:</label>
+                    <DatePicker
+                      selected={newSeriesDate.end_date}
+                      onChange={(date: Date | null) =>
+                        setNewSeriesDate((prev) => ({
+                          ...prev,
+                          end_date: date,
+                        }))
+                      }
+                      dateFormat="yyyy-MM-dd"
+                      className="form-input"
+                      minDate={newSeriesDate.start_date || undefined}
+                      placeholderText={
+                        newSeriesDate.start_date
+                          ? "Select end date"
+                          : "Please select start date first"
+                      }
+                      disabled={!newSeriesDate.start_date}
+                    />
+                  </div>
                 </div>
-              ))}
+              </div>
+
+              <div className="series-details">
+                <div className="conference-list">{renderConferences()}</div>
+              </div>
+
+              <div className="button-container">
+                <button
+                  className="nav-button button-back"
+                  onClick={() => {
+                    setMatchingSeries(null);
+                    setSelectedConference("");
+                    setNewSeriesDate({ start_date: null, end_date: null });
+                  }}
+                >
+                  Go Back
+                </button>
+                <button
+                  className="nav-button button-primary"
+                  onClick={() => {
+                    console.log("Selected conference ID:", selectedConference);
+                    console.log("matchingSeries:", matchingSeries);
+                    const selectedConf = matchingSeries.conferences?.find(
+                      (conf: any) => conf.id === selectedConference
+                    );
+                    console.log("Selected conference:", selectedConf);
+
+                    if (selectedConf) {
+                      setForm((prev) => ({
+                        ...prev,
+                        name: selectedConf.name,
+                        acronym: selectedConf.acronym || prev.acronym,
+                        short_acronym:
+                          selectedConf.short_acronym || prev.short_acronym,
+                        website: selectedConf.website || prev.website,
+                        city: selectedConf.city || prev.city,
+                        venue: selectedConf.venue || prev.venue,
+                        state: selectedConf.state || prev.state,
+                        country: selectedConf.country || prev.country,
+                        start_date:
+                          newSeriesDate.start_date?.toISOString() || "",
+                        end_date: newSeriesDate.end_date?.toISOString() || "",
+                      }));
+                      setCurrentStep(1);
+                    }
+                  }}
+                  disabled={
+                    !newSeriesDate.start_date ||
+                    !newSeriesDate.end_date ||
+                    !selectedConference
+                  }
+                >
+                  Continue
+                </button>
+              </div>
             </div>
-          </div>
+          ) : (
+            <>
+              <div className="progress-container">
+                <div className="progress-steps-container">
+                  {currentSteps.map((_, index) => (
+                    <div key={index} className="step-container">
+                      <div
+                        className={`step-circle ${
+                          index <= currentStep ? "active" : ""
+                        }`}
+                      >
+                        {index + 1}
+                      </div>
+                      {index < currentSteps.length - 1 && (
+                        <div
+                          className={`step-line ${
+                            index < currentStep ? "active" : ""
+                          }`}
+                        />
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
 
-          <div className="form-content">
-            <h2 className="form-title">{step.title}</h2>
-            {currentStep === 1 && form.conference_type === "series" ? (
-              <div>memduh</div>
-            ) : (
-              <form onSubmit={handleFormSubmit}>
-                <div className="space-y-4">
-                  {step.fields.map((field) => {
-                    const rawValue = form[field as keyof ConferenceForm];
-                    const isObjectField =
-                      rawValue &&
-                      typeof rawValue === "object" &&
-                      "value" in rawValue;
-                    const value = isObjectField
-                      ? (rawValue as any).value
-                      : rawValue;
-                    const scope = isObjectField
-                      ? (rawValue as any).scope
-                      : null;
-                    const isInvalid = invalidFields.has(field);
+              <div className="form-content">
+                <h2 className="form-title">{step.title}</h2>
+                <form onSubmit={handleFormSubmit}>
+                  <div className="space-y-4">
+                    {step.fields.map((field) => {
+                      const rawValue = form[field as keyof ConferenceForm];
+                      const isObjectField =
+                        rawValue &&
+                        typeof rawValue === "object" &&
+                        "value" in rawValue;
+                      const value = isObjectField
+                        ? (rawValue as any).value
+                        : rawValue;
+                      const scope = isObjectField
+                        ? (rawValue as any).scope
+                        : null;
+                      const isInvalid = invalidFields.has(field);
 
-                    return (
-                      // Hide conference_series_name field if conference_type is individual
-                      field === "conference_series_name" &&
-                        form.conference_type === "individual" ? null : (
-                        <div key={field} className="form-field-container">
-                          <div
-                            className={`form-field ${
-                              isInvalid ? "invalid" : ""
-                            }`}
-                          >
-                            <label className="form-label">
-                              {formatLabel(field)}
-                              {scope && (
-                                <span className="scope-badge">{scope}</span>
+                      return (
+                        // Hide conference_series_name field if conference_type is individual
+                        field === "conference_series_name" &&
+                          form.conference_type === "individual" ? null : (
+                          <div key={field} className="form-field-container">
+                            <div
+                              className={`form-field ${
+                                isInvalid ? "invalid" : ""
+                              }`}
+                            >
+                              <label className="form-label">
+                                {formatLabel(field)}
+                                {scope && (
+                                  <span className="scope-badge">{scope}</span>
+                                )}
+                              </label>
+
+                              {field === "conference_type" ? (
+                                <select
+                                  value={value as string}
+                                  onChange={(e) =>
+                                    handleChange(
+                                      field as keyof ConferenceForm,
+                                      e.target.value
+                                    )
+                                  }
+                                  className="form-input"
+                                >
+                                  <option value="individual">
+                                    Individual Conference
+                                  </option>
+                                  <option value="series">
+                                    Conference Series
+                                  </option>
+                                </select>
+                              ) : field === "start_date" ||
+                                field === "end_date" ||
+                                field === "license_expiry" ? (
+                                <DatePicker
+                                  selected={
+                                    field === "license_expiry"
+                                      ? form.license_expiry
+                                      : value
+                                      ? new Date(value)
+                                      : null
+                                  }
+                                  onChange={(date) =>
+                                    handleChange(
+                                      field as keyof ConferenceForm,
+                                      date
+                                    )
+                                  }
+                                  dateFormat="yyyy-MM-dd"
+                                  className="form-input"
+                                  minDate={
+                                    field === "end_date" && form.start_date
+                                      ? new Date(form.start_date)
+                                      : undefined
+                                  }
+                                  placeholderText={
+                                    field === "end_date" && !form.start_date
+                                      ? "Please select start date first"
+                                      : "Select date"
+                                  }
+                                  disabled={
+                                    field === "end_date" && !form.start_date
+                                  }
+                                />
+                              ) : typeof value === "boolean" ? (
+                                <input
+                                  type="checkbox"
+                                  checked={value}
+                                  onChange={(e) =>
+                                    handleChange(
+                                      field as keyof ConferenceForm,
+                                      isObjectField
+                                        ? { value: e.target.checked, scope }
+                                        : e.target.checked
+                                    )
+                                  }
+                                  className="form-checkbox"
+                                />
+                              ) : typeof value === "number" ? (
+                                <input
+                                  type="number"
+                                  value={value}
+                                  onChange={(e) =>
+                                    handleChange(
+                                      field as keyof ConferenceForm,
+                                      isObjectField
+                                        ? {
+                                            value: Number(e.target.value),
+                                            scope,
+                                          }
+                                        : Number(e.target.value)
+                                    )
+                                  }
+                                  className="form-input"
+                                />
+                              ) : (
+                                <input
+                                  type="text"
+                                  value={value as string}
+                                  onChange={(e) =>
+                                    handleChange(
+                                      field as keyof ConferenceForm,
+                                      isObjectField
+                                        ? { value: e.target.value, scope }
+                                        : e.target.value
+                                    )
+                                  }
+                                  className="form-input"
+                                />
                               )}
-                            </label>
-
-                            {field === "conference_type" ? (
-                              <select
-                                value={value as string}
-                                onChange={(e) =>
-                                  handleChange(
-                                    field as keyof ConferenceForm,
-                                    e.target.value
-                                  )
-                                }
-                                className="form-input"
-                              >
-                                <option value="individual">
-                                  Individual Conference
-                                </option>
-                                <option value="series">
-                                  Conference Series
-                                </option>
-                              </select>
-                            ) : field === "start_date" ||
-                              field === "end_date" ||
-                              field === "license_expiry" ? (
-                              <DatePicker
-                                selected={
-                                  field === "license_expiry"
-                                    ? form.license_expiry
-                                    : value
-                                    ? new Date(value)
-                                    : null
-                                }
-                                onChange={(date) =>
-                                  handleChange(
-                                    field as keyof ConferenceForm,
-                                    date
-                                  )
-                                }
-                                dateFormat="yyyy-MM-dd"
-                                className="form-input"
-                                minDate={
-                                  field === "end_date" && form.start_date
-                                    ? new Date(form.start_date)
-                                    : undefined
-                                }
-                                placeholderText={
-                                  field === "end_date" && !form.start_date
-                                    ? "Please select start date first"
-                                    : "Select date"
-                                }
-                                disabled={
-                                  field === "end_date" && !form.start_date
-                                }
-                              />
-                            ) : typeof value === "boolean" ? (
-                              <input
-                                type="checkbox"
-                                checked={value}
-                                onChange={(e) =>
-                                  handleChange(
-                                    field as keyof ConferenceForm,
-                                    isObjectField
-                                      ? { value: e.target.checked, scope }
-                                      : e.target.checked
-                                  )
-                                }
-                                className="form-checkbox"
-                              />
-                            ) : typeof value === "number" ? (
-                              <input
-                                type="number"
-                                value={value}
-                                onChange={(e) =>
-                                  handleChange(
-                                    field as keyof ConferenceForm,
-                                    isObjectField
-                                      ? { value: Number(e.target.value), scope }
-                                      : Number(e.target.value)
-                                  )
-                                }
-                                className="form-input"
-                              />
-                            ) : (
-                              <input
-                                type="text"
-                                value={value as string}
-                                onChange={(e) =>
-                                  handleChange(
-                                    field as keyof ConferenceForm,
-                                    isObjectField
-                                      ? { value: e.target.value, scope }
-                                      : e.target.value
-                                  )
-                                }
-                                className="form-input"
-                              />
+                            </div>
+                            {isInvalid && fieldErrors[field] && (
+                              <div className="error-message">
+                                {fieldErrors[field]}
+                              </div>
                             )}
                           </div>
-                          {isInvalid && fieldErrors[field] && (
-                            <div className="error-message">
-                              {fieldErrors[field]}
-                            </div>
-                          )}
-                        </div>
-                      )
-                    );
-                  })}
-                </div>
+                        )
+                      );
+                    })}
+                  </div>
 
-                <div className="button-container">
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setCurrentStep((prev) => Math.max(prev - 1, 0))
-                    }
-                    disabled={currentStep === 0}
-                    className="nav-button button-back"
-                  >
-                    Back
-                  </button>
-                  <button type="submit" className="nav-button button-primary">
-                    {currentStep === currentSteps.length - 1
-                      ? "Create Conference"
-                      : "Next"}
-                  </button>
-                </div>
-              </form>
-            )}
-          </div>
+                  <div className="button-container">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setCurrentStep((prev) => Math.max(prev - 1, 0))
+                      }
+                      disabled={currentStep === 0}
+                      className="nav-button button-back"
+                    >
+                      Back
+                    </button>
+                    <button type="submit" className="nav-button button-primary">
+                      {currentStep === currentSteps.length - 1
+                        ? "Create Conference"
+                        : "Next"}
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </>
+          )}
         </div>
       </div>
     </div>

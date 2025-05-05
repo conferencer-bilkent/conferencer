@@ -125,15 +125,17 @@ def create_conference_from_series():
     try:
         series_id = data.get("conference_series_id")
         series_name = data.get("conference_series_name")
+        template_conference_id = data.get("template_conference_id")
 
-        if not series_id or not series_name:
-            return jsonify({"error": "conference_series_id and conference_series_name are required"}), 400
+        if not all([series_id, series_name, template_conference_id]):
+            return jsonify({"error": "Missing required fields"}), 400
 
-        # Check that the provided series exists
-        series = mongo.db.conference_series.find_one({"_id": ObjectId(series_id)})
-        if not series:
-            return jsonify({"error": "Conference series not found"}), 404
+        # Get template conference
+        template = mongo.db.conferences.find_one({"conference_id": template_conference_id})
+        if not template:
+            return jsonify({"error": "Template conference not found"}), 404
 
+        # Create new conference using template data but with new basic info
         conference = Conference(
             name=data.get("name"),
             acronym=data.get("acronym"),
@@ -144,51 +146,52 @@ def create_conference_from_series():
             state=data.get("state"),
             country=data.get("country"),
             description=data.get("description"),
-            submission_page=data.get("submission_page"),
+            submission_page=template.get("submission_page"),
             license_expiry=data.get("license_expiry"),
             contact_emails=data.get("contact_emails"),
             created_by=session["user_id"],
             conference_series_name=series_name,
             conference_series_id=str(series_id),
-
-            double_blind_review=data.get("double_blind_review"),
-            can_pc_see_unassigned_submissions=data.get("can_pc_see_unassigned_submissions"),
-            abstract_before_full=data.get("abstract_before_full"),
-            abstract_section_hidden=data.get("abstract_section_hidden"),
-            max_abstract_length=data.get("max_abstract_length"),
-            submission_instructions=data.get("submission_instructions"),
-            additional_fields_enabled=data.get("additional_fields_enabled"),
-            file_upload_fields=data.get("file_upload_fields"),
-            submission_updates_allowed=data.get("submission_updates_allowed"),
-            new_submission_allowed=data.get("new_submission_allowed"),
-            use_bidding_or_relevance=data.get("use_bidding_or_relevance"),
-            bidding_enabled=data.get("bidding_enabled"),
-            chairs_can_view_bids=data.get("chairs_can_view_bids"),
-            reviewers_per_paper=data.get("reviewers_per_paper"),
-            can_pc_see_reviewer_names=data.get("can_pc_see_reviewer_names"),
-            status_menu_enabled=data.get("status_menu_enabled"),
-            pc_can_enter_review=data.get("pc_can_enter_review"),
-            pc_can_access_reviews=data.get("pc_can_access_reviews"),
-            decision_range=data.get("decision_range"),
-            subreviewers_allowed=data.get("subreviewers_allowed"),
-            subreviewer_anonymous=data.get("subreviewer_anonymous"),
-            track_chair_notifications=data.get("track_chair_notifications"),
+            
+            # Copy settings from template
+            double_blind_review=template.get("double_blind_review"),
+            can_pc_see_unassigned_submissions=template.get("can_pc_see_unassigned_submissions"),
+            abstract_before_full=template.get("abstract_before_full"),
+            abstract_section_hidden=template.get("abstract_section_hidden"),
+            max_abstract_length=template.get("max_abstract_length"),
+            submission_instructions=template.get("submission_instructions"),
+            additional_fields_enabled=template.get("additional_fields_enabled"),
+            file_upload_fields=template.get("file_upload_fields"),
+            submission_updates_allowed=template.get("submission_updates_allowed"),
+            new_submission_allowed=template.get("new_submission_allowed"),
+            use_bidding_or_relevance=template.get("use_bidding_or_relevance"),
+            bidding_enabled=template.get("bidding_enabled"),
+            chairs_can_view_bids=template.get("chairs_can_view_bids"),
+            reviewers_per_paper=template.get("reviewers_per_paper"),
+            can_pc_see_reviewer_names=template.get("can_pc_see_reviewer_names"),
+            status_menu_enabled=template.get("status_menu_enabled"),
+            pc_can_enter_review=template.get("pc_can_enter_review"),
+            pc_can_access_reviews=template.get("pc_can_access_reviews"),
+            decision_range=template.get("decision_range"),
+            subreviewers_allowed=template.get("subreviewers_allowed"),
+            subreviewer_anonymous=template.get("subreviewer_anonymous"),
+            track_chair_notifications=template.get("track_chair_notifications"),
             start_date=data.get("start_date"),
             end_date=data.get("end_date")
         )
 
-        # Prepare and insert the conference
+        # Insert new conference
         conference_dict = conference.to_dict()
         insert_result = mongo.db.conferences.insert_one(conference_dict)
         inserted_conference_id = insert_result.inserted_id
 
-        # Update the existing series to add this new conference _id
+        # Update series with new conference
         mongo.db.conference_series.update_one(
             {"_id": ObjectId(series_id)},
             {"$addToSet": {"conferences": inserted_conference_id}}
         )
 
-        # Assign superchair role
+        # Create superchair role
         new_role = Role(
             conference_id=conference.conference_id,
             position="superchair",
@@ -204,7 +207,8 @@ def create_conference_from_series():
         }
 
         mongo.db.roles.insert_one(role_dict)
-
+        
+        # Update user roles
         user_id = session["user_id"]
         result = mongo.db.users.update_one(
             {'_id': ObjectId(user_id)},
@@ -213,7 +217,7 @@ def create_conference_from_series():
 
         if result.modified_count > 0:
             return jsonify({
-                "message": "Conference created successfully under the provided series",
+                "message": "Conference created successfully from template",
                 "conference_id": str(inserted_conference_id),
                 "role_id": str(new_role.id)
             }), 201
@@ -221,9 +225,8 @@ def create_conference_from_series():
             return jsonify({'error': 'User not found or role not updated'}), 404
 
     except Exception as e:
-        print("Conference creation (from series) error:", e)
-        return jsonify({"error": "Failed to create conference from series"}), 500
-
+        print("Conference creation from template error:", e)
+        return jsonify({"error": "Failed to create conference from template"}), 500
 
 def get_conferences():
     try:
