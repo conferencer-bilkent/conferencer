@@ -79,6 +79,8 @@ export interface UserData {
   not_preferred_keywords?: string[];
   country?: string |null;
   organization?: string | null;
+  affiliation?: string | null;
+  past_affiliations?: string[] | null;
 }
 
 // Add a utility function to get the first stats object

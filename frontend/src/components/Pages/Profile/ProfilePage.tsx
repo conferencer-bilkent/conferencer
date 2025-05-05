@@ -14,11 +14,15 @@ import {
   TableBody,
   TableRow,
   TableCell,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
 } from "@mui/material";
 import AppTitle from "../../global/AppTitle";
 import ProfileUserRoles from "./components/ProfileUserRoles";
 import { tokens } from "../../../theme";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useUser } from "../../../context/UserContext";
 import { getUserStats, UserData, Role } from "../../../models/user";
 import { getUserById } from "../../../services/userService";
@@ -31,6 +35,7 @@ const ProfilePage: React.FC = () => {
   const colors = tokens(theme.palette.mode);
   const { user: currentUser } = useUser();
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const [profileUser, setProfileUser] = useState<UserData | null>(null);
   const [userRoles, setUserRoles] = useState<Role[]>([]);
   const [loading, setLoading] = useState(true);
@@ -41,10 +46,14 @@ const ProfilePage: React.FC = () => {
     surname: "",
     bio: "",
     email: "",
+    affiliation: "",
   });
   const [allKeywords, setAllKeywords] = useState<string[]>([]);
   const [preferredKeywords, setPreferredKeywords] = useState<string[]>([]);
   const [unwantedKeywords, setUnwantedKeywords] = useState<string[]>([]);
+  const [affiliations, setAffiliations] = useState<string[]>([]);
+  const [selectedAffiliation, setSelectedAffiliation] = useState<string>("");
+  const [affiliationInput, setAffiliationInput] = useState("");
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -100,15 +109,36 @@ const ProfilePage: React.FC = () => {
   }, []);
 
   useEffect(() => {
+    const fetchAffiliations = async () => {
+      try {
+        const response = await fetch(
+          "http://127.0.0.1:5000/profile/affiliations",
+          {
+            credentials: "include",
+          }
+        );
+        const data = await response.json();
+        setAffiliations(data.affiliations || []);
+      } catch (error) {
+        console.error("Error fetching affiliations:", error);
+      }
+    };
+    fetchAffiliations();
+  }, []);
+
+  useEffect(() => {
     if (profileUser) {
       setEditData({
         name: profileUser.name || "",
         surname: profileUser.surname || "",
         bio: profileUser.bio || "",
         email: profileUser.email || "",
+        affiliation: profileUser.affiliation || "",
       });
       setPreferredKeywords(profileUser.preferred_keywords || []);
       setUnwantedKeywords(profileUser.not_preferred_keywords || []);
+      setSelectedAffiliation(profileUser.affiliation || "");
+      setAffiliationInput(profileUser.affiliation || "");
     }
     console.log("Profile User:", profileUser);
     console.log("Preferred Keywords:", preferredKeywords);
@@ -126,7 +156,6 @@ const ProfilePage: React.FC = () => {
 
   const handleEditSave = async () => {
     try {
-      console.log("data edited", editData);
       const response = await fetch("http://127.0.0.1:5000/profile/update", {
         method: "POST",
         headers: {
@@ -140,22 +169,14 @@ const ProfilePage: React.FC = () => {
           email: editData.email,
           preferred_keywords: preferredKeywords,
           not_preferred_keywords: unwantedKeywords,
+          affiliation: affiliationInput,
         }),
       });
+
       if (!response.ok) throw new Error("Failed to update profile");
-      setProfileUser((prev) =>
-        prev
-          ? {
-              ...prev,
-              name: editData.name,
-              surname: editData.surname,
-              bio: editData.bio,
-              preferred_keywords: preferredKeywords,
-              not_preferred_keywords: unwantedKeywords,
-            }
-          : null
-      );
+
       handleEditClose();
+      window.location.reload(); // Force refresh of the page
     } catch (error) {
       console.error("Error updating profile:", error);
     }
@@ -311,6 +332,9 @@ const ProfilePage: React.FC = () => {
           <p>Surname: {profileUser.surname}</p>
           <p>Bio: {profileUser.bio || "No bio provided"}</p>
           <p>Email: {profileUser.email}</p>
+          <p>
+            Affiliation: {profileUser.affiliation || "No affiliation provided"}
+          </p>
         </div>
 
         {/* New flex container for roles and stats */}
@@ -471,6 +495,23 @@ const ProfilePage: React.FC = () => {
                 variant="outlined"
                 label="Unwanted Keywords"
                 placeholder="Search keywords"
+              />
+            )}
+          />
+
+          <Autocomplete
+            freeSolo
+            value={affiliationInput}
+            onChange={(_, newValue) => setAffiliationInput(newValue || "")}
+            onInputChange={(_, newValue) => setAffiliationInput(newValue)}
+            inputValue={affiliationInput}
+            options={affiliations}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                label="Affiliation"
+                variant="outlined"
+                fullWidth
               />
             )}
           />
