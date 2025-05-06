@@ -4,13 +4,14 @@ import React, {
   createContext,
   ReactNode,
   useContext,
-  // act,
+  useEffect,
 } from "react";
 import { Action, reducer } from "../reducer/reducer";
 import { initialState, State } from "../reducer/initailState";
 import submitPaper, { PaperSubmission } from "../services/submissionService";
 import { useConference } from "./ConferenceContext";
 import { useNavigate } from "react-router-dom";
+import { Autocomplete, TextField } from "@mui/material"; // Add this import
 
 interface MyContextType {
   state: State;
@@ -26,6 +27,9 @@ interface MyContextType {
   handleFileChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   handleSendSubmission: () => void;
   showValidation: boolean;
+  allKeywords: string[];
+  selectedKeywords: string[];
+  setSelectedKeywords: (keywords: string[]) => void;
 }
 
 const SubmissionContext = createContext<MyContextType | undefined>(undefined);
@@ -39,6 +43,25 @@ const SubmissionProvider: React.FC<{ children: ReactNode }> = ({
   const [file, setFile] = useState<File | null>(null);
   const [showValidation, setShowValidation] = useState(false);
   const { activeConference } = useConference();
+  const [allKeywords, setAllKeywords] = useState<string[]>([]);
+  const [selectedKeywords, setSelectedKeywords] = useState<string[]>([]);
+
+  useEffect(() => {
+    const fetchKeywords = async () => {
+      try {
+        const response = await fetch("http://localhost:5000/keywords", {
+          credentials: "include",
+        });
+        const data = await response.json();
+        setAllKeywords(
+          Array.isArray(data.keywords.keywords) ? data.keywords.keywords : []
+        );
+      } catch (error) {
+        console.error("Error fetching keywords:", error);
+      }
+    };
+    fetchKeywords();
+  }, []);
 
   const handleInput = (
     e: React.ChangeEvent<
@@ -186,6 +209,9 @@ const SubmissionProvider: React.FC<{ children: ReactNode }> = ({
         handleInput,
         handleSendSubmission,
         showValidation,
+        allKeywords,
+        selectedKeywords,
+        setSelectedKeywords,
       }}
     >
       {children}
