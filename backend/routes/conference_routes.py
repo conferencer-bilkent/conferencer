@@ -511,8 +511,7 @@ def get_series_stats(series_id):
 
                 # ---------- 5. avg_rating_given ----------
                 if "evaluation" in review:
-                    # You didn't specify exactly how to convert "evaluation" to grade
-                    # Assuming it's an integer or numeric value
+
                     try:
                         eval_value = float(review["evaluation"])
                         total_eval_score += eval_value
