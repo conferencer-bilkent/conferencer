@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { useTheme } from "@mui/material";
-import { tokens } from "../../theme";
+// import { useTheme } from "@mui/material";
+// import { tokens } from "../../theme";
 import { getConflictsForTrack } from "../../services/trackService";
 import { Conflict } from "../../models/conflict";
 
@@ -98,8 +98,6 @@ const ConflictOfInterestPopup: React.FC<ConflictOfInterestPopupProps> = ({
   onClose,
   trackId 
 }) => {
-  const theme = useTheme();
-  const colors = tokens(theme.palette.mode);
   const [conflicts, setConflicts] = useState<Conflict[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);

@@ -4,7 +4,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import "../CreateConference/CreateConference.css";
 import { useNavigate } from "react-router-dom";
 import { useConference } from "../../../../context/ConferenceContext";
-import { getConferenceById, refreshActiveConference, updateConference } from "../../../../services/conferenceService";
+import { getConferenceById, updateConference } from "../../../../services/conferenceService";
 
 const steps = [
   {

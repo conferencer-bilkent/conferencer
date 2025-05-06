@@ -11,7 +11,6 @@ import { initialState, State } from "../reducer/initailState";
 import submitPaper, { PaperSubmission } from "../services/submissionService";
 import { useConference } from "./ConferenceContext";
 import { useNavigate } from "react-router-dom";
-import { Autocomplete, TextField } from "@mui/material"; // Add this import
 
 interface MyContextType {
   state: State;

@@ -10,7 +10,7 @@ import ConferenceDetail from "./components/ConferenceDetail";
 import AppTitle from "../../global/AppTitle";
 import SelectPeoplePopup from "../../global/SelectPeoplePopUp";
 import SelectPaperPopup from "../../global/SelectPaperPopUp";
-import ConflictOfInterestPopup from "../../global/ConflictOfInterestPopup";
+// import ConflictOfInterestPopup from "../../global/ConflictOfInterestPopup";
 import "./ConferencePage.css";
 import { useConference } from "../../../context/ConferenceContext";
 import {
@@ -43,7 +43,7 @@ const ConferencePage: React.FC = () => {
   const [activeTrack, setActiveTrack] = useState<any>(null);
 
   const [papers, setPapers] = useState<any[]>([]);
-  const [loadingPapers, setLoadingPapers] = useState(false);
+  const [, setLoadingPapers] = useState(false);
 
   const fetchTrackPapers = async (trackId: string) => {
     setLoadingPapers(true);
@@ -85,10 +85,10 @@ const ConferencePage: React.FC = () => {
   }, [activeTrack]);
 
 
-  const isCurrentUserPCMember = React.useMemo(() => {
-    if (!user || !activeConference?.pcMembers) return false;
-    return activeConference.pcMembers.includes(user.id);
-  }, [user, activeConference]);
+  // const isCurrentUserPCMember = React.useMemo(() => {
+  //   if (!user || !activeConference?.pcMembers) return false;
+  //   return activeConference.pcMembers.includes(user.id);
+  // }, [user, activeConference]);
 
   const isCurrentUserSuperchair = React.useMemo(() => {
     if (!user || !activeConference?.superchairs) return false;
