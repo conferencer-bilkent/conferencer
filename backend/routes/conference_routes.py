@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify, session
 from models.conference import Conference
 from bson import ObjectId
+from datetime import datetime
 from extensions import mongo
 from models.pc_member_invitation import PCMemberInvitation
 from routes.notification_routes import send_notification
@@ -411,7 +412,121 @@ def appoint_superchair(conference_id):
 
     except Exception as e:
         return jsonify({"error": f"Failed to appoint superchair: {str(e)}"}), 500
-    
+
+def get_series_stats(series_id):
+    if "user_id" not in session:
+        return jsonify({"error": "Unauthorized"}), 401
+
+    try:
+        # Step 1: Get all conferences in the series
+        series = mongo.db.conference_series.find_one({"_id": ObjectId(series_id)})
+        if not series:
+            return jsonify({"error": "Conference series not found"}), 404
+
+        conference_ids = series.get("conferences", [])
+        pc_member_ids = set()
+
+        # Step 2: For each conference, collect all PC members
+        for conf_id in conference_ids:
+            conference = mongo.db.conferences.find_one({"_id": ObjectId(conf_id)})
+            if conference:
+                pc_members = conference.get("pc_members", [])
+                pc_member_ids.update(pc_members)
+
+        result_stats = []
+
+        # Step 3: For each PC member, calculate stats
+        for pc_member in pc_member_ids:
+            # Collect values for all stats
+            total_submit_time = 0
+            total_review_rating = 0
+            total_words = 0
+            total_review_time = 0
+            total_eval_score = 0
+
+            review_count = 0
+            rating_count = 0
+
+            # Step 3a: Find all reviews by this reviewer in any track of any conference
+            reviews = mongo.db.reviews.find({"reviewer_id": pc_member})
+
+            for review in reviews:
+                
+                review_count += 1
+
+                # ---------- 1. avg_submit_time_before_deadline ----------
+                paper = mongo.db.papers.find_one({"_id": ObjectId(review["paper_id"])})
+                if not paper:
+                    continue  # skip if paper not found
+
+                paper_created = paper["created_at"]
+                review_created = review["created_at"]
+
+                # Get conference
+                track = mongo.db.tracks.find_one({"_id": ObjectId(paper["track"])})
+                if not track:
+                    continue
+
+                conference = mongo.db.conferences.find_one({"_id": ObjectId(track["conference_id"])})
+                if not conference:
+                    continue
+
+                conf_end_date = conference.get("end_date")
+                if not conf_end_date:
+                    continue  # Skip if end date missing
+
+                # If conf_end_date is a string, convert to datetime
+                if isinstance(conf_end_date, str):
+                    conf_end_date = datetime.fromisoformat(conf_end_date.replace("Z", "+00:00"))
+
+                submit_time = (conf_end_date - review_created).total_seconds() / 3600
+
+                total_submit_time += submit_time
+
+                # ---------- 2. review_rating ----------
+                if "review_rating" in review:
+                    total_review_rating += review["review_rating"]
+                    rating_count += 1
+
+                # ---------- 3. avg_words_per_review ----------
+                word_count = len(review.get("evaluation_text", "").split())
+                total_words += word_count
+
+                # ---------- 4. avg_time_to_review ----------
+                time_to_review = (review_created - paper_created).total_seconds() / 3600  # hours
+                total_review_time += time_to_review
+
+                # ---------- 5. avg_rating_given ----------
+                if "evaluation" in review:
+                    # You didn't specify exactly how to convert "evaluation" to grade
+                    # Assuming it's an integer or numeric value
+                    try:
+                        eval_value = float(review["evaluation"])
+                        total_eval_score += eval_value
+                    except:
+                        pass
+
+            if review_count == 0:
+                continue  # no reviews by this reviewer
+
+            stats = {
+                "pc_member_id": str(pc_member),
+                "avg_submit_time_before_deadline_hours": total_submit_time / review_count,
+                "review_rating": (total_review_rating / rating_count) if rating_count > 0 else 0,
+                "avg_words_per_review": total_words / review_count,
+                "avg_time_to_review_hours": total_review_time / review_count,
+                "avg_rating_given": total_eval_score / review_count
+            }
+
+            result_stats.append(stats)
+
+        return jsonify({
+            "series_id": str(series_id),
+            "pc_member_stats": result_stats
+        }), 200
+
+    except Exception as e:
+        return jsonify({"error": f"Failed to compute series stats: {str(e)}"}), 500  
 
 def get_conference(conference_id):
     try:

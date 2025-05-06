@@ -1,6 +1,6 @@
 from flask import Blueprint
 from routes.auth_routes import login, signup, logout, check_session, login_google, google_callback
-from routes.conference_routes import get_conference_by_id, create_conference, create_conference_from_series, get_conferences, get_my_conference_series, get_conference, invite_pc_member, update_conference, appoint_superchair
+from routes.conference_routes import get_conference_by_id, create_conference, create_conference_from_series, get_conferences, get_my_conference_series, get_conference, invite_pc_member, update_conference, appoint_superchair, get_series_stats
 from routes.ping_routes import ping
 from routes.profile_routes import get_profile, update_profile, get_all_users, get_affiliations, add_affiliations
 from routes.role_routes import assign_role, get_roles, get_role, get_role_status
@@ -45,6 +45,7 @@ conference_bp.route("/series/my_series", methods=["GET"])(get_my_conference_seri
 conference_bp.route("/<conference_id>", methods=["GET"])(get_conference)
 conference_bp.route("/<conference_id>/superchair", methods=["POST"])(appoint_superchair)
 conference_bp.route("/update_conference/<conference_id>", methods=["POST"])(update_conference)
+conference_bp.route("/series/stats/<series_id>", methods=["GET"])(get_series_stats)
 
 ping_bp.route("/", methods=["GET"])(ping)
 
