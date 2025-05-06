@@ -451,12 +451,13 @@ def get_series_stats(series_id):
             reviews = mongo.db.reviews.find({"reviewer_id": pc_member})
 
             for review in reviews:
-                
+                print(1)
                 review_count += 1
 
                 # ---------- 1. avg_submit_time_before_deadline ----------
                 paper = mongo.db.papers.find_one({"_id": ObjectId(review["paper_id"])})
                 if not paper:
+                    print(2)
                     continue  # skip if paper not found
 
                 paper_created = paper["created_at"]
@@ -465,19 +466,31 @@ def get_series_stats(series_id):
                 # Get conference
                 track = mongo.db.tracks.find_one({"_id": ObjectId(paper["track"])})
                 if not track:
+                    print(3)
                     continue
 
                 conference = mongo.db.conferences.find_one({"_id": ObjectId(track["conference_id"])})
                 if not conference:
+                    print(4)
                     continue
 
                 conf_end_date = conference.get("end_date")
                 if not conf_end_date:
+                    print(5)
                     continue  # Skip if end date missing
 
                 # If conf_end_date is a string, convert to datetime
                 if isinstance(conf_end_date, str):
                     conf_end_date = datetime.fromisoformat(conf_end_date.replace("Z", "+00:00"))
+
+                if conf_end_date.tzinfo is not None:
+                    conf_end_date = conf_end_date.replace(tzinfo=None)
+
+                if review_created.tzinfo is not None:
+                    review_created = review_created.replace(tzinfo=None)
+
+                if paper_created.tzinfo is not None:
+                    paper_created = paper_created.replace(tzinfo=None)
 
                 submit_time = (conf_end_date - review_created).total_seconds() / 3600
 
@@ -509,14 +522,25 @@ def get_series_stats(series_id):
             if review_count == 0:
                 continue  # no reviews by this reviewer
 
+            submit_time_avg = total_submit_time / review_count
+            review_time_avg = total_review_time / review_count
+
+            user = mongo.db.users.find_one({"_id": ObjectId(pc_member)})
+            if user:
+                pc_member_name = user.get("name", "") + " " + user.get("surname", "")
+            else:
+                pc_member_name = "Unknown"
+
             stats = {
                 "pc_member_id": str(pc_member),
-                "avg_submit_time_before_deadline_hours": total_submit_time / review_count,
+                "pc_member_name": pc_member_name,
+                "avg_submit_time_before_deadline": format_duration(submit_time_avg),
                 "review_rating": (total_review_rating / rating_count) if rating_count > 0 else 0,
                 "avg_words_per_review": total_words / review_count,
-                "avg_time_to_review_hours": total_review_time / review_count,
+                "avg_time_to_review": format_duration(review_time_avg),
                 "avg_rating_given": total_eval_score / review_count
             }
+
 
             result_stats.append(stats)
 
@@ -763,3 +787,18 @@ def update_conference(conference_id):
 
     except Exception as e:
         return jsonify({"error": f"Failed to update conference: {str(e)}"}), 500
+
+def format_duration(hours):
+    months = int(hours // (24 * 30))
+    days = int((hours % (24 * 30)) // 24)
+    remaining_hours = int(hours % 24)
+
+    parts = []
+    if months > 0:
+        parts.append(f"{months} Months")
+    if days > 0:
+        parts.append(f"{days} Days")
+    if remaining_hours > 0 or not parts:
+        parts.append(f"{remaining_hours} Hours")
+
+    return " ".join(parts)
