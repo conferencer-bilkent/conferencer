@@ -10,6 +10,7 @@ import ConferenceDetail from "./components/ConferenceDetail";
 import AppTitle from "../../global/AppTitle";
 import SelectPeoplePopup from "../../global/SelectPeoplePopUp";
 import SelectPaperPopup from "../../global/SelectPaperPopUp";
+import ConflictOfInterestPopup from "../../global/ConflictOfInterestPopup";
 import "./ConferencePage.css";
 import { useConference } from "../../../context/ConferenceContext";
 import {
@@ -53,6 +54,7 @@ const ConferencePage: React.FC = () => {
           credentials: "include",
         }
       );
+      
       if (!response.ok) throw new Error("Failed to fetch papers");
       const data = await response.json();
       setPapers(data.papers || []);
@@ -69,6 +71,16 @@ const ConferencePage: React.FC = () => {
       fetchTrackPapers(activeTrack._id);
     } else {
       setPapers([]);
+    }
+  }, [activeTrack]);
+
+  useEffect(() => {
+    if (activeTrack) {
+      console.log('Active Track:', {
+        id: activeTrack._id,
+        name: activeTrack.track_name,
+        description: activeTrack.description
+      });
     }
   }, [activeTrack]);
 
@@ -534,13 +546,30 @@ const ConferencePage: React.FC = () => {
                         }`
                       : "-",
                   },
-                  {
-                    content: "See Full Calendar",
-                    link: hasActiveTrack ? "#" : undefined,
+                
+                  { 
+                    content: `Total Submissions: ${hasActiveTrack ? papers.length : "-"}` 
                   },
-                  { content: `Total Submissions: ${hasActiveTrack ? 0 : "-"}` },
-                  { content: `Assigned Reviews: ${hasActiveTrack ? 0 : "-"}` },
-                  { content: `Pending Reviews: ${hasActiveTrack ? 0 : "-"}` },
+                  { 
+                    content: `Track Chairs: ${
+                      hasActiveTrack ? activeTrack.track_chairs?.length || 0 : "-"
+                    }` 
+                  },
+                  { 
+                    content: `Track Members: ${
+                      hasActiveTrack ? activeTrack.track_members?.length || 0 : "-"
+                    }` 
+                  },
+                  { 
+                    content: `Reviews: ${
+                      hasActiveTrack ? activeTrack.reviews?.length || 0 : "-"
+                    }` 
+                  },
+                  { 
+                    content: `Assignments: ${
+                      hasActiveTrack ? activeTrack.assignments?.length || 0 : "-"
+                    }` 
+                  },
                 ]}
                 buttons={[
                   {
@@ -752,79 +781,9 @@ const ConferencePage: React.FC = () => {
             </div>
           )}
 
-          {isCurrentUserPCMember && activeTrack && (
-            <div
-              style={{
-                marginTop: 20,
-                padding: "20px",
-                backgroundColor: colors.primary[1000],
-                borderRadius: "8px",
-                border: `1px solid ${colors.grey[800]}`,
-              }}
-            >
-              <h3
-                style={{
-                  color: colors.grey[100],
-                  marginBottom: 15,
-                  fontSize: "18px",
-                  fontWeight: 600,
-                }}
-              >
-                Submitted Papers
-              </h3>
-              {loadingPapers ? (
-                <div style={{ color: colors.grey[300] }}>Loading papers...</div>
-              ) : papers.length > 0 ? (
-                <div
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: "10px",
-                  }}
-                >
-                  {papers.map((paper) => (
-                    <div
-                      key={paper._id}
-                      onClick={() => navigate(`/paper/${paper._id}`)}
-                      style={{
-                        padding: "12px",
-                        backgroundColor: colors.primary[900],
-                        border: `1px solid ${colors.grey[700]}`,
-                        borderRadius: "6px",
-                        cursor: "pointer",
-                        transition: "background-color 0.2s",
-                      }}
-                    >
-                      <div
-                        style={{
-                          fontSize: "16px",
-                          fontWeight: 500,
-                          marginBottom: "4px",
-                        }}
-                      >
-                        {paper.title}
-                      </div>
-                      <div
-                        style={{
-                          fontSize: "14px",
-                          color: colors.grey[300],
-                        }}
-                      >
-                        Submitted:{" "}
-                        {new Date(paper.submission_date).toLocaleDateString()}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div style={{ color: colors.grey[300] }}>
-                  No papers submitted yet
-                </div>
-              )}
-            </div>
-          )}
+        
 
-          {popupAction && popupAction != "Select Paper(s)" && (
+          {popupAction && popupAction !== "Select Paper(s)" && popupAction !== "ConflictOfInterest" && (
             <SelectPeoplePopup
               buttonText={popupAction}
               people={getFilteredUsersForPopup()}
@@ -842,6 +801,8 @@ const ConferencePage: React.FC = () => {
               onClose={closePopup}
             />
           )}
+
+          
         </div>
       </div>
     </div>
