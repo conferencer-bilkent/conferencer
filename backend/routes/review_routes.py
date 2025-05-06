@@ -215,7 +215,16 @@ def submit_review(paper_id):
             {"_id": ObjectId(paper_id)},
             {"$addToSet": {"reviews": result.inserted_id}}
         )
-        
+
+        track_id = paper.get("track")
+        if track_id:
+            mongo.db.tracks.update_one(
+                {"_id": ObjectId(track_id)},
+                {"$addToSet": {"reviews": result.inserted_id}}
+            )
+        else:
+            print("Warning: Paper has no track_id assigned.")
+
         update_paper_avg_acceptance(paper_id)
 
         return jsonify({
