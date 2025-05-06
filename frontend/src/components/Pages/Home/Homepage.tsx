@@ -23,7 +23,6 @@ const Homepage: React.FC = () => {
   useEffect(() => {
     getAllConferences()
       .then((conferences) => {
-        const now = new Date();
         const upcoming: Conference[] = [];
         const past: Conference[] = [];
 

@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { useTheme } from "@mui/material";
 import { tokens } from "../../theme";
-import { FaCheck, FaTimes } from "react-icons/fa"; // ensure these are installed
 
 type AppButtonProps = {
   icon?: React.ReactNode;

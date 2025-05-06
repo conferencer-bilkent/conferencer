@@ -13,7 +13,6 @@ export const mapApiResponseToConference = (apiConference: any): Conference => {
     venue: apiConference.venue || "",
     state: apiConference.state || "",
     country: apiConference.country || "",
-    submissionPage: apiConference.submission_page || "",
     licenseExpiry: apiConference.license_expiry || "",
     contactEmails: apiConference.contact_emails || [],
     createdBy: apiConference.created_by || "",

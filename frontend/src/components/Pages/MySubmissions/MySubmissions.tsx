@@ -17,7 +17,6 @@ const MySubmissions = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const [papers, setPapers] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [paperReviews, setPaperReviews] = useState<{ [key: string]: any[] }>(
     {}
   );
@@ -39,9 +38,7 @@ const MySubmissions = () => {
         setPapers(data.papers);
       } catch (error) {
         console.error("Error fetching papers:", error);
-      } finally {
-        setLoading(false);
-      }
+      } 
     };
     fetchPapers();
   }, []);
@@ -254,7 +251,7 @@ const MySubmissions = () => {
                         Reviews ({paperReviews[paper._id].length}):
                       </Typography>
                       {paperReviews[paper._id].map(
-                        (review: any, index: number) => (
+                        (review: any) => (
                           <Box key={review._id} ml={1} mt={0.5}>
                             <Typography
                               variant="body2"

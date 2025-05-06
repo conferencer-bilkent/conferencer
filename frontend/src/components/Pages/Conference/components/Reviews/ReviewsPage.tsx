@@ -229,11 +229,6 @@ const ReviewsPage: React.FC = () => {
   };
 
   // Create a wrapper function that doesn't take parameters for AppButton
-  const createDownloadHandler = (paper: Paper) => {
-    return () => {
-      handleDownloadPaper({ stopPropagation: () => {} } as React.MouseEvent, paper);
-    };
-  };
 
   // Handle opening the bid dialog
   const handleOpenBidDialog = (e: React.MouseEvent, paper: Paper) => {

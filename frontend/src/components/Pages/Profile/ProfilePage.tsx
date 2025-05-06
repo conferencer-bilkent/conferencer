@@ -14,15 +14,11 @@ import {
   TableBody,
   TableRow,
   TableCell,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
 } from "@mui/material";
 import AppTitle from "../../global/AppTitle";
 import ProfileUserRoles from "./components/ProfileUserRoles";
 import { tokens } from "../../../theme";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { useUser } from "../../../context/UserContext";
 import { getUserStats, UserData, Role } from "../../../models/user";
 import { getUserById } from "../../../services/userService";
@@ -35,7 +31,6 @@ const ProfilePage: React.FC = () => {
   const colors = tokens(theme.palette.mode);
   const { user: currentUser } = useUser();
   const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
   const [profileUser, setProfileUser] = useState<UserData | null>(null);
   const [userRoles, setUserRoles] = useState<Role[]>([]);
   const [loading, setLoading] = useState(true);
@@ -52,7 +47,6 @@ const ProfilePage: React.FC = () => {
   const [preferredKeywords, setPreferredKeywords] = useState<string[]>([]);
   const [unwantedKeywords, setUnwantedKeywords] = useState<string[]>([]);
   const [affiliations, setAffiliations] = useState<string[]>([]);
-  const [selectedAffiliation, setSelectedAffiliation] = useState<string>("");
   const [affiliationInput, setAffiliationInput] = useState("");
 
   useEffect(() => {
@@ -137,7 +131,6 @@ const ProfilePage: React.FC = () => {
       });
       setPreferredKeywords(profileUser.preferred_keywords || []);
       setUnwantedKeywords(profileUser.not_preferred_keywords || []);
-      setSelectedAffiliation(profileUser.affiliation || "");
       setAffiliationInput(profileUser.affiliation || "");
     }
     console.log("Profile User:", profileUser);

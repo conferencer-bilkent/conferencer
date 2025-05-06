@@ -30,7 +30,6 @@ export interface ReviewFlag {
     description: string;
     state: string;
     country: string;
-    submissionPage: string;
     licenseExpiry: string;           // or Date, if you map it
     contactEmails: string[];
     createdBy: string;

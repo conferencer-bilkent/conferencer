@@ -136,7 +136,6 @@ const CreateConference: React.FC = () => {
   const [invalidFields, setInvalidFields] = useState<Set<string>>(new Set());
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const { setActiveConference } = useConference();
-  const [loading, setLoading] = useState(false);
   const [matchingSeries, setMatchingSeries] = useState<any>(null);
 
   useEffect(() => {

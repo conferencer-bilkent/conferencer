@@ -5,9 +5,7 @@ import AppButton from "../../../../global/AppButton";
 import { FaFilter, FaSearch } from "react-icons/fa";
 import {
   Box,
-  IconButton,
   TextField,
-  Button,
   InputAdornment,
   useTheme,
   Collapse,
@@ -19,7 +17,6 @@ import { Track } from "../../../../../models/conference";
 import { getTrackById, getPapersForTrack } from "../../../../../services/trackService";
 import { Paper } from "../../../../../models/paper";
 import { parseAuthorsInfo } from "../../../../../utils/parseAuthors";
-import App from "../../../../../App";
 
 // Define a type for the location state
 interface LocationState {
