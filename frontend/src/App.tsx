@@ -26,6 +26,7 @@ import ConferenceOverview from "./components/Pages/Conference/ConferenceOverview
 import ReviewPage from "./components/Pages/Review/ReviewPage";
 import { NotificationsProvider } from "./context/NotificationsContext";
 import MySubmissions from "./components/Pages/MySubmissions/MySubmissions";
+import EditConference from './components/Pages/Conference/EditConference/EditConference';
 
 const App: React.FC = () => {
   const [theme, colorMode] = useMode();
@@ -184,6 +185,10 @@ const App: React.FC = () => {
                               <Route
                                 path="/review/:paperId"
                                 element={<ReviewPage />}
+                              />
+                              <Route
+                                path="/conference/edit"
+                                element={<EditConference />}
                               />
                             </Routes>
                           </div>

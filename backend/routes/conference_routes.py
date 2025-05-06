@@ -25,7 +25,6 @@ def create_conference():
             state=data.get("state"),
             country=data.get("country"),
             description=data.get("description"),
-            submission_page=data.get("submission_page"),
             license_expiry=data.get("license_expiry"),
             contact_emails=data.get("contact_emails"),
             created_by=session["user_id"],
@@ -142,7 +141,6 @@ def create_conference_from_series():
         contact_emails = data.get("contact_emails")
         start_date = data.get("start_date")
         end_date = data.get("end_date")
-        submission_page = data.get("submission_page")
 
         # Validate required fields
         if not name or not acronym or not short_acronym:
@@ -167,6 +165,9 @@ def create_conference_from_series():
 
         if not last_conf:
             return jsonify({"error": "Last conference in the series not found"}), 404
+            
+        print("data:", last_conf)
+        print("type:", type(last_conf))
 
         # ----------------------------
         # Step 4: Copy all settings from last conference
@@ -189,7 +190,6 @@ def create_conference_from_series():
             state=state,
             country=country,
             description="",
-            submission_page=submission_page,
             license_expiry=license_expiry,
             contact_emails=contact_emails,
             created_by=session["user_id"],

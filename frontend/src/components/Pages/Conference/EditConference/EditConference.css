@@ -1,0 +1,15 @@
+/* Import CreateConference styles */
+@import url('../CreateConference/CreateConference.css');
+
+/* Add any additional EditConference-specific styles here */
+.form-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.form-subtitle {
+  font-size: 0.9rem;
+  color: #888;
+  font-style: italic;
+}

@@ -3,7 +3,7 @@ from datetime import datetime
 
 class Conference:
     def __init__(self, name, acronym, short_acronym, website, city, venue,
-                 state, country, submission_page, license_expiry, contact_emails,
+                 state, country, license_expiry, contact_emails,
                  created_by,
                  double_blind_review,
                  can_pc_see_unassigned_submissions,
@@ -48,7 +48,6 @@ class Conference:
         self.venue = venue
         self.state = state
         self.country = country
-        self.submission_page = submission_page
         self.license_expiry = license_expiry
         self.contact_emails = contact_emails or []
         self.created_by = created_by
@@ -98,7 +97,6 @@ class Conference:
             "venue": self.venue,
             "state": self.state,
             "country": self.country,
-            "submission_page": self.submission_page,
             "license_expiry": self.license_expiry,
             "contact_emails": self.contact_emails,
             "created_by": self.created_by,

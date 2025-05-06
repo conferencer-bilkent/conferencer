@@ -145,6 +145,60 @@ export const getConferenceById = async (conferenceId: string): Promise<Conferenc
 };
 
 /**
+ * Updates an existing conference with new data
+ * 
+ * @param conferenceId - ID of the conference to update
+ * @param payload - Data to update
+ * @returns Promise with the updated Conference object
+ */
+export const updateConference = async (
+  conferenceId: string,
+  payload: Record<string, any>
+): Promise<Conference> => {
+  try {
+    // First get the conference to find its MongoDB _id
+    const response1 = await fetch(`http://127.0.0.1:5000/conference/${conferenceId}`, {
+      method: "GET",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (!response1.ok) {
+      throw new Error(`Error fetching conference: ${response1.statusText}`);
+    }
+
+    const data = await response1.json();
+    const mongoId = data.conference._id; // Get the MongoDB _id
+    
+    console.log("Using MongoDB _id for update:", mongoId);
+    
+    // Then update using the MongoDB _id
+    const response = await fetch(`http://localhost:5000/conference/update_conference/${mongoId}`, {
+      method: "POST", // Changed to POST as the route expects POST
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    });
+    console.log("aaaaaa", JSON.stringify(payload));
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || `Error updating conference: ${response.statusText}`);
+    }
+
+    // Fetch the updated conference data
+    return await getConferenceById(conferenceId);
+  } catch (error) {
+    console.error(`Failed to update conference with ID ${conferenceId}:`, error);
+    throw error;
+  }
+};
+
+/**
  * Refreshes the active conference by fetching the latest data from the backend
  * and updating the conference context
  * 
