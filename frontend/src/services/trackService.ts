@@ -1,6 +1,7 @@
 import { Track, mapResponseToTrack } from "../models/track";
 import { Paper, mapResponseToPaper } from "../models/paper";
 import { Assignment } from "../models/assignment";
+import { Conflict, mapConflicts } from "../models/conflict";
 
 // The API base URL - adjust if needed
 const API_BASE_URL = "http://127.0.0.1:5000";
@@ -13,11 +14,16 @@ const API_BASE_URL = "http://127.0.0.1:5000";
  */
 export const createTrack = async (trackData: any): Promise<string> => {
   try {
-    // For now, we only send track_name and conference_id
+    // Map all track data fields
     const payload = {
-      track_name: trackData.name, // Mapping from form field to API field
-      conference_id: trackData.conference_id
+      track_name: trackData.name,
+      conference_id: trackData.conference_id,
+      description: trackData.description || '', // Add description field
+      track_chairs: trackData.track_chairs || [], // Optional: Add track chairs if present
+      track_members: trackData.track_members || [], // Optional: Add track members if present
     };
+
+    console.log("Creating track with payload:", payload);
 
     const response = await fetch(`${API_BASE_URL}/track/create`, {
       method: "POST",
@@ -114,6 +120,36 @@ export const getPapersForTrack = async (trackId: string): Promise<Paper[]> => {
     return data.papers.map((paper: any) => mapResponseToPaper(paper));
   } catch (error) {
     console.error(`Error fetching papers for track ${trackId}:`, error);
+    throw error;
+  }
+};
+
+/**
+ * Get conflicts of interest for a track
+ * 
+ * @param trackId - ID of the track to fetch conflicts for
+ * @returns Promise with array of conflicts
+ */
+export const getConflictsForTrack = async (trackId: string): Promise<Conflict[]> => {
+  console.log(`Fetching conflicts for track: ${trackId}`);
+  try {
+    const url = `${API_BASE_URL}/track/${trackId}/conflicts`;
+    console.log(`Making API call to: ${url}`);
+    
+    const response = await fetch(url, {
+      credentials: "include",
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || "Failed to fetch conflicts");
+    }
+
+    const data = await response.json();
+    console.log("Conflicts API response:", data);
+    return mapConflicts(data.conflicts || []);
+  } catch (error) {
+    console.error(`Error fetching conflicts for track ${trackId}:`, error);
     throw error;
   }
 };
