@@ -54,7 +54,7 @@ const ConferencePage: React.FC = () => {
           credentials: "include",
         }
       );
-      
+
       if (!response.ok) throw new Error("Failed to fetch papers");
       const data = await response.json();
       setPapers(data.papers || []);
@@ -83,6 +83,7 @@ const ConferencePage: React.FC = () => {
       });
     }
   }, [activeTrack]);
+
 
   const isCurrentUserPCMember = React.useMemo(() => {
     if (!user || !activeConference?.pcMembers) return false;
@@ -784,6 +785,7 @@ const ConferencePage: React.FC = () => {
         
 
           {popupAction && popupAction !== "Select Paper(s)" && popupAction !== "ConflictOfInterest" && (
+
             <SelectPeoplePopup
               buttonText={popupAction}
               people={getFilteredUsersForPopup()}

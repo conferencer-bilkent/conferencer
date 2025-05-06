@@ -75,6 +75,7 @@ def create_conference():
         insert_result = mongo.db.conferences.insert_one(conference_dict)
         inserted_conference_id = insert_result.inserted_id
 
+
         if conference_series_id:
             mongo.db.conference_series.update_one(
                 {"_id": conference_series_id},
@@ -143,6 +144,8 @@ def create_conference_from_series():
         start_date = data.get("start_date")
         end_date = data.get("end_date")
 
+
+
         # Validate required fields
         if not name or not acronym or not short_acronym:
             return jsonify({"error": "name, acronym, and short_acronym are required"}), 400
@@ -166,9 +169,6 @@ def create_conference_from_series():
 
         if not last_conf:
             return jsonify({"error": "Last conference in the series not found"}), 404
-            
-        print("data:", last_conf)
-        print("type:", type(last_conf))
 
         # ----------------------------
         # Step 4: Copy all settings from last conference
@@ -191,6 +191,7 @@ def create_conference_from_series():
             state=state,
             country=country,
             description="",
+
             license_expiry=license_expiry,
             contact_emails=contact_emails,
             created_by=session["user_id"],
@@ -801,3 +802,4 @@ def format_duration(hours):
         parts.append(f"{remaining_hours} Hours")
 
     return " ".join(parts)
+
