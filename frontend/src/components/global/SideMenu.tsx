@@ -42,9 +42,6 @@ const SideMenu: React.FC<SideMenuProps> = ({ items }) => {
       case "CHATS":
         navigate("/chat");
         break;
-      case "SETTINGS":
-        navigate("/settings");
-        break;
       case "LOG OUT":
         fetch("http://localhost:5000/auth/logout", {
           method: "POST",

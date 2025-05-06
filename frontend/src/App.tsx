@@ -34,11 +34,9 @@ const App: React.FC = () => {
     "CONFERENCES",
     "PROFILE",
     "MY TASKS",
-    "MY ROLES",
-    "NOTIFICATIONS",
     "MY SUBMISSIONS",
     "CHATS",
-    "SETTINGS",
+    "NOTIFICATIONS",
     "LOG OUT",
   ];
 
