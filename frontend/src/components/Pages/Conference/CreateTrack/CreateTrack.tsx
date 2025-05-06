@@ -115,8 +115,11 @@ const CreateTrack: React.FC = () => {
           throw new Error("No active conference selected");
         }
 
-        // Add conference_id to payload
+        // Add conference_id and ensure description is included in payload
         payload.conference_id = activeConference.id;
+        payload.description = form.description || ''; // Ensure description is explicitly set
+
+        console.log('Creating track with payload:', payload); // Debug log
 
         const trackId = await createTrack(payload);
         const newTrack = mapApiResponseToTrack({
