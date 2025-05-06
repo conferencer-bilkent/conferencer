@@ -34,7 +34,6 @@ const ReviewPage: React.FC = () => {
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isSubmitted, setIsSubmitted] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
 
   useEffect(() => {
@@ -374,12 +373,9 @@ const ReviewPage: React.FC = () => {
                   onClick={handleSubmit}
                   variant="contained"
                   color="primary"
-                >
-                  {isSubmitting
-                    ? "Submitting..."
-                    : isSubmitted
-                    ? "Submitted!"
-                    : "Submit Review"}
+                > 
+                Submit
+
                 </Button>
               </Box>
             </Grid>

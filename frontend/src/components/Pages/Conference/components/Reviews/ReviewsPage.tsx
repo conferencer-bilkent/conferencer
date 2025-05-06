@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import AppTitle from "../../../../global/AppTitle";
 import AppButton from "../../../../global/AppButton";
-import { FaFilter, FaSearch } from "react-icons/fa";
+import { FaFilter, FaSearch, FaDownload, FaHandPaper } from "react-icons/fa";
 import {
   Box,
   TextField,
@@ -11,17 +11,23 @@ import {
   Collapse,
   Typography,
   FormControl,
-  FormLabel,
   RadioGroup,
   Radio,
   FormControlLabel,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
 } from "@mui/material";
 import { tokens } from "../../../../../theme";
 import { useConference } from "../../../../../context/ConferenceContext";
 import { Track } from "../../../../../models/conference";
-import { getTrackById, getPapersForTrack } from "../../../../../services/trackService";
+import { getTrackById, getPapersForTrack, submitPaperBid } from "../../../../../services/trackService";
+import { downloadPaper } from "../../../../../services/paperService";
 import { Paper } from "../../../../../models/paper";
 import { parseAuthorsInfo } from "../../../../../utils/parseAuthors";
+import { useUser } from "../../../../../context/UserContext";
 
 // Define a type for the location state
 interface LocationState {
@@ -34,6 +40,7 @@ const ReviewsPage: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { activeConference } = useConference();
+  const { user } = useUser();
   
   // Get the track and view type from location state
   const state = location.state as LocationState;
@@ -46,6 +53,30 @@ const ReviewsPage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [decisionFilter, setDecisionFilter] = useState<string>("all");
   const [expandedIds, setExpandedIds] = useState<Set<number>>(new Set());
+  
+  // State for bid dialog
+  const [bidDialogOpen, setBidDialogOpen] = useState(false);
+  const [currentPaperForBid, setCurrentPaperForBid] = useState<Paper | null>(null);
+  const [submittingBid, setSubmittingBid] = useState(false);
+
+  // Check user roles
+  const isTrackchair = React.useMemo(() => {
+    if (!user || !activeTrack?.track_chairs) return false;
+    return activeTrack.track_chairs.includes(user.id);
+  }, [user, activeTrack]);
+
+  const isSuperchair = React.useMemo(() => {
+    if (!user || !activeConference?.superchairs) return false;
+    return activeConference.superchairs.includes(user.id);
+  }, [user, activeConference]);
+
+  // A track member is someone who can view papers but not make decisions
+  const isOnlyTrackMember = React.useMemo(() => {
+    if (!user || !activeTrack?.track_members) return false;
+    return activeTrack.track_members.includes(user.id) && 
+           !activeTrack.track_chairs.includes(user.id) &&
+           (!activeConference?.superchairs || !activeConference.superchairs.includes(user.id));
+  }, [user, activeTrack, activeConference]);
 
   useEffect(() => {
     const fetchTrack = async () => {
@@ -94,9 +125,9 @@ const ReviewsPage: React.FC = () => {
   const getPageTitle = () => {
     console.log("activeTrack", activeTrack);
     if (activeTrack) {
-      return `${activeTrack.track_name || "Track"}: ${'Assignments'}`;
+      return `${activeTrack.track_name || "Track"}: ${'Papers and Assignments'}`;
     }
-    return `${activeConference?.name || "Conference"}: ${'All Assignments'}`;
+    return `${activeConference?.name || "Conference"}: ${'All Papers'}`;
   };
 
   // Toggle expanded state for a paper
@@ -115,7 +146,10 @@ const ReviewsPage: React.FC = () => {
   const isExpanded = (id: number) => expandedIds.has(id);
 
   const handleNavigateToDetail = (paper: Paper) => {
-    navigate("/review/detail", { state: { paper, activeTrack } });
+    // Only track chairs and superchairs can view review details
+    if (isTrackchair || isSuperchair) {
+      navigate("/review/detail", { state: { paper, activeTrack } });
+    }
   };
 
   // Handler to navigate back to the conference page
@@ -170,6 +204,57 @@ const ReviewsPage: React.FC = () => {
   const getReviewColor = () => {
     // For paper objects these values are not provided so we choose a default color
     return colors.greenAccent[400];
+  };
+
+  // Handle paper download
+  const handleDownloadPaper = async (e: React.MouseEvent, paper: Paper) => {
+    e.stopPropagation(); // Prevent expanding paper details
+    
+    try {
+      const blob = await downloadPaper(paper._id);
+      
+      // Create a download link and trigger it
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${paper.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (error) {
+      console.error("Error downloading paper:", error);
+      alert("Failed to download paper. Please try again.");
+    }
+  };
+
+  // Create a wrapper function that doesn't take parameters for AppButton
+
+  // Handle opening the bid dialog
+  const handleOpenBidDialog = (e: React.MouseEvent, paper: Paper) => {
+    e.stopPropagation(); // Prevent expanding paper details
+    setCurrentPaperForBid(paper);
+    setBidDialogOpen(true);
+  };
+
+  // Handle submitting a bid
+  const handleSubmitBid = async () => {
+    if (!currentPaperForBid) return;
+  
+    try {
+      setSubmittingBid(true);
+      // Send the bid request with a default bid value of 1
+      await submitPaperBid(currentPaperForBid._id, 1);
+      alert("Bid submitted successfully!");
+      setBidDialogOpen(false);
+    } catch (error) {
+      console.error("Error submitting bid:", error);
+      alert("Failed to submit bid. Please try again.");
+    } finally {
+      setSubmittingBid(false);
+    }
+    
+    
   };
 
   return (
@@ -273,7 +358,12 @@ const ReviewsPage: React.FC = () => {
               border={`1px solid ${colors.grey[700]}`}
             >
               <Typography variant="body1">
-                Currently viewing: <strong>{'Assignments'}</strong> for track <strong>{activeTrack.track_name || "Unnamed Track"}</strong>
+                Currently viewing: <strong>{'Papers and Assignments'}</strong> for track <strong>{activeTrack.track_name || "Unnamed Track"}</strong>
+                {isOnlyTrackMember && (
+                  <Typography variant="body2" color={colors.grey[300]} mt={1}>
+                    As a track member, you can download papers and make bids on which papers you'd like to review.
+                  </Typography>
+                )}
               </Typography>
             </Box>
           )}
@@ -321,7 +411,7 @@ const ReviewsPage: React.FC = () => {
                   p={2}
                   borderRadius="8px"
                 >
-                  <Box>
+                  <Box sx={{ flexGrow: 1 }}>
                     <Typography variant="h6" color={colors.grey[100]}>
                       {paper.title}
                     </Typography>
@@ -338,30 +428,48 @@ const ReviewsPage: React.FC = () => {
                     </Typography>
                     
                     {paper.decision !== undefined && (
-                      <Typography 
-                        variant="body2" 
+                      <Typography
+                        variant="body2"
                         fontWeight="bold"
-                        color={paper.decision === true 
-                          ? colors.greenAccent[500] 
-                          : paper.decision === false 
-                            ? colors.redAccent[500] 
+                        color={paper.decision === true
+                          ? colors.greenAccent[500]
+                          : paper.decision === false
+                            ? colors.redAccent[500]
                             : colors.grey[300]}
                       >
-                        Status: {paper.decision === true 
-                          ? "Accepted" 
-                          : paper.decision === false 
-                            ? "Rejected" 
+                        Status: {paper.decision === true
+                          ? "Accepted"
+                          : paper.decision === false
+                            ? "Rejected"
                             : "Pending Decision"}
                       </Typography>
                     )}
                   </Box>
 
-                  <AppButton
-                    onClick={() => {
-                      handleNavigateToDetail(paper);
-                    }}
-                    text="View Details"
-                  />
+                  {/* Buttons container - moved to the right */}
+                  <Box display="flex" flexDirection="column" gap={1} ml={2} onClick={(e) => e.stopPropagation()}>
+                    {isOnlyTrackMember ? (
+                      <>
+                        <AppButton
+                          onClick={() => handleDownloadPaper({ stopPropagation: () => {} } as React.MouseEvent, paper)}
+                          text="Download"
+                          icon={<FaDownload />}
+                        />
+                        <AppButton
+                          onClick={() => handleOpenBidDialog({ stopPropagation: () => {} } as React.MouseEvent, paper)}
+                          text="Make Bid"
+                          icon={<FaHandPaper />}
+                        />
+                      </>
+                    ) : (
+                      <AppButton
+                        onClick={() => {
+                          handleNavigateToDetail(paper);
+                        }}
+                        text="View Reviews"
+                      />
+                    )}
+                  </Box>
                 </Box>
 
                 <Collapse in={isExpanded(index)} timeout="auto" unmountOnExit>
@@ -421,6 +529,48 @@ const ReviewsPage: React.FC = () => {
           )}
         </div>
       </div>
+
+      {/* Bid Dialog */}
+      <Dialog 
+        open={bidDialogOpen} 
+        onClose={() => setBidDialogOpen(false)}
+        PaperProps={{
+          style: {
+            backgroundColor: colors.primary[400],
+            borderRadius: '12px',
+            padding: '12px',
+            minWidth: '400px',
+            color: colors.grey[100],
+          }
+        }}
+      >
+        <DialogTitle>
+          Make a Bid for Paper Review
+          <Typography variant="body2" color={colors.grey[300]}>
+            {currentPaperForBid?.title}
+          </Typography>
+        </DialogTitle>
+        <DialogContent>
+          <Typography gutterBottom mb={2}>
+            Click the button below to submit your bid for reviewing this paper.
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button 
+            onClick={() => setBidDialogOpen(false)}
+            sx={{ color: colors.grey[300] }}
+          >
+            Cancel
+          </Button>
+          <AppButton 
+            onClick={handleSubmitBid}
+            text={submittingBid ? 'Submitting...' : 'Submit Bid'}
+            disabled={submittingBid}
+            // Optionally style the AppButton to match your design:
+            
+          />
+        </DialogActions>
+      </Dialog>
     </div>
   );
 };

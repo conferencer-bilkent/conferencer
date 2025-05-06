@@ -27,7 +27,7 @@ def get_all_tracks():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-def create_track():
+def create_track2():
     if "user_id" not in session:
         return jsonify({"error": "Unauthorized"}), 401
 
@@ -266,8 +266,6 @@ def get_all_relevant_people(track_id):
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-
-
 def get_track_by_people(people_id):
     # use all relevant people function and get_all_tracks function to realize thşis one
 
@@ -347,7 +345,6 @@ def get_track_members(track_id):
         return jsonify({"track_members": member_details}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-
 
 def get_track_authors_by_papers_in_the_track(track_id):
     if "user_id" not in session:
@@ -514,3 +511,144 @@ def conflict_of_interest(track_id):
         
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+    
+### FOR LATER USE/UPDATE
+def create_track():
+    if "user_id" not in session:
+        return jsonify({"error": "Unauthorized"}), 401
+
+    data = request.get_json()
+
+    try:
+        track = Track(
+            track_name=data.get("track_name"),
+            conference_id=data.get("conference_id"),
+            description=data.get("description"),
+            track_chairs=data.get("track_chairs"),
+            papers=data.get("papers"),
+            reviews=data.get("reviews"),
+            assignments=data.get("assignments")
+        )
+
+        # Initialize settings as an empty dict
+        track.settings = {}
+
+        # ✅ Get the conference to copy settings with scope "track"
+        conference = mongo.db.conferences.find_one({"_id": ObjectId(data.get("conference_id"))})
+
+        if conference:
+            # Go through each key in the conference document
+            for key, value in conference.items():
+                if isinstance(value, dict):
+                    # If the value is already a dict (e.g., {"value": X, "scope": Y}), check scope
+                    if value.get("scope") == "track":
+                        track.settings[key] = {
+                            "value": value.get("value"),
+                            "scope": "track"
+                        }
+
+        # Save the track with settings as a DICT
+        mongo.db.tracks.insert_one(track.to_dict())
+
+        return jsonify({
+            "message": "Track created successfully",
+            "track_id": str(track.id),
+            "settings": track.settings
+        }), 201
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+def get_effective_track_settings(track_id):
+    try:
+        # 1️⃣ Find the track
+        track = mongo.db.tracks.find_one({"_id": ObjectId(track_id)})
+        if not track:
+            return jsonify({"error": "Track not found"}), 404
+
+        conference_id = track.get("conference_id")
+        if not conference_id:
+            return jsonify({"error": "Conference ID not found in track"}), 400
+
+        # 2️⃣ Find the conference
+        conference = mongo.db.conferences.find_one({"_id": ObjectId(conference_id)})
+        if not conference:
+            return jsonify({"error": "Conference not found"}), 404
+
+        # 3️⃣ Prepare the response dictionary
+        effective_settings = {}
+
+        # 4️⃣ Iterate all keys in the conference
+        for key, value in conference.items():
+            if isinstance(value, dict) and "scope" in value:
+                # If it's a setting object with scope
+                if value["scope"] == "track":
+                    # If the track has an override for this setting, use it
+                    track_setting = track.get("settings", {}).get(key)
+                    if track_setting:
+                        effective_settings[key] = {
+                            "value": track_setting.get("value"),
+                            "scope": "track"
+                        }
+                    else:
+                        # If no override in track, use the conference default
+                        effective_settings[key] = {
+                            "value": value.get("value"),
+                            "scope": "track"
+                        }
+                elif value["scope"] == "conference":
+                    effective_settings[key] = {
+                        "value": value.get("value"),
+                        "scope": "conference"
+                    }
+
+        return jsonify({
+            "track_id": str(track_id),
+            "conference_id": conference_id,
+            "effective_settings": effective_settings
+        }), 200
+
+    except Exception as e:
+        return jsonify({"error": f"Failed to retrieve effective settings: {str(e)}"}), 500
+
+def update_track(track_id):
+    if "user_id" not in session:
+        return jsonify({"error": "Unauthorized"}), 401
+
+    data = request.get_json()
+
+    try:
+        update_fields = {}
+        for key, value in data.items():
+            if key != "settings":
+                update_fields[key] = value
+
+        if update_fields:
+            mongo.db.tracks.update_one(
+                {"_id": ObjectId(track_id)},
+                {"$set": update_fields}
+            )
+
+        if "settings" in data:
+            track = mongo.db.tracks.find_one({"_id": ObjectId(track_id)})
+            current_settings = track.get("settings", {})
+
+            # Only update existing settings, do not create new ones
+            for key, val in data["settings"].items():
+                if key in current_settings:
+                    # Update value and keep scope as 'track'
+                    current_settings[key]["value"] = val.get("value")
+                    current_settings[key]["scope"] = "track"
+                else:
+                    # 🔥 Ignore keys that are not in current settings
+                    pass
+
+            mongo.db.tracks.update_one(
+                {"_id": ObjectId(track_id)},
+                {"$set": {"settings": current_settings}}
+            )
+
+        return jsonify({"message": "Track updated successfully"}), 200
+
+    except Exception as e:
+        return jsonify({"error": f"Failed to update track: {str(e)}"}), 500

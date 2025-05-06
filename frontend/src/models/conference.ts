@@ -10,10 +10,13 @@ export interface ReviewFlag {
     track_name: string;
     conference_id: string;
     track_chairs: string[];
+    track_members: string[];
     papers: string[];
     reviews: string[];
     assignments: string[];
     created_at: string;
+
+  
   }
   
   export interface Conference {
@@ -27,7 +30,6 @@ export interface ReviewFlag {
     description: string;
     state: string;
     country: string;
-    submissionPage: string;
     licenseExpiry: string;           // or Date, if you map it
     contactEmails: string[];
     createdBy: string;

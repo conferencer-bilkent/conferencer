@@ -4,11 +4,16 @@ import "react-datepicker/dist/react-datepicker.css"; // Add this import
 import "./CreateConference.css";
 import {
   createConference,
+  createConferenceFromSeries,
   mapApiResponseToConference,
+  getMyConferenceSeries,
 } from "../../../../services/conferenceService";
 import { useConference } from "../../../../context/ConferenceContext";
-
 const steps = [
+  {
+    title: "Conference Type",
+    fields: ["conference_type", "conference_series_name"],
+  },
   {
     title: "Conference Information",
     fields: [
@@ -69,6 +74,14 @@ const steps = [
   },
 ];
 
+const seriesSteps = [
+  {
+    title: "Conference Type",
+    fields: ["conference_type", "conference_series_name"],
+  },
+  ...steps.slice(1),
+];
+
 const defaultScope = "conference";
 const oneYearLater = new Date();
 oneYearLater.setFullYear(oneYearLater.getFullYear() + 1);
@@ -88,6 +101,9 @@ const defaultForm = {
 
   start_date: "",
   end_date: "",
+
+  conference_type: "individual", // Add this field
+  conference_series_name: "", // Add this field
 
   double_blind_review: { value: false, scope: defaultScope },
   can_pc_see_unassigned_submissions: { value: false, scope: defaultScope },
@@ -120,6 +136,7 @@ const CreateConference: React.FC = () => {
   const [invalidFields, setInvalidFields] = useState<Set<string>>(new Set());
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const { setActiveConference } = useConference();
+  const [matchingSeries, setMatchingSeries] = useState<any>(null);
 
   useEffect(() => {
     setInvalidFields(new Set());
@@ -130,7 +147,17 @@ const CreateConference: React.FC = () => {
     const invalid: string[] = [];
     const errors: Record<string, string> = {};
 
-    steps[currentStep].fields.forEach((field) => {
+    const currentSteps =
+      form.conference_type === "series" ? seriesSteps : steps;
+    currentSteps[currentStep].fields.forEach((field) => {
+      // Skip validation for conference_series_name if type is individual
+      if (
+        field === "conference_series_name" &&
+        form.conference_type === "individual"
+      ) {
+        return;
+      }
+
       const formValue = form[field as keyof ConferenceForm];
       let value: any;
 
@@ -174,36 +201,97 @@ const CreateConference: React.FC = () => {
       return;
     }
 
-    // build payload by unwrapping any { value, scope } objects
-    const payload: Record<string, any> = {};
-    Object.entries(form).forEach(([key, val]) => {
-      if (val && typeof val === "object" && "value" in val) {
-        payload[key] = (val as any).value;
-      } else if (key === "start_date" || key === "end_date") {
-        payload[key] = val ? new Date(val).toISOString() : ""; // Format dates
-      } else {
-        payload[key] = val;
+    if (currentStep === 0 && form.conference_type === "series") {
+      // Check if series exists
+      const seriesList = await getMyConferenceSeries();
+      const foundSeries = seriesList.find(
+        (s) =>
+          s.series_name.toLowerCase() ===
+          form.conference_series_name.toLowerCase()
+      );
+
+      if (foundSeries) {
+        setMatchingSeries(foundSeries);
+        setCurrentStep(1);
+        return;
       }
-    });
+      setCurrentStep(1);
+      return;
+    }
 
-    if (currentStep === steps.length - 1) {
+    // If we're at conference information step (step 1) and it's a series creation
+    if (currentStep === 1 && matchingSeries) {
+      const seriesPayload = {
+        conference_series_id: matchingSeries._id,
+        name: form.name,
+        acronym: form.acronym,
+        short_acronym: form.short_acronym,
+        website: form.website,
+        city: form.city,
+        venue: form.venue,
+        state: form.state,
+        country: form.country,
+        license_expiry: form.license_expiry,
+        contact_emails: form.contact_emails
+          .split(",")
+          .map((email: string) => email.trim()),
+        start_date: form.start_date,
+        end_date: form.end_date,
+      };
+
       try {
-        const conferenceId = await createConference(payload);
+        const conferenceId = await createConferenceFromSeries(seriesPayload);
+        const newConf = mapApiResponseToConference({
+          conference_id: conferenceId,
+          ...seriesPayload,
+          created_at: new Date().toISOString(),
+        });
+        setActiveConference(newConf);
+        alert("Conference created in series!");
+        return;
+      } catch (err: any) {
+        alert(`Error: ${err.message || "Network error"}`);
+        return;
+      }
+    }
 
-        // build a Conference object and mark it active
+    // For all other cases (individual conference or new series), proceed to next step
+    if (currentStep === 1) {
+      setCurrentStep(2);
+      return;
+    }
+
+    // Regular conference creation flow for the final step
+    if (currentStep === steps.length - 1) {
+      const payload: Record<string, any> = {};
+      Object.entries(form).forEach(([key, val]) => {
+        if (val && typeof val === "object" && "value" in val) {
+          payload[key] = (val as any).value;
+        } else if (key === "start_date" || key === "end_date") {
+          payload[key] = val ? new Date(val).toISOString() : "";
+        } else {
+          payload[key] = val;
+        }
+      });
+
+      try {
+        if (form.conference_type === "series") {
+          payload.conference_series_name = form.conference_series_name;
+        }
+
+        const conferenceId = await createConference(payload);
         const newConf = mapApiResponseToConference({
           conference_id: conferenceId,
           ...payload,
           created_at: new Date().toISOString(),
         });
         setActiveConference(newConf);
-
         alert("Conference created!");
       } catch (err: any) {
         alert(`Error: ${err.message || "Network error"}`);
       }
     } else {
-      setCurrentStep((prev) => Math.min(prev + 1, steps.length - 1));
+      setCurrentStep((prev) => prev + 1);
     }
   };
 
@@ -213,7 +301,8 @@ const CreateConference: React.FC = () => {
       .replace(/\b\w/g, (char) => char.toUpperCase());
   };
 
-  const step = steps[currentStep];
+  const currentSteps = form.conference_type === "series" ? seriesSteps : steps;
+  const step = currentSteps[currentStep];
 
   return (
     <div className="content-container">
@@ -221,7 +310,7 @@ const CreateConference: React.FC = () => {
         <div className="form-card">
           <div className="progress-container">
             <div className="progress-steps-container">
-              {steps.map((_, index) => (
+              {currentSteps.map((_, index) => (
                 <div key={index} className="step-container">
                   <div
                     className={`step-circle ${
@@ -230,7 +319,7 @@ const CreateConference: React.FC = () => {
                   >
                     {index + 1}
                   </div>
-                  {index < steps.length - 1 && (
+                  {index < currentSteps.length - 1 && (
                     <div
                       className={`step-line ${
                         index < currentStep ? "active" : ""
@@ -259,95 +348,123 @@ const CreateConference: React.FC = () => {
                   const isInvalid = invalidFields.has(field);
 
                   return (
-                    <div key={field} className="form-field-container">
-                      <div
-                        className={`form-field ${isInvalid ? "invalid" : ""}`}
-                      >
-                        <label className="form-label">
-                          {formatLabel(field)}
-                          {scope && (
-                            <span className="scope-badge">{scope}</span>
-                          )}
-                        </label>
+                    // Hide conference_series_name field if conference_type is individual
+                    field === "conference_series_name" &&
+                      form.conference_type === "individual" ? null : (
+                      <div key={field} className="form-field-container">
+                        <div
+                          className={`form-field ${isInvalid ? "invalid" : ""}`}
+                        >
+                          <label className="form-label">
+                            {formatLabel(field)}
+                            {scope && (
+                              <span className="scope-badge">{scope}</span>
+                            )}
+                          </label>
 
-                        {field === "start_date" ||
-                        field === "end_date" ||
-                        field === "license_expiry" ? (
-                          <DatePicker
-                            selected={
-                              field === "license_expiry"
-                                ? form.license_expiry
-                                : value
-                                ? new Date(value)
-                                : null
-                            }
-                            onChange={(date) =>
-                              handleChange(field as keyof ConferenceForm, date)
-                            }
-                            dateFormat="yyyy-MM-dd"
-                            className="form-input"
-                            minDate={
-                              field === "end_date" && form.start_date
-                                ? new Date(form.start_date)
-                                : undefined
-                            }
-                            placeholderText={
-                              field === "end_date" && !form.start_date
-                                ? "Please select start date first"
-                                : "Select date"
-                            }
-                            disabled={field === "end_date" && !form.start_date}
-                          />
-                        ) : typeof value === "boolean" ? (
-                          <input
-                            type="checkbox"
-                            checked={value}
-                            onChange={(e) =>
-                              handleChange(
-                                field as keyof ConferenceForm,
-                                isObjectField
-                                  ? { value: e.target.checked, scope }
-                                  : e.target.checked
-                              )
-                            }
-                            className="form-checkbox"
-                          />
-                        ) : typeof value === "number" ? (
-                          <input
-                            type="number"
-                            value={value}
-                            onChange={(e) =>
-                              handleChange(
-                                field as keyof ConferenceForm,
-                                isObjectField
-                                  ? { value: Number(e.target.value), scope }
-                                  : Number(e.target.value)
-                              )
-                            }
-                            className="form-input"
-                          />
-                        ) : (
-                          <input
-                            type="text"
-                            value={value as string}
-                            onChange={(e) =>
-                              handleChange(
-                                field as keyof ConferenceForm,
-                                isObjectField
-                                  ? { value: e.target.value, scope }
-                                  : e.target.value
-                              )
-                            }
-                            className="form-input"
-                          />
+                          {field === "conference_type" ? (
+                            <select
+                              value={value as string}
+                              onChange={(e) =>
+                                handleChange(
+                                  field as keyof ConferenceForm,
+                                  e.target.value
+                                )
+                              }
+                              className="form-input"
+                            >
+                              <option value="individual">
+                                Individual Conference
+                              </option>
+                              <option value="series">Conference Series</option>
+                            </select>
+                          ) : field === "start_date" ||
+                            field === "end_date" ||
+                            field === "license_expiry" ? (
+                            <DatePicker
+                              selected={
+                                field === "license_expiry"
+                                  ? form.license_expiry
+                                  : value
+                                  ? new Date(value)
+                                  : null
+                              }
+                              onChange={(date) =>
+                                handleChange(
+                                  field as keyof ConferenceForm,
+                                  date
+                                )
+                              }
+                              dateFormat="yyyy-MM-dd"
+                              className="form-input"
+                              minDate={
+                                field === "end_date" && form.start_date
+                                  ? new Date(form.start_date)
+                                  : undefined
+                              }
+                              placeholderText={
+                                field === "end_date" && !form.start_date
+                                  ? "Please select start date first"
+                                  : "Select date"
+                              }
+                              disabled={
+                                field === "end_date" && !form.start_date
+                              }
+                            />
+                          ) : typeof value === "boolean" ? (
+                            <input
+                              type="checkbox"
+                              checked={value}
+                              onChange={(e) =>
+                                handleChange(
+                                  field as keyof ConferenceForm,
+                                  isObjectField
+                                    ? { value: e.target.checked, scope }
+                                    : e.target.checked
+                                )
+                              }
+                              className="form-checkbox"
+                            />
+                          ) : typeof value === "number" ? (
+                            <input
+                              type="number"
+                              value={value}
+                              onChange={(e) =>
+                                handleChange(
+                                  field as keyof ConferenceForm,
+                                  isObjectField
+                                    ? {
+                                        value: Number(e.target.value),
+                                        scope,
+                                      }
+                                    : Number(e.target.value)
+                                )
+                              }
+                              className="form-input"
+                            />
+                          ) : (
+                            <input
+                              type="text"
+                              value={value as string}
+                              onChange={(e) =>
+                                handleChange(
+                                  field as keyof ConferenceForm,
+                                  isObjectField
+                                    ? { value: e.target.value, scope }
+                                    : e.target.value
+                                )
+                              }
+                              className="form-input"
+                            />
+                          )}
+                        </div>
+                        {isInvalid && fieldErrors[field] && (
+                          <div className="error-message">
+                            {fieldErrors[field]}
+                          </div>
                         )}
                       </div>
-                      {isInvalid && fieldErrors[field] && (
-                        <div className="error-message">
-                          {fieldErrors[field]}
-                        </div>
-                      )}
-                    </div>
+                    )
                   );
                 })}
               </div>
@@ -364,7 +481,7 @@ const CreateConference: React.FC = () => {
                   Back
                 </button>
                 <button type="submit" className="nav-button button-primary">
-                  {currentStep === steps.length - 1
+                  {currentStep === currentSteps.length - 1
                     ? "Create Conference"
                     : "Next"}
                 </button>

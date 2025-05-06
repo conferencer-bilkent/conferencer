@@ -13,7 +13,6 @@ export const mapApiResponseToConference = (apiConference: any): Conference => {
     venue: apiConference.venue || "",
     state: apiConference.state || "",
     country: apiConference.country || "",
-    submissionPage: apiConference.submission_page || "",
     licenseExpiry: apiConference.license_expiry || "",
     contactEmails: apiConference.contact_emails || [],
     createdBy: apiConference.created_by || "",
@@ -95,6 +94,28 @@ export const createConference = async (
   }
 };
 
+export const createConferenceFromSeries = async (
+  payload: Record<string, any>
+): Promise<number> => {
+  try {
+    const res = await fetch("http://127.0.0.1:5000/conference/create_from_series", {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    
+    const data = await res.json();
+    if (!res.ok) {
+      throw new Error(data.error || res.statusText);
+    }
+    return data.conference_id as number;
+  } catch (err) {
+    console.error("Failed to create conference from series:", err);
+    throw err;
+  }
+};
+
 /**
  * Fetches a specific conference by its ID
  * 
@@ -116,8 +137,6 @@ export const getConferenceById = async (conferenceId: string): Promise<Conferenc
     }
 
     const data = await response.json();
-    console.log("Conference data from API:", data); // Debug log
-    // Transform API response to match the Conference interface
     return mapApiResponseToConference(data.conference);
   } catch (error) {
     console.error(`Failed to fetch conference with ID ${conferenceId}:`, error);
@@ -248,6 +267,34 @@ export const assignSuperchair = async (
     };
   } catch (error) {
     console.error("Failed to assign superchair:", error);
+    throw error;
+  }
+};
+
+/**
+ * Fetches the user's conference series
+ * 
+ * @returns Promise with the list of conference series
+ */
+export const getMyConferenceSeries = async (): Promise<any[]> => {
+  try {
+    const response = await fetch("http://127.0.0.1:5000/conference/series/my_series", {
+      method: "GET",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Error fetching conference series: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    console.log("Conference series data from API:", data); // Debug log
+    return data.conference_series_list || [];
+  } catch (error) {
+    console.error("Failed to fetch conference series:", error);
     throw error;
   }
 };
