@@ -31,6 +31,9 @@ const styles = {
     borderRadius: "8px",
     width: "300px",
     position: "relative" as const,
+    maxHeight: "80vh", // Add maximum height
+    display: "flex",
+    flexDirection: "column" as const,
   },
   close: {
     position: "absolute" as const,
@@ -52,6 +55,12 @@ const styles = {
     color: "#fff",
     marginBottom: "1rem",
   } as React.CSSProperties,
+  contentContainer: {
+    overflowY: "auto" as const,
+    flex: 1,
+    marginRight: "-0.5rem", // Compensate for padding
+    paddingRight: "0.5rem", // Add padding for scrollbar
+  },
   action: {
     marginTop: "1rem",
     padding: "0.75rem 1rem",
@@ -141,11 +150,13 @@ const SelectPeoplePopup: React.FC<Props> = ({
           />
         </div>
 
-        <SelectPeopleItem
-          people={filteredPeople}
-          selectedIds={selected}
-          onToggle={toggle}
-        />
+        <div style={styles.contentContainer}>
+          <SelectPeopleItem
+            people={filteredPeople}
+            selectedIds={selected}
+            onToggle={toggle}
+          />
+        </div>
 
         <button style={styles.action} onClick={handleSelection}>
           {buttonText}
