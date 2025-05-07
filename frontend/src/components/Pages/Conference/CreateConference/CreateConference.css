@@ -286,3 +286,28 @@ body {
 .conference-item label {
   flex: 1;
 }
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: white;
+  color: black;
+  table-layout: fixed; /* FORCE equal widths for th and td */
+}
+
+th, td {
+  border: 1px solid black;
+  padding: 8px 12px;
+  text-align: center;
+  word-wrap: break-word; /* Prevents overflow text */
+}
+
+th {
+  background-color: #f0f0f0;
+  color: black;
+  cursor: pointer;
+}
+
+tr:hover {
+  background-color: #e8e8e8;
+}
+

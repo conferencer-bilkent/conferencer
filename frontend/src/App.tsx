@@ -27,6 +27,7 @@ import ReviewPage from "./components/Pages/Review/ReviewPage";
 import { NotificationsProvider } from "./context/NotificationsContext";
 import MySubmissions from "./components/Pages/MySubmissions/MySubmissions";
 import EditConference from './components/Pages/Conference/EditConference/EditConference';
+import SeriesStatsPage from "./components/Pages/Conference/SeriesStatsPage";
 
 const App: React.FC = () => {
   const [theme, colorMode] = useMode();
@@ -188,6 +189,11 @@ const App: React.FC = () => {
                                 path="/conference/edit"
                                 element={<EditConference />}
                               />
+                              <Route
+                                path="/conference/seriesStats"
+                                element={<SeriesStatsPage />}
+                              />
+
                             </Routes>
                           </div>
                         </div>

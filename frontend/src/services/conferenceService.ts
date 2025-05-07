@@ -51,7 +51,7 @@ export const mapApiResponseToConference = (apiConference: any): Conference => {
 
 export const getAllConferences = async (): Promise<Conference[]> => {
   try {
-    const response = await fetch("http://127.0.0.1:5000/conference/", {
+    const response = await fetch("http://localhost:5000/conference/", {
       method: "GET",
       credentials: "include",
       headers: {
@@ -93,6 +93,25 @@ export const createConference = async (
     throw err;
   }
 };
+export const getSeriesStats = async (seriesId: string) => {
+  const response = await fetch(
+    `http://localhost:5000/conference/series/stats/${seriesId}`,
+    {
+      method: "GET",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch series stats");
+  }
+
+  const data = await response.json();
+  return data.pc_member_stats;
+};
 
 export const createConferenceFromSeries = async (
   payload: Record<string, any>
@@ -124,7 +143,7 @@ export const createConferenceFromSeries = async (
  */
 export const getConferenceById = async (conferenceId: string): Promise<Conference> => {
   try {
-    const response = await fetch(`http://127.0.0.1:5000/conference/${conferenceId}`, {
+    const response = await fetch(`http://localhost:5000/conference/${conferenceId}`, {
       method: "GET",
       credentials: "include",
       headers: {
@@ -157,7 +176,7 @@ export const updateConference = async (
 ): Promise<Conference> => {
   try {
     // First get the conference to find its MongoDB _id
-    const response1 = await fetch(`http://127.0.0.1:5000/conference/${conferenceId}`, {
+    const response1 = await fetch(`http://localhost:5000/conference/${conferenceId}`, {
       method: "GET",
       credentials: "include",
       headers: {

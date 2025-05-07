@@ -80,34 +80,11 @@ const ReviewsPage: React.FC = () => {
            (!activeConference?.superchairs || !activeConference.superchairs.includes(user.id));
   }, [user, activeTrack, activeConference]);
 
-  // State for bid dialog
-  const [bidDialogOpen, setBidDialogOpen] = useState(false);
-  const [currentPaperForBid, setCurrentPaperForBid] = useState<Paper | null>(null);
-  const [submittingBid, setSubmittingBid] = useState(false);
 
   // New popup state for Conflict of Interest
   const [popupAction, setPopupAction] = useState<string | null>(null);
   const openPopup = (action: string) => setPopupAction(action);
   const closePopup = () => setPopupAction(null);
-
-  // Check user roles
-  const isTrackchair = React.useMemo(() => {
-    if (!user || !activeTrack?.track_chairs) return false;
-    return activeTrack.track_chairs.includes(user.id);
-  }, [user, activeTrack]);
-
-  const isSuperchair = React.useMemo(() => {
-    if (!user || !activeConference?.superchairs) return false;
-    return activeConference.superchairs.includes(user.id);
-  }, [user, activeConference]);
-
-  // A track member is someone who can view papers but not make decisions
-  const isOnlyTrackMember = React.useMemo(() => {
-    if (!user || !activeTrack?.track_members) return false;
-    return activeTrack.track_members.includes(user.id) &&
-      !activeTrack.track_chairs.includes(user.id) &&
-      (!activeConference?.superchairs || !activeConference.superchairs.includes(user.id));
-  }, [user, activeTrack, activeConference]);
 
   useEffect(() => {
     const fetchTrack = async () => {
