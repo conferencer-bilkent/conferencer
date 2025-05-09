@@ -2,6 +2,7 @@ from flask import request, jsonify, session
 from extensions import mongo
 from bson.objectid import ObjectId
 from models.affiliations import Affiliations
+from datetime import datetime
 
 def get_profile(user_id=None):
     if not user_id:
@@ -164,3 +165,136 @@ def add_affiliations():
             "success": False,
             "error": str(e)
         }), 500
+
+def get_user_stats():
+    if "user_id" not in session:
+        return jsonify({"error": "Unauthorized"}), 401
+
+    try:
+        user_id = session["user_id"]
+
+        reviews = mongo.db.reviews.find({"reviewer_id": user_id})
+
+        total_submit_time = 0
+        total_review_rating = 0
+        total_words = 0
+        total_review_time = 0
+        total_eval_score = 0
+
+        review_count = 0
+        rating_count = 0
+
+        for review in reviews:
+            paper = mongo.db.papers.find_one({"_id": ObjectId(review["paper_id"])})
+            if not paper:
+                continue
+
+            paper_created = paper["created_at"]
+            review_created = review["created_at"]
+
+            track = mongo.db.tracks.find_one({"_id": ObjectId(paper["track"])})
+            if not track:
+                continue
+
+            conference = mongo.db.conferences.find_one({"_id": ObjectId(track["conference_id"])})
+            if not conference:
+                continue
+
+            conf_end_date = conference.get("end_date")
+            if not conf_end_date:
+                continue
+
+            if isinstance(conf_end_date, str):
+                conf_end_date = datetime.fromisoformat(conf_end_date.replace("Z", "+00:00"))
+
+            if conf_end_date.tzinfo is not None:
+                conf_end_date = conf_end_date.replace(tzinfo=None)
+            if review_created.tzinfo is not None:
+                review_created = review_created.replace(tzinfo=None)
+            if paper_created.tzinfo is not None:
+                paper_created = paper_created.replace(tzinfo=None)
+
+            submit_time = (conf_end_date - review_created).total_seconds() / 3600
+            total_submit_time += submit_time
+
+            # 2. review_rating (from rates[])
+            if "rates" in review and isinstance(review["rates"], list):
+                for rate_entry in review["rates"]:
+                    rate_value = rate_entry.get("rate")
+                    if rate_value is not None:
+                        total_review_rating += rate_value
+                        rating_count += 1
+
+            # 3. avg_words_per_review
+            word_count = len(review.get("evaluation_text", "").split())
+            total_words += word_count
+
+            # 4. avg_time_to_review
+            time_to_review = (review_created - paper_created).total_seconds() / 3600
+            total_review_time += time_to_review
+
+            # 5. avg_rating_given
+            if "evaluation" in review:
+                try:
+                    eval_value = float(review["evaluation"])
+                    total_eval_score += eval_value
+                except:
+                    pass
+
+            review_count += 1
+
+        if review_count == 0:
+            return jsonify({"message": "No reviews found for this user."}), 200
+
+        submit_time_avg = total_submit_time / review_count
+        review_time_avg = total_review_time / review_count
+
+        total_reviews = review_count
+
+        conferences_worked = mongo.db.conferences.count_documents({
+            "pc_members": user_id
+        })
+
+        submissions_count = mongo.db.papers.count_documents({
+            "created_by": user_id
+        })
+
+        user = mongo.db.users.find_one({"_id": ObjectId(user_id)})
+        if user:
+            user_name = user.get("name", "") + " " + user.get("surname", "")
+        else:
+            user_name = "Unknown"
+
+        stats = {
+            "user_id": str(user_id),
+            "user_name": user_name,
+            "avg_submit_time_before_deadline": format_duration(submit_time_avg),
+            "review_rating": round((total_review_rating / rating_count), 1) if rating_count > 0 else 0,
+            "avg_words_per_review": round(total_words / review_count, 1),
+            "avg_time_to_review": format_duration(review_time_avg),
+            "avg_eval_score_given": round(total_eval_score / review_count, 1),
+            "totalReviews": total_reviews,
+            "conferencesWorked": conferences_worked,
+            "submissions": submissions_count
+        }
+
+
+        return jsonify({"user_stats": stats}), 200
+
+    except Exception as e:
+        return jsonify({"error": f"Failed to compute user stats: {str(e)}"}), 500
+
+def format_duration(hours):
+    months = int(hours // (24 * 30))
+    days = int((hours % (24 * 30)) // 24)
+    remaining_hours = int(hours % 24)
+
+    parts = []
+    if months > 0:
+        parts.append(f"{months} Months")
+    if days > 0:
+        parts.append(f"{days} Days")
+    if remaining_hours > 0 or not parts:
+        parts.append(f"{remaining_hours} Hours")
+
+    return " ".join(parts)

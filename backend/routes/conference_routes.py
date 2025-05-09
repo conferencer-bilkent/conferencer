@@ -276,7 +276,6 @@ def create_conference_from_series():
         print("Conference creation (from series) error:", e)
         return jsonify({"error": f"Failed to create conference from series: {str(e)}"}), 500
 
-
 def get_conferences():
     try:
         user_id = request.args.get('user_id')  # optional query param
@@ -498,9 +497,13 @@ def get_series_stats(series_id):
                 total_submit_time += submit_time
 
                 # ---------- 2. review_rating ----------
-                if "review_rating" in review:
-                    total_review_rating += review["review_rating"]
-                    rating_count += 1
+                if "rates" in review and isinstance(review["rates"], list):
+                    for rate_entry in review["rates"]:
+                        rate_value = rate_entry.get("rate")
+                        if rate_value is not None:
+                            total_review_rating += rate_value
+                            rating_count += 1
+
 
                 # ---------- 3. avg_words_per_review ----------
                 word_count = len(review.get("evaluation_text", "").split())
@@ -535,10 +538,10 @@ def get_series_stats(series_id):
                 "pc_member_id": str(pc_member),
                 "pc_member_name": pc_member_name,
                 "avg_submit_time_before_deadline": format_duration(submit_time_avg),
-                "review_rating": (total_review_rating / rating_count) if rating_count > 0 else 0,
-                "avg_words_per_review": total_words / review_count,
+                "review_rating": round((total_review_rating / rating_count), 1) if rating_count > 0 else 0,
+                "avg_words_per_review": round(total_words / review_count, 1),
                 "avg_time_to_review": format_duration(review_time_avg),
-                "avg_rating_given": total_eval_score / review_count
+                "avg_eval_score_given": round(total_eval_score / review_count, 1)
             }
 
 

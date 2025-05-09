@@ -3,7 +3,7 @@ from routes.auth_routes import login, signup, logout, check_session, login_googl
 from routes.conference_routes import get_conference_by_id, create_conference, create_conference_from_series, get_conferences, get_my_conference_series, get_conference, invite_pc_member, update_conference, appoint_superchair, get_series_stats
 
 from routes.ping_routes import ping
-from routes.profile_routes import get_profile, update_profile, get_all_users, get_affiliations, add_affiliations
+from routes.profile_routes import get_profile, update_profile, get_all_users, get_affiliations, add_affiliations, get_user_stats
 from routes.role_routes import assign_role, get_roles, get_role, get_role_status
 from routes.chad_routes import send_chad, get_received_chad, get_sent_chad
 from routes.paper_routes import  get_paper, get_all_papers, submit_paper, download_paper, get_biddings, bid, update_paper, decide, get_papers_of_user
@@ -56,6 +56,7 @@ profile_bp.route("/update", methods=["POST"])(update_profile)
 profile_bp.route("/users", methods=["GET"])(get_all_users)
 profile_bp.route("affiliations", methods=["GET"])(get_affiliations)
 profile_bp.route("affiliations", methods=["POST"])(add_affiliations)
+profile_bp.route("/stats", methods=["GET"])(get_user_stats)
 
 role_bp.route("/", methods=["POST"])(assign_role)
 role_bp.route("/", methods=["GET"])(get_roles)
@@ -110,7 +111,6 @@ track_bp.route('/<track_id>/effective_settings', methods=['GET'])(get_effective_
 track_bp.route('/update_track/<track_id>', methods=['post'])(update_track)
 track_bp.route("/<track_id>/authors", methods=["GET"])(get_track_authors_by_papers_in_the_track)
 track_bp.route("/<track_id>/conflicts", methods=["GET"])(conflict_of_interest)
-
 
 assignment_bp.route("/reviewer/<reviewer_id>", methods=["GET"])(get_assignments_for_reviewer)
 assignment_bp.route("/reviewer/<reviewer_id>/papers", methods=["GET"])(get_assigned_papers)
