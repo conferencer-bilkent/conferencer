@@ -1,7 +1,7 @@
 from bson import ObjectId
 
 class User:
-    def __init__(self, user_id, name, surname, email, password=None, bio="", roles=None, stat_id=None, auth_provider="local", google_id=None, affiliation=None, past_affiliations=None, preferred_keywords=None, not_preferred_keywords=None):
+    def __init__(self, user_id, name, surname, email, password=None, bio="", roles=None, stat_id=None, auth_provider="local", google_id=None, review_quota_per_conference=None, affiliation=None, past_affiliations=None, preferred_keywords=None, not_preferred_keywords=None):
         self.id = str(user_id) if isinstance(user_id, ObjectId) else user_id 
         self.name = name
         self.surname = surname
@@ -16,6 +16,7 @@ class User:
         self.past_affiliations = past_affiliations or []
         self.preferred_keywords = preferred_keywords or []
         self.not_preferred_keywords = not_preferred_keywords or []
+        self.review_quota_per_conference = review_quota_per_conference if review_quota_per_conference is not None else 5
 
     def to_dict(self, include_password=False):
         user_data = {
@@ -31,7 +32,8 @@ class User:
             "affiliation": self.affiliation,
             "past_affiliations": self.past_affiliations,
             "preferred_keywords": self.preferred_keywords,
-            "not_preferred_keywords": self.not_preferred_keywords
+            "not_preferred_keywords": self.not_preferred_keywords,
+            "review_quota_per_conference": self.review_quota_per_conference,
         }
         if include_password:
             user_data["password"] = self.password

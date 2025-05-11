@@ -30,6 +30,7 @@ def get_profile(user_id=None):
         "not_preferred_keywords": user.get("not_preferred_keywords"),
         "affiliation": user.get("affiliation"),
         "past_affiliations": user.get("past_affiliations"),
+        "review_quota_per_conference": user.get("review_quota_per_conference", 5),
     }
 
     return jsonify(user_data), 200
@@ -44,7 +45,8 @@ def update_profile():
 
     # Define allowed fields in the user model
     allowed_fields = ["email", "name", "surname", "bio", "preferred_keywords", 
-                     "not_preferred_keywords", "affiliation", "past_affiliations"]
+                      "not_preferred_keywords", "affiliation", "past_affiliations",
+                      "review_quota_per_conference"]
     
     update_fields = {}
     for field, value in data.items():
@@ -108,7 +110,6 @@ def get_all_users():
     # Return the list of users
     return jsonify(users), 200
 
-
 def get_affiliations():
     """Get all affiliations"""
     # find affiliations collection from mongodb and retreive it, there is no function built in
@@ -134,7 +135,6 @@ def get_affiliations():
             'error': str(e)
         }), 500
     
-
 def add_affiliations():
     """Add a new affiliation"""
     if "user_id" not in session:

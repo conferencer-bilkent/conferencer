@@ -652,3 +652,62 @@ def update_track(track_id):
 
     except Exception as e:
         return jsonify({"error": f"Failed to update track: {str(e)}"}), 500
+
+def get_track_members_with_remaining_quota(track_id):
+    if "user_id" not in session:
+        return jsonify({"error": "Unauthorized"}), 401
+
+    try:
+        # 1. Get the current track
+        track = mongo.db.tracks.find_one({"_id": ObjectId(track_id)})
+        if not track:
+            return jsonify({"error": "Track not found"}), 404
+
+        conference_id = track.get("conference_id")
+        if not conference_id:
+            return jsonify({"error": "Conference ID not found in track"}), 400
+
+        # 2. Get all tracks for the same conference
+        tracks = list(mongo.db.tracks.find({"conference_id": conference_id}))
+
+        # 3. Gather all assignment IDs from all tracks
+        all_assignment_ids = []
+        for trk in tracks:
+            all_assignment_ids.extend(trk.get("assignments", []))  # These are assignment.id (not ObjectId)
+
+        # 4. Fetch all matching assignments from the database
+        assignments = list(mongo.db.assignments.find({"id": {"$in": all_assignment_ids}}))
+
+        # 5. Count assignments per reviewer_id
+        assignment_counts = {}
+        for assignment in assignments:
+            reviewer_id = assignment.get("reviewer_id")
+            if reviewer_id:
+                assignment_counts[reviewer_id] = assignment_counts.get(reviewer_id, 0) + 1
+
+        # 6. Calculate remaining quota for each track_member in the selected track
+        result = []
+        track_members = track.get("track_members", [])
+
+        for member in track_members:
+            user = mongo.db.users.find_one({"_id": ObjectId(member)})
+            if not user:
+                continue
+            review_quota = user.get("review_quota_per_conference", 0)
+            assigned_count = assignment_counts.get(str(user["_id"]), 0)
+            remaining_quota = review_quota - assigned_count
+
+            result.append({
+                "user_id": str(user["_id"]),
+                "name": f'{user.get("name", "")} {user.get("surname", "")}'.strip(),
+                "email": user.get("email", ""),
+                "review_quota": review_quota,
+                "assigned_count": assigned_count,
+                "remaining_quota": remaining_quota
+            })
+
+        return jsonify({"track_members": result}), 200
+
+    except Exception as e:
+        print("Error:", e)
+        return jsonify({"error": str(e)}), 500

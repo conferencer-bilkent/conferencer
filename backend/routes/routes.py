@@ -9,7 +9,7 @@ from routes.paper_routes import  get_paper, get_all_papers, submit_paper, downlo
 from routes.review_routes import get_review, update_review, submit_review, get_reviews_by_paper, rate_review, avg_rate, get_review_by_assignment_id, avg_rate_of_user 
 from routes.notification_routes import get_notification, mark_notification_as_answered, mark_all_read
 from routes.keywords_routes import get_keywords, add_keyword, set_keywords
-from routes.track_routes import create_track, get_tracks_by_conference, appoint_track_chair, get_track_by_people, get_track_by_author, get_track_by_reviewer, get_track, get_all_tracks, get_all_relevant_people, get_all_papers_in_track, appoint_track_member, get_track_members, get_effective_track_settings, update_track,  get_track_authors_by_papers_in_the_track, conflict_of_interest
+from routes.track_routes import create_track, get_tracks_by_conference, get_track_members_with_remaining_quota, appoint_track_chair, get_track_by_people, get_track_by_author, get_track_by_reviewer, get_track, get_all_tracks, get_all_relevant_people, get_all_papers_in_track, appoint_track_member, get_track_members, get_effective_track_settings, update_track,  get_track_authors_by_papers_in_the_track, conflict_of_interest
 from routes.assignment_routes import create_assignment_for_track, get_assignments_for_reviewer, get_assigned_papers, get_assignments_by_paper
 
 
@@ -108,6 +108,7 @@ track_bp.route('/<track_id>/effective_settings', methods=['GET'])(get_effective_
 track_bp.route('/update_track/<track_id>', methods=['post'])(update_track)
 track_bp.route("/<track_id>/authors", methods=["GET"])(get_track_authors_by_papers_in_the_track)
 track_bp.route("/<track_id>/conflicts", methods=["GET"])(conflict_of_interest)
+track_bp.route("/<track_id>/quotas", methods=["GET"])(get_track_members_with_remaining_quota)
 
 assignment_bp.route("/reviewer/<reviewer_id>", methods=["GET"])(get_assignments_for_reviewer)
 assignment_bp.route("/reviewer/<reviewer_id>/papers", methods=["GET"])(get_assigned_papers)
