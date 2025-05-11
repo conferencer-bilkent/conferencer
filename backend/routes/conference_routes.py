@@ -275,7 +275,6 @@ def create_conference_from_series():
         print("Conference creation (from series) error:", e)
         return jsonify({"error": f"Failed to create conference from series: {str(e)}"}), 500
 
-
 def get_conferences():
     try:
         user_id = request.args.get('user_id')  # optional query param

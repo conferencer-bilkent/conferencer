@@ -63,7 +63,6 @@ def get_assigned_papers(reviewer_id):
         print(f"Error fetching assigned papers: {str(e)}")
         return jsonify({"error": "Failed to retrieve assigned papers."}), 500
     
-
 def get_assignments_by_paper(paper_id):
     try:
         assignments = list(mongo.db.assignments.find({"paper_id": paper_id}))
