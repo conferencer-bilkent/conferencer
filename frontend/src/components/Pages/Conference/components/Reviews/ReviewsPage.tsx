@@ -4,6 +4,7 @@ import AppTitle from "../../../../global/AppTitle";
 import AppButton from "../../../../global/AppButton";
 import ConflictOfInterestPopup from "../../../../global/ConflictOfInterestPopup";
 import { FaFilter, FaSearch, FaDownload, FaHandPaper, FaUser } from "react-icons/fa";
+
 import {
   Box,
   TextField,
@@ -54,6 +55,30 @@ const ReviewsPage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [decisionFilter, setDecisionFilter] = useState<string>("all");
   const [expandedIds, setExpandedIds] = useState<Set<number>>(new Set());
+  
+  // State for bid dialog
+  const [bidDialogOpen, setBidDialogOpen] = useState(false);
+  const [currentPaperForBid, setCurrentPaperForBid] = useState<Paper | null>(null);
+  const [submittingBid, setSubmittingBid] = useState(false);
+
+  // Check user roles
+  const isTrackchair = React.useMemo(() => {
+    if (!user || !activeTrack?.track_chairs) return false;
+    return activeTrack.track_chairs.includes(user.id);
+  }, [user, activeTrack]);
+
+  const isSuperchair = React.useMemo(() => {
+    if (!user || !activeConference?.superchairs) return false;
+    return activeConference.superchairs.includes(user.id);
+  }, [user, activeConference]);
+
+  // A track member is someone who can view papers but not make decisions
+  const isOnlyTrackMember = React.useMemo(() => {
+    if (!user || !activeTrack?.track_members) return false;
+    return activeTrack.track_members.includes(user.id) && 
+           !activeTrack.track_chairs.includes(user.id) &&
+           (!activeConference?.superchairs || !activeConference.superchairs.includes(user.id));
+  }, [user, activeTrack, activeConference]);
 
   // State for bid dialog
   const [bidDialogOpen, setBidDialogOpen] = useState(false);
@@ -134,6 +159,7 @@ const ReviewsPage: React.FC = () => {
       return `${activeTrack.track_name || "Track"}: ${"Papers and Assignments"}`;
     }
     return `${activeConference?.name || "Conference"}: ${"All Papers"}`;
+
   };
 
   // Toggle expanded state for a paper
@@ -224,6 +250,7 @@ const ReviewsPage: React.FC = () => {
       const a = document.createElement("a");
       a.href = url;
       a.download = `${paper.title.replace(/[^a-z0-9]/gi, "_").toLowerCase()}.pdf`;
+
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);
@@ -233,6 +260,7 @@ const ReviewsPage: React.FC = () => {
       alert("Failed to download paper. Please try again.");
     }
   };
+
 
   // Handle opening the bid dialog
   const handleOpenBidDialog = (e: React.MouseEvent, paper: Paper) => {
@@ -257,6 +285,7 @@ const ReviewsPage: React.FC = () => {
     } finally {
       setSubmittingBid(false);
     }
+
   };
 
   return (
@@ -383,6 +412,7 @@ const ReviewsPage: React.FC = () => {
               <Typography variant="body1">
                 Currently viewing: <strong>{"Papers and Assignments"}</strong> for track{" "}
                 <strong>{activeTrack.track_name || "Unnamed Track"}</strong>
+
                 {isOnlyTrackMember && (
                   <Typography variant="body2" color={colors.grey[300]} mt={1}>
                     As a track member, you can download papers and make bids on which papers you'd like to review.
@@ -423,6 +453,7 @@ const ReviewsPage: React.FC = () => {
                 }}
               >
                 <Box display="flex" justifyContent="space-between" alignItems="center" p={2} borderRadius="8px">
+
                   <Box sx={{ flexGrow: 1 }}>
                     <Typography variant="h6" color={colors.grey[100]}>
                       {paper.title}
@@ -452,6 +483,7 @@ const ReviewsPage: React.FC = () => {
                           : paper.decision === false
                           ? "Rejected"
                           : "Pending Decision"}
+
                       </Typography>
                     )}
                   </Box>
@@ -542,6 +574,7 @@ const ReviewsPage: React.FC = () => {
       {/* Bid Dialog */}
       <Dialog
         open={bidDialogOpen}
+
         onClose={() => setBidDialogOpen(false)}
         PaperProps={{
           style: {
@@ -551,6 +584,7 @@ const ReviewsPage: React.FC = () => {
             minWidth: "400px",
             color: colors.grey[100],
           },
+
         }}
       >
         <DialogTitle>
@@ -582,6 +616,7 @@ const ReviewsPage: React.FC = () => {
           trackId={activeTrack?._id}
         />
       )}
+
     </div>
   );
 };

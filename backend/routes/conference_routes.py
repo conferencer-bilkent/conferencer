@@ -75,6 +75,7 @@ def create_conference():
         insert_result = mongo.db.conferences.insert_one(conference_dict)
         inserted_conference_id = insert_result.inserted_id
 
+
         if conference_series_id:
             mongo.db.conference_series.update_one(
                 {"_id": conference_series_id},
@@ -143,6 +144,8 @@ def create_conference_from_series():
         start_date = data.get("start_date")
         end_date = data.get("end_date")
 
+
+
         # Validate required fields
         if not name or not acronym or not short_acronym:
             return jsonify({"error": "name, acronym, and short_acronym are required"}), 400
@@ -166,9 +169,6 @@ def create_conference_from_series():
 
         if not last_conf:
             return jsonify({"error": "Last conference in the series not found"}), 404
-            
-        print("data:", last_conf)
-        print("type:", type(last_conf))
 
         # ----------------------------
         # Step 4: Copy all settings from last conference
@@ -191,6 +191,7 @@ def create_conference_from_series():
             state=state,
             country=country,
             description="",
+
             license_expiry=license_expiry,
             contact_emails=contact_emails,
             created_by=session["user_id"],
@@ -496,9 +497,13 @@ def get_series_stats(series_id):
                 total_submit_time += submit_time
 
                 # ---------- 2. review_rating ----------
-                if "review_rating" in review:
-                    total_review_rating += review["review_rating"]
-                    rating_count += 1
+                if "rates" in review and isinstance(review["rates"], list):
+                    for rate_entry in review["rates"]:
+                        rate_value = rate_entry.get("rate")
+                        if rate_value is not None:
+                            total_review_rating += rate_value
+                            rating_count += 1
+
 
                 # ---------- 3. avg_words_per_review ----------
                 word_count = len(review.get("evaluation_text", "").split())
@@ -533,10 +538,10 @@ def get_series_stats(series_id):
                 "pc_member_id": str(pc_member),
                 "pc_member_name": pc_member_name,
                 "avg_submit_time_before_deadline": format_duration(submit_time_avg),
-                "review_rating": (total_review_rating / rating_count) if rating_count > 0 else 0,
-                "avg_words_per_review": total_words / review_count,
+                "review_rating": round((total_review_rating / rating_count), 1) if rating_count > 0 else 0,
+                "avg_words_per_review": round(total_words / review_count, 1),
                 "avg_time_to_review": format_duration(review_time_avg),
-                "avg_rating_given": total_eval_score / review_count
+                "avg_eval_score_given": round(total_eval_score / review_count, 1)
             }
 
 
@@ -800,3 +805,4 @@ def format_duration(hours):
         parts.append(f"{remaining_hours} Hours")
 
     return " ".join(parts)
+
